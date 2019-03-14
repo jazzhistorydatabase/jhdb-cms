@@ -1,10 +1,18 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+You can clone the project by running
+### `git clone https://github.com/jazzhistorydatabase/jhdb-cms.git`
+
+
 ## Available Scripts
+
 
 In the project directory, you can run:
 
-### `npm start`
+### `npm install`
+Installs all dependencies
+
+### `npm dev`
 
 Runs the app in the development mode.<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
@@ -25,17 +33,19 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### `npm start`
 
-### `npm run eject`
+Runs app in production mode. This will serve the content in the build` folder statically. To apply code changes, rebuild.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Automatic Deployment
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+All commits to the `master` branch are auto-deployed to the [staging environment](https://jhdb-cms.appspot.com)
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Manual Deployment
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Authenticated users with the Google Cloud SDK installed can run
+`gcloud builds submit --config cloudbuild.yaml .`
+This should be used in extreme circumstances only! All releases should be peer reviewed and auto-deployed via pull request.
 
 ## Learn More
 
