@@ -9,15 +9,22 @@ class App extends Component {
   render() {
     let contribs = {
       a: {
-        name: "A",
+        name: "Contribution Name A",
+        status: "Published",
 
       },
       b: {
-        name: "B",
+        name: "Contribution Name B",
+        status: "Published",
       },
       c: {
-        name: "C",
+        name: "Contribution Name C",
+        status: "Pending Review",
       },
+      d: {
+        name: "Contribution Name D",
+        status: "Draft",
+      }
     };
 
     return (
