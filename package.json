@@ -12,26 +12,29 @@
   "engines": {
     "node": ">=8"
   },
-  "scripts": {
-    "deploy": "gcloud app deploy",
-    "start": "node app.js",
-    "system-test": "repo-tools test app",
-    "test": "npm run system-test",
-    "e2e-test": "repo-tools test deploy"
-  },
   "dependencies": {
-    "express": "^4.16.3"
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-scripts": "2.1.8"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^3.0.0"
   },
-  "cloud-repo-tools": {
-    "test": {
-      "app": {
-        "msg": "Hello, world!"
-      }
-    },
-    "requiresKeyFile": true,
-    "requiresProjectId": true
-  }
+  "scripts": {
+    "deploy": "gcloud app deploy",
+    "start": "node app.js",
+    "dev": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
