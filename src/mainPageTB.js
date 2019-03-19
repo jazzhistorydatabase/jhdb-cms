@@ -31,10 +31,10 @@ function MainPageTB(props) {
                 {/*.map maps a function to every single key*/}
                 {/*e is a variable that represents a collection's key*/}
                 {/*contrib[e].attribute accesses the attribute of that contrib by their key*/}
-                {Object.keys(contrib).map((e) => {
+                {contrib.map((e) => {
                     return (<ListItem button>
-                        <ListItemText primary={contrib[e].name} />
-                        <ListItemText primary={contrib[e].status}/>
+                        <ListItemText primary={e.name} />
+                        <ListItemText primary={e.status}/>
 
                         <ListItemIcon>
                             <InboxIcon />

@@ -13,8 +13,6 @@ class App extends Component {
         this.state = {
             user: null,
             contributions: [],
-            selectedStory: null,
-            selectedPage: null,
         }
     }
 
@@ -49,7 +47,7 @@ class App extends Component {
         <Header
         />
       <h1>Hello</h1>
-        <MainPageTB contributions={contribs}
+        <MainPageTB contributions={this.state.contributions}
           />
       </div>
     );
