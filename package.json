@@ -13,8 +13,13 @@
     "node": ">=8"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
+=======
+    "firebase": "^5.9.0",
+    "re-base": "^4.0.0",
+>>>>>>> firebase-integration
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8"

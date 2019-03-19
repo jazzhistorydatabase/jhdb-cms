@@ -4,28 +4,45 @@ import './App.css';
 import Header from './Header';
 import MainPageTB from './mainPageTB';
 
+import fb from './firebase.js';
+
 class App extends Component {
 
-  render() {
-    let contribs = {
-      a: {
-        name: "Contribution Name A",
-        status: "Published",
+    constructor(props) {
+        super(props);
+        this.state = {
+            user: null,
+            contributions: [],
+            selectedStory: null,
+            selectedPage: null,
+        }
+    }
 
-      },
-      b: {
-        name: "Contribution Name B",
-        status: "Published",
-      },
-      c: {
-        name: "Contribution Name C",
-        status: "Pending Review",
-      },
-      d: {
-        name: "Contribution Name D",
-        status: "Draft",
-      }
-    };
+    handleUserAuth(user) {
+        this.setState({user: user});
+        if(user) {
+            fb.base.bindCollection(`Contributions`, {
+                context: this,
+                state: 'contributions',
+                withRefs: true
+            });
+        }
+    }
+
+    componentWillMount() {
+        if(!fb.app) {
+            fb.initialize(this.handleUserAuth.bind(this));
+        }
+        fb.base.bindCollection(`Contributions`, {
+            context: this,
+            state: 'contributions',
+            withRefs: true
+        });
+    }
+
+  render() {
+
+    console.log(this.state.contributions);
 
     return (
       <div className="App">
