@@ -2,8 +2,46 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+import fb from './firebase.js';
+
 class App extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            user: null,
+            contributions: [],
+            selectedStory: null,
+            selectedPage: null,
+        }
+    }
+
+    handleUserAuth(user) {
+        this.setState({user: user});
+        if(user) {
+            fb.base.bindCollection(`Contributions`, {
+                context: this,
+                state: 'contributions',
+                withRefs: true
+            });
+        }
+    }
+
+    componentWillMount() {
+        if(!fb.app) {
+            fb.initialize(this.handleUserAuth.bind(this));
+        }
+        fb.base.bindCollection(`Contributions`, {
+            context: this,
+            state: 'contributions',
+            withRefs: true
+        });
+    }
+
   render() {
+
+    console.log(this.state.contributions);
+
     return (
       <div className="App">
         <header className="App-header">
