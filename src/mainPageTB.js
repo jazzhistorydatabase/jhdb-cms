@@ -35,7 +35,7 @@ function MainPageTB(props) {
                 {/*e is a variable that represents a collection's key*/}
                 {/*contrib[e].attribute accesses the attribute of that contrib by their key*/}
                 {contrib.map((e) => {
-                    return (<ListItem button>
+                    return (<ListItem>
                         <ListItemText primary={e.name} />
                         <Button variant="outlined" color={"primary"} className={classes.button}>Edit </Button>
                         <Button variant="outlined" color={"primary"} className={classes.button}>Preview </Button>
