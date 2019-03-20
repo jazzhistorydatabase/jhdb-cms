@@ -39,16 +39,11 @@ class App extends Component {
     }
 
   render() {
-
-    console.log(this.state.contributions);
-
     return (
       <div className="App">
-        <Header
-        />
+        <Header/>
       <h1>My Contributions</h1>
-        <MainPageTB contributions={this.state.contributions}
-          />
+        <MainPageTB contributions={this.state.contributions}/>
       </div>
     );
   }
