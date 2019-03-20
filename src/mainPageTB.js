@@ -8,7 +8,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/Inbox';
 import DraftsIcon from '@material-ui/icons/Drafts';
 
+
 import './mainPageTB.css';
+import Button from '@material-ui/core/Button';
 const styles = theme => ({
     root: {
         width: '100%',
@@ -24,6 +26,7 @@ function MainPageTB(props) {
     console.log(Object.keys(contrib));
     return (
         <div className={classes.root+" MainPage-format"}>
+            <Button variant="outlined" color={"primary"} className={classes.button}>Add Contribution </Button>
             <List component="nav">
                 {/*Object.keys() gives you the keys of that object as an array*/}
                 {/*contrib is an object made up of keys that correspond to their unique information (collections -> collection name, collection status, etc.)*/}
@@ -34,10 +37,11 @@ function MainPageTB(props) {
                 {contrib.map((e) => {
                     return (<ListItem button>
                         <ListItemText primary={e.name} />
+                        <Button variant="outlined" color={"primary"} className={classes.button}>Edit </Button>
+                        <Button variant="outlined" color={"primary"} className={classes.button}>Preview </Button>
                         <ListItemText primary={e.status}/>
-
                         <ListItemIcon>
-                            <InboxIcon />
+
                         </ListItemIcon>
                     </ListItem>);
                 })}

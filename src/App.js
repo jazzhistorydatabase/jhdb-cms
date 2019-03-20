@@ -46,7 +46,7 @@ class App extends Component {
       <div className="App">
         <Header
         />
-      <h1>Hello</h1>
+      <h1>My Contributions</h1>
         <MainPageTB contributions={this.state.contributions}
           />
       </div>
