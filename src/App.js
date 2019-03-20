@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Header from './Header';
-import MainPageTB from './mainPageTB';
+import ButtonAppBar from './ButtonAppBar';
+import MainPageTB from './MainPageTB';
 
 import fb from './firebase.js';
 
@@ -41,7 +41,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Header/>
+        <ButtonAppBar/>
       <h1>My Contributions</h1>
         <MainPageTB contributions={this.state.contributions}/>
       </div>
