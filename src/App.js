@@ -1,28 +1,51 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
+import ButtonAppBar from './ButtonAppBar';
+import MainPageTB from './MainPageTB';
+
+import fb from './firebase.js';
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            user: null,
+            contributions: [],
+        }
+    }
+
+    handleUserAuth(user) {
+        this.setState({user: user});
+        if (user) {
+            fb.base.bindCollection(`Contributions`, {
+                context: this,
+                state: 'contributions',
+                withRefs: true
+            });
+        }
+    }
+
+    componentWillMount() {
+        if (!fb.app) {
+            fb.initialize(this.handleUserAuth.bind(this));
+        }
+        fb.base.bindCollection(`Contributions`, {
+            context: this,
+            state: 'contributions',
+            withRefs: true
+        });
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <ButtonAppBar/>
+                <h1>My Contributions</h1>
+                <MainPageTB contributions={this.state.contributions}/>
+            </div>
+        );
+    }
 }
 
 export default App;
