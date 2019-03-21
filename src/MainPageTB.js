@@ -2,11 +2,11 @@ import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import React, { Component } from 'react';
-
-import { withStyles } from '@material-ui/core/styles';
+import React, {Component} from 'react';
+import {withStyles} from '@material-ui/core/styles';
 
 import './MainPageTB.css';
+
 const styles = theme => ({
     root: {
         width: '100%',
@@ -16,8 +16,8 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
-    render(){
-        const classes = this.props;
+    render() {
+        const classes = this.props.classes;
         let contrib = this.props.contributions;
         return (
             <div className={" MainPage-format"}>
@@ -25,18 +25,18 @@ class MainPageTB extends Component {
                 <List component="nav">
 
                     {contrib.map((e) => {
-                        return (<ListItem>
-                            <ListItemText primary={e.name} />
-                            <Button variant="outlined" color={"primary"} className={classes.button}>Edit </Button>
-                            <Button variant="outlined" color={"primary"} className={classes.button}>Preview </Button>
-                            <ListItemText primary={e.status}/>
-                        </ListItem>);
+                        return (
+                            <ListItem key={e.id || e.name}>
+                                <ListItemText primary={e.name}/>
+                                <Button variant="outlined" color={"primary"} className={classes.button}>Edit </Button>
+                                <Button variant="outlined" color={"primary"} className={classes.button}>Preview </Button>
+                                <ListItemText primary={e.status}/>
+                            </ListItem>);
                     })}
                 </List>
             </div>
         );
     }
-
 }
 
 export default withStyles(styles)(MainPageTB);

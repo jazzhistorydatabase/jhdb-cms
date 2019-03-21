@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
 import ButtonAppBar from './ButtonAppBar';
 import MainPageTB from './MainPageTB';
@@ -18,7 +17,7 @@ class App extends Component {
 
     handleUserAuth(user) {
         this.setState({user: user});
-        if(user) {
+        if (user) {
             fb.base.bindCollection(`Contributions`, {
                 context: this,
                 state: 'contributions',
@@ -28,7 +27,7 @@ class App extends Component {
     }
 
     componentWillMount() {
-        if(!fb.app) {
+        if (!fb.app) {
             fb.initialize(this.handleUserAuth.bind(this));
         }
         fb.base.bindCollection(`Contributions`, {
@@ -38,15 +37,15 @@ class App extends Component {
         });
     }
 
-  render() {
-    return (
-      <div className="App">
-        <ButtonAppBar/>
-      <h1>My Contributions</h1>
-        <MainPageTB contributions={this.state.contributions}/>
-      </div>
-    );
-  }
+    render() {
+        return (
+            <div className="App">
+                <ButtonAppBar/>
+                <h1>My Contributions</h1>
+                <MainPageTB contributions={this.state.contributions}/>
+            </div>
+        );
+    }
 }
 
 export default App;

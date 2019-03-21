@@ -4,9 +4,8 @@ import 'firebase/firestore'
 import Rebase from 're-base'
 
 const fb = {
-
-    // Must be bound to component
-    initialize: function(callback) {
+    // Must be bound to component — ie call initialize.bind(this)(callback) from App.componentWillMount()
+    initialize: function (callback) {
         var config = {
             apiKey: "AIzaSyBnkU1O4VkRUkbZS8LXuR7MYIBv2WQAupY",
             authDomain: "testproj-34045.firebaseapp.com",
@@ -21,39 +20,25 @@ const fb = {
         fb.auth = firebase.auth();
         fb.base = Rebase.createClass(fb.db);
 
-        fb.auth.onAuthStateChanged(function(user) {
+        fb.auth.onAuthStateChanged(function (user) {
             if (user) {
                 callback(user);
-                // User is signed in.
-                // console.log(user);
-                // fb.user = {
-                //   displayName: user.displayName,
-                //   email: user.email,
-                //   photoURL: user.photoURL,
-                //   uid: user.uid,
-                // }
             } else {
                 callback(null);
-                // fb.user = null;
             }
         });
     },
 
-
-    showAuthPopup: function() {
-
+    showAuthPopup: function () {
         var provider = new firebase.auth.GoogleAuthProvider();
-        this.auth.signInWithPopup(provider).then(function(result) {
+        this.auth.signInWithPopup(provider).then(function (result) {
             // User signed in!
-            // this.user.uid = result.user.uid;
             this.user = result.user;
             console.log(this.user);
-        }).catch(function(error) {
+        }).catch(function (error) {
             // An error occurred
         });
     }
-
-
 
 
 }
