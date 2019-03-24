@@ -4,6 +4,7 @@ import ButtonAppBar from './ButtonAppBar';
 import MainPageTB from './MainPageTB';
 
 import fb from './firebase.js';
+import EditContributionView from "./EditContributionView";
 
 class App extends Component {
 
@@ -12,6 +13,7 @@ class App extends Component {
         this.state = {
             user: null,
             contributions: [],
+            showEditWindow: false
         }
     }
 
@@ -37,12 +39,21 @@ class App extends Component {
         });
     }
 
+    windowSwap() {
+        this.setState({
+            showEditWindow: !this.state.showEditWindow
+        });
+    }
+
     render() {
+        let currentWindow = this.state.showEditWindow ? <EditContributionView windowSwap={this.windowSwap.bind(this)} /> :
+                                                        <MainPageTB contributions={this.state.contributions}
+                                                                    windowSwap={this.windowSwap.bind(this)}/> ;
         return (
             <div className="App">
                 <ButtonAppBar/>
                 <h1>My Contributions</h1>
-                <MainPageTB contributions={this.state.contributions}/>
+                {currentWindow}
             </div>
         );
     }

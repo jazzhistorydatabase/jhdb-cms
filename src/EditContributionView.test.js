@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ButtonAppBar from './ButtonAppBar';
+import EditContributionView from './ButtonAppBar';
 
 it('renders without crashing', () => {
     const div = document.createElement('div');
-    ReactDOM.render(<ButtonAppBar/>, div);
+    ReactDOM.render(<EditContributionView/>, div);
     ReactDOM.unmountComponentAtNode(div);
 });
