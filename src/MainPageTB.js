@@ -5,6 +5,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import React, {Component} from 'react';
 import {withStyles} from '@material-ui/core/styles';
 
+
 import './MainPageTB.css';
 
 const styles = theme => ({
@@ -25,6 +26,7 @@ class MainPageTB extends Component {
         let contrib = this.props.contributions;
         return (
             <div className={" MainPage-format"}>
+                <h1>My Contributions</h1>
                 <Button onClick={this.handleAddButtonClick.bind(this)} variant="outlined" color={"primary"}
                         className={classes.button}>Add Contribution </Button>
                 <List component="nav">

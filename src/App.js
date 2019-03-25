@@ -52,7 +52,6 @@ class App extends Component {
         return (
             <div className="App">
                 <ButtonAppBar/>
-                <h1>My Contributions</h1>
                 {currentWindow}
             </div>
         );
