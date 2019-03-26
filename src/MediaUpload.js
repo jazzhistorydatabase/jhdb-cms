@@ -42,9 +42,7 @@ class MediaUpload extends Component {
             makeSubpage: event.target.checked
         });
     };
-    handleTextChange = event => {
-        this.setState({contribBio: event.target.value});
-    };
+   
 
     render() {
         const classes = this.props.classes;

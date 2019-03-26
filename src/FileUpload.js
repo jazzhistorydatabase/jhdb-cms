@@ -26,7 +26,7 @@ class FileUpload extends Component {
         contribText: '',
     };
     handleTextChange = event => {
-        this.setState({contribBio: event.target.value});
+        this.setState({contribText: event.target.value});
     };
 
     render() {
