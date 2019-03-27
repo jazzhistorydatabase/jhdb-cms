@@ -4,6 +4,7 @@ import ButtonAppBar from './ButtonAppBar';
 import MainPageTB from './MainPageTB';
 
 import fb from './firebase.js';
+import dbx from './dropbox.js';
 
 class App extends Component {
 
@@ -35,6 +36,11 @@ class App extends Component {
             state: 'contributions',
             withRefs: true
         });
+        if (!dbx.app) {
+            dbx.initialize();
+            // TODO: find the right way to do this
+            setTimeout(() => console.log(dbx.getAccessTokenFromUrl()), 10000);
+        }
     }
 
     render() {
