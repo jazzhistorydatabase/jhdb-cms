@@ -36,16 +36,21 @@ class MediaUpload extends Component {
     state = {
         makeSubpage: '',
         contribText: '',
+        filesList: [],
     };
     handleSubpage = name => event => {
         this.setState({
             makeSubpage: event.target.checked
         });
     };
-   
 
     render() {
         const classes = this.props.classes;
+        // let fileIndex = 0;
+        // let FileUploads = this.state.filesList.map( (isUploaded) => {
+        //     fileIndex++;
+        //     return (<FileUpload number=fileIndex />);
+        // });
 
         return (
             <div className={classes.root}>
@@ -72,9 +77,12 @@ class MediaUpload extends Component {
                     <h4>
                         <FileUpload fileName="File #2"/>
                     </h4>
-                    <Button variant="contained" color="primary" className={classes.button}>
-                        + ADD MORE
-                    </Button>
+                    <h4>
+                        <FileUpload fileName="File #3"/>
+                    </h4>
+                    {/*<Button variant="contained" color="primary" className={classes.button}>*/}
+                        {/*+ ADD MORE*/}
+                    {/*</Button>*/}
                 </Paper>
             </div>
         );
