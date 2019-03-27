@@ -27,7 +27,7 @@ class App extends Component {
     }
 
     handleUserSignOut() {
-        if(!window.confirm("Sign out of " + this.state.user.displayName + "?")) {
+        if (!window.confirm("Sign out of " + this.state.user.displayName + "?")) {
             return;
         }
         this.setState({user: null});
@@ -52,7 +52,7 @@ class App extends Component {
                 <MainPageTB contributions={this.state.contributions}/>
             </div>
         ) : (
-          <h3>Sign in to continue</h3>
+            <h3>Sign in to continue</h3>
         );
         return (
             <div className="App">
