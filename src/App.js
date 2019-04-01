@@ -39,7 +39,16 @@ class App extends Component {
         if (!dbx.app) {
             dbx.initialize();
             // TODO: find the right way to do this
-            setTimeout(() => console.log(dbx.getAccessTokenFromUrl()), 10000);
+            setTimeout(() => {
+                console.log(dbx.getAccessTokenFromUrl());
+                console.log(dbx.app.filesListFolder({path: ''})
+                    .then(function(response) {
+                        console.log(response);
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    }));
+            }, 10000);
         }
     }
 
