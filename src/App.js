@@ -38,17 +38,6 @@ class App extends Component {
         });
         if (!dbx.app) {
             dbx.initialize();
-            // TODO: find the right way to do this
-            setTimeout(() => {
-                console.log(dbx.getAccessTokenFromUrl());
-                console.log(dbx.app.filesListFolder({path: ''})
-                    .then(function(response) {
-                        console.log(response);
-                    })
-                    .catch(function(error) {
-                        console.log(error);
-                    }));
-            }, 10000);
         }
     }
 
@@ -57,7 +46,10 @@ class App extends Component {
             <div className="App">
                 <ButtonAppBar/>
                 <h1>My Contributions</h1>
-                <MainPageTB contributions={this.state.contributions}/>
+                <MainPageTB 
+                    contributions={this.state.contributions}
+                    dropbox={dbx}
+                />
             </div>
         );
     }

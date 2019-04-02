@@ -16,6 +16,12 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
+
+    // Testing purposes. Attach this to a button's onClick to see in action - it opens a file attached to the collection, in dropbox.
+    onBioDocumentClick = function(documentName) {
+        this.props.dropbox.openFile(documentName);
+    };
+
     render() {
         const classes = this.props.classes;
         let contrib = this.props.contributions;

@@ -2,16 +2,21 @@ import dropbox from 'dropbox';
 
 const dbx = {
 
-    // Must be bound to component — ie call initialize.bind(this)(callback) from App.componentWillMount()
+    // Must be called in componentWillMount in App.js
     initialize: function (callback) {
         var config = {
-            accessToken: "MnliSZfDR6AAAAAAAAAArtG4qF-XIjyL_DP9FpSfmRqPdTmQtTSwHwkwBQs9Ycxs",
+            appKey: "l3bfhq15xjjtxqp",
             clientId: "jhbdlvkjabsdkljvna",
             clientSecret: "t523msf8d0pr610",
             redirectUri: "http://localhost:3000/"
         };
-        this.app = new dropbox.Dropbox(config);
-        this.app.authUrl = this.app.getAuthenticationUrl("http://localhost:3000/", null, 'code');
+        let accessToken = this.getAccessTokenFromUrl();
+        if (!accessToken) {
+            window.location.href = "http://dropbox.com/oauth2/authorize?client_id=" + config.appKey + "&response_type=token&redirect_uri=" + window.location.href;
+        } else  {
+            config.accessToken = accessToken;
+            this.app = new dropbox.Dropbox(config);
+        }
     },
 
     getAccessTokenFromCode: function (redirectUri, code) {
@@ -27,6 +32,14 @@ const dbx = {
      // Parses the url and gets the access token if it is in the urls hash
     getAccessTokenFromUrl: function () {
         return parseQueryString(window.location.hash).access_token;
+    },
+
+    isAuthenticated: function () {
+        return !!this.getAccessTokenFromUrl();
+    },
+
+    openFile: function (fileName) {
+        window.location.href = "https://www.dropbox.com/home?preview=" + fileName;
     }
 
 }
