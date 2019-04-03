@@ -17,6 +17,9 @@
 
 // [START gae_node_request_example]
 const express = require('express');
+var exphbs  = require('express-handlebars');
+
+const fb = require('src/firebase');
 
 const app = express();
 
@@ -26,7 +29,17 @@ const app = express();
 //     .send('Jazz!')
 //     .end();
 // });
+// fb.initialize();
 app.use(express.static('build'));
+
+app.engine('handlebars', exphbs({defaultLayout: 'template'}));
+app.set('view engine', 'handlebars');
+
+
+app.get('/', function (req, res) {
+    res.render('preview', {name: "Tom Belino", description: "A human person"});
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 8080;

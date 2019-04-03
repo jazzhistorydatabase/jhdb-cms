@@ -16,6 +16,7 @@
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
     "dropbox": "^4.0.17",
+    "express-handlebars": "^3.0.2",
     "firebase": "^5.9.0",
     "re-base": "^4.0.0",
     "react": "^16.8.4",

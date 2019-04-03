@@ -26,6 +26,12 @@ class App extends Component {
                 state: 'contributions',
                 withRefs: true
             });
+
+            fb.base.bindDoc('Contributions/EmRPI7wYBKcT8fVdAKzk', {
+                context: this,
+                state: 'render',
+                withRefs: true
+            })
         }
     }
 
@@ -58,6 +64,13 @@ class App extends Component {
     }
 
     render() {
+
+        if(this.state.render && this.state.preview) {
+            return (
+
+            )
+        }
+
         let currentWindow = this.state.showEditWindow ? <EditContributionView windowSwap={this.windowSwap.bind(this)} /> :
                                                         <MainPageTB contributions={this.state.contributions}
                                                                     windowSwap={this.windowSwap.bind(this)}/> ;
