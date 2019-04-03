@@ -32,25 +32,38 @@ const styles = theme => ({
 });
 
 class MediaUpload extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            makeSubpage: '',
+            contribText: '',
+            filesList: [],
+            add: '',
+        };
+    }
 
-    state = {
-        makeSubpage: '',
-        contribText: '',
-        filesList: [],
-    };
-    handleSubpage = name => event => {
+    handleSubpage(event) {
         this.setState({
             makeSubpage: event.target.checked
         });
     };
 
+    addFileUpload(event) {
+        console.log(this.state);
+        let lst = this.state.filesList;
+        lst.push(false);
+        this.setState({
+            filesList: lst
+        });
+    };
+
     render() {
         const classes = this.props.classes;
-        // let fileIndex = 0;
-        // let FileUploads = this.state.filesList.map( (isUploaded) => {
-        //     fileIndex++;
-        //     return (<FileUpload number=fileIndex />);
-        // });
+        let fileIndex = 0;
+        let fileUploads = this.state.filesList.map((isUploaded) => {
+            fileIndex++;
+            return (<FileUpload key={fileIndex} fileName={fileIndex}/>);
+        });
 
         return (
             <div className={classes.root}>
@@ -64,7 +77,7 @@ class MediaUpload extends Component {
                             control={
                                 <Switch
                                     checked={this.state.makeSubpage}
-                                    onChange={this.handleSubpage('')}
+                                    onChange={this.handleSubpage.bind(this)}
                                     value="make subpage"
                                 />
                             }
@@ -72,17 +85,12 @@ class MediaUpload extends Component {
                         />
                     </FormGroup>
                     <h4>
-                        <FileUpload fileName="File #1"/>
+                        {fileUploads}
                     </h4>
-                    <h4>
-                        <FileUpload fileName="File #2"/>
-                    </h4>
-                    <h4>
-                        <FileUpload fileName="File #3"/>
-                    </h4>
-                    {/*<Button variant="contained" color="primary" className={classes.button}>*/}
-                        {/*+ ADD MORE*/}
-                    {/*</Button>*/}
+                    <Button variant="contained" color="primary" className={classes.button}
+                            onClick={this.addFileUpload.bind(this)}>
+                        + ADD MORE
+                    </Button>
                 </Paper>
             </div>
         );
