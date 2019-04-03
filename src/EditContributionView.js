@@ -100,8 +100,7 @@ class EditContributionView extends Component {
                     <FormLabel component="legend"> Contribution Type</FormLabel>
                     <RadioGroup row
                                 value={this.state.contribType}
-                                onChange={this.handleCheckBoxChange}
-                    >
+                                onChange={this.handleCheckBoxChange}>
                         <FormControlLabel
                             value="artist type"
                             control={<Radio color="primary"/>}
@@ -155,16 +154,13 @@ class EditContributionView extends Component {
                                     <Checkbox checked={mediaProcess} onChange={this.handleEndBoxChange('mediaProcess')}
                                               value="Media Processing"/>
                                 }
-                                label="Additional Media Processing Required"
-                            />
+                                label="Additional Media Processing Required"/>
                             <FormControlLabel
                                 control={
                                     <Checkbox checked={contentEditing}
                                               onChange={this.handleEndBoxChange('contentEditing')}
-                                              value="Content Editing"/>
-                                }
-                                label="Additional Content Editing Required"
-                            />
+                                              value="Content Editing"/>}
+                                label="Additional Content Editing Required"/>
                         </FormGroup>
                         <FormGroup row>
                             <Button variant="contained" color="primary" className={classes.button3}>

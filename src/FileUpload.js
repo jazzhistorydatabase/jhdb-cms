@@ -22,13 +22,15 @@ const styles = theme => ({
 
 class FileUpload extends Component {
 
-    state = {
-        contribText: '',
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            contribText: '',
+        };
+    }
     handleTextChange = event => {
         this.setState({contribText: event.target.value});
     };
-
     render() {
         const classes = this.props.classes;
 
