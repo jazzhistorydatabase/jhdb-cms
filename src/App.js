@@ -64,7 +64,6 @@ class App extends Component {
         
         const appContent = this.state.user ? (
             <div>
-                <ButtonAppBar/>
                 {currentWindow}
             </div>
         ) : (
