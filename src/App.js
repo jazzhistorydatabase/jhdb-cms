@@ -2,9 +2,10 @@ import React, {Component} from 'react';
 import './App.css';
 import ButtonAppBar from './ButtonAppBar';
 import MainPageTB from './MainPageTB';
+import EditContributionView from "./EditContributionView";
 
 import fb from './firebase.js';
-import EditContributionView from "./EditContributionView";
+import dbx from './dropbox.js';
 
 class App extends Component {
 
@@ -45,6 +46,9 @@ class App extends Component {
             state: 'contributions',
             withRefs: true
         });
+        if (!dbx.app) {
+            dbx.initialize();
+        }
     }
 
     windowSwap() {
@@ -60,7 +64,6 @@ class App extends Component {
         
         const appContent = this.state.user ? (
             <div>
-                <ButtonAppBar/>
                 {currentWindow}
             </div>
         ) : (
