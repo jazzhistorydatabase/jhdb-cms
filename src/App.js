@@ -26,6 +26,14 @@ class App extends Component {
         }
     }
 
+    handleUserSignOut() {
+        if (!window.confirm("Sign out of " + this.state.user.displayName + "?")) {
+            return;
+        }
+        this.setState({user: null});
+        fb.auth.signOut();
+    }
+
     componentWillMount() {
         if (!fb.app) {
             fb.initialize(this.handleUserAuth.bind(this));
@@ -38,11 +46,18 @@ class App extends Component {
     }
 
     render() {
-        return (
-            <div className="App">
-                <ButtonAppBar/>
+        const appContent = this.state.user ? (
+            <div>
                 <h1>My Contributions</h1>
                 <MainPageTB contributions={this.state.contributions}/>
+            </div>
+        ) : (
+            <h3>Sign in to continue</h3>
+        );
+        return (
+            <div className="App">
+                <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
+                {appContent}
             </div>
         );
     }
