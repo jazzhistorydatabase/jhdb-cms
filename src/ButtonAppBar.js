@@ -5,8 +5,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {withStyles} from '@material-ui/core/styles';
 import './App.css';
-import fb from './firebase';
 
+import fb from './firebase';
 
 const styles = {
     root: {
