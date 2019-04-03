@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import MainPageTB from "./MainPageTB";
+import EditContributionView from "./EditContributionView";
+
 
 it('renders without crashing', () => {
     const div = document.createElement('div');
-    ReactDOM.render(<MainPageTB/>, div);
+    ReactDOM.render(<EditContributionView/>, div);
     ReactDOM.unmountComponentAtNode(div);
 });
