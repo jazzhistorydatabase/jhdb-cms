@@ -14,7 +14,8 @@ class App extends Component {
         this.state = {
             user: null,
             contributions: [],
-            showEditWindow: false
+            showEditWindow: false,
+            selectedContribution: undefined
         }
     }
 
@@ -51,14 +52,16 @@ class App extends Component {
         }
     }
 
-    windowSwap() {
+    windowSwap(selectedContribution) {
         this.setState({
+            selectedContribution: selectedContribution,
             showEditWindow: !this.state.showEditWindow
         });
     }
 
     render() {
-        let currentWindow = this.state.showEditWindow ? <EditContributionView windowSwap={this.windowSwap.bind(this)} /> :
+        let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
+                                                                              windowSwap={this.windowSwap.bind(this)} /> :
                                                         <MainPageTB contributions={this.state.contributions}
                                                                     windowSwap={this.windowSwap.bind(this)}/> ;
         

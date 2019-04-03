@@ -13,6 +13,8 @@ import Paper from "@material-ui/core/Paper";
 import FormGroup from "@material-ui/core/FormGroup";
 import Checkbox from "@material-ui/core/Checkbox";
 
+import fb from "./firebase";
+
 const styles = theme => ({
     container: {
         display: 'flex',
@@ -57,30 +59,54 @@ class EditContributionView extends Component {
         this.props.windowSwap();
     }
 
-    state = {
-        contribName: '',
-        contribType: '',
-        contribBio: '',
-        mediaProcess: '',
-        contentEditing: '',
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            contribName: '',
+            contribType: '',
+            contribBio: '',
+            mediaProcess: '',
+            contentEditing: '',
+            contributionData: null
+        };
+    }
 
     handleNameChange = event => {
-        this.setState({contribName: event.target.value});
+        let data = this.state.contributionData;
+        data.name = event.target.value;
+        this.setState({contributionData: data});
     };
 
     handleCheckBoxChange = event => {
-        this.setState({contribType: event.target.value});
+        let data = this.state.contributionData;
+        data.type = event.target.value;
+        this.setState({contributionData: data});
     };
     handleBioChange = event => {
-        this.setState({contribBio: event.target.value});
+        let data = this.state.contributionData;
+        data.description = event.target.value;
+        this.setState({contributionData: data});
     };
     handleEndBoxChange = name => event => {
         this.setState({[name]: event.target.checked});
     };
 
+    componentWillMount() {
+        console.log(this.props && this.props.selectedContribution);
+        console.log(fb.base);
+        if (this.props.selectedContribution) {
+            fb.base.syncDoc(this.props.selectedContribution.ref.path, {
+                context: this,
+                state: 'contributionData',
+                withRefs: true
+            });
+            console.log(this.state.contributionData);
+        }
+    }
+
     render() {
         const classes = this.props.classes;
+        const contrib = this.state.contributionData;
         const {mediaProcess, contentEditing} = this.state;
         return (
             <div>
@@ -92,17 +118,17 @@ class EditContributionView extends Component {
                     id="standard-name"
                     label="Contribution Title"
                     className={classes.textField}
-                    value={this.state.contribName}
+                    value={contrib && contrib.name || ""}
                     onChange={this.handleNameChange}
                     margin="normal"
                 />
                 <FormControl component={"fieldset"} className={classes.formControl}>
                     <FormLabel component="legend"> Contribution Type</FormLabel>
                     <RadioGroup row
-                                value={this.state.contribType}
+                                value={contrib && contrib.type || ""}
                                 onChange={this.handleCheckBoxChange}>
                         <FormControlLabel
-                            value="artist type"
+                            value="artist"
                             control={<Radio color="primary"/>}
                             label="Artist Type"
                             labelPlacement="start"
@@ -122,7 +148,7 @@ class EditContributionView extends Component {
                         label="Biography"
                         style={{margin: 5}}
                         multiline
-                        value={this.state.contribBio}
+                        value={contrib && contrib.description || ""}
                         onChange={this.handleBioChange}
                         fullWidth
                         margin="normal"
