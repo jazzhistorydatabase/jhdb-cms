@@ -5,6 +5,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import React, {Component} from 'react';
 import {withStyles} from '@material-ui/core/styles';
 
+import dbx from './dropbox.js';
 import './MainPageTB.css';
 
 const styles = theme => ({
@@ -17,10 +18,10 @@ const styles = theme => ({
 
 class MainPageTB extends Component {
 
-    // Testing purposes. Attach this to a button's onClick to see in action - it opens a file attached to the collection, in dropbox.
-    onBioDocumentClick = function(documentName) {
-        this.props.dropbox.openFile(documentName);
-    };
+    // // Testing purposes. Attach this to a button's onClick to see in action - it opens a file attached to the collection, in dropbox.
+    // onBioDocumentClick = function(documentName) {
+    //     this.props.dropbox.openFile(documentName);
+    // };
 
     render() {
         const classes = this.props.classes;

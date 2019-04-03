@@ -48,7 +48,6 @@ class App extends Component {
                 <h1>My Contributions</h1>
                 <MainPageTB 
                     contributions={this.state.contributions}
-                    dropbox={dbx}
                 />
             </div>
         );
