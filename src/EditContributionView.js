@@ -12,7 +12,17 @@ import MediaUpload from "./MediaUpload";
 import Paper from "@material-ui/core/Paper";
 import FormGroup from "@material-ui/core/FormGroup";
 import Checkbox from "@material-ui/core/Checkbox";
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import 'typeface-roboto';
 
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+            main: '#c51162',
+        } ,
+    },
+
+});
 const styles = theme => ({
     container: {
         display: 'flex',
@@ -83,6 +93,7 @@ class EditContributionView extends Component {
         const classes = this.props.classes;
         const {mediaProcess, contentEditing} = this.state;
         return (
+            <MuiThemeProvider theme={theme}>
             <div>
                 <h1> Contribution </h1>
                 <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
@@ -176,7 +187,7 @@ class EditContributionView extends Component {
                     </Paper>
                 </FormControl>
             </div>
-
+            </MuiThemeProvider>
         );
     }
 

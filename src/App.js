@@ -5,7 +5,7 @@ import MainPageTB from './MainPageTB';
 
 import fb from './firebase.js';
 import EditContributionView from "./EditContributionView";
-
+import Paper from "@material-ui/core/Paper";
 class App extends Component {
 
     constructor(props) {
@@ -50,6 +50,7 @@ class App extends Component {
                                                         <MainPageTB contributions={this.state.contributions}
                                                                     windowSwap={this.windowSwap.bind(this)}/> ;
         return (
+
             <div className="App">
                 <ButtonAppBar/>
                 {currentWindow}

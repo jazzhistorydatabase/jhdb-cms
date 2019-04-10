@@ -27,6 +27,9 @@ const styles = theme => ({
     fab: {
         margin: theme.spacing.unit,
     },
+    cardColor: {
+        backgroundColor: '#fce4ec',
+    }
 
 
 });
@@ -68,7 +71,7 @@ class MediaUpload extends Component {
         return (
             <div className={classes.root}>
                 <br/>
-                <Paper className={classes.paper} elevation={3} square={false}>
+                <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     <FormGroup row>
                         <h3>
                             {this.props.uploadName || ""}

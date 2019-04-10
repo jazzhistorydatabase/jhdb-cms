@@ -5,8 +5,16 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {withStyles} from '@material-ui/core/styles';
 import './App.css';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import 'typeface-roboto';
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+         main: '#c51162',
+        } ,
+    },
 
-
+});
 const styles = {
     root: {
         flexGrow: 1,
@@ -25,6 +33,7 @@ class ButtonAppBar extends Component {
         const classes = this.props.classes;
 
         return (
+            <MuiThemeProvider theme={theme}>
             <div className={classes.root}>
                 <AppBar position="static">
                     <Toolbar>
@@ -54,6 +63,7 @@ class ButtonAppBar extends Component {
                     </Toolbar>
                 </AppBar>
             </div>
+            </MuiThemeProvider>
         );
     }
 
