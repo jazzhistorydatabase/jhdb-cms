@@ -8,6 +8,8 @@ import Paper from "@material-ui/core/Paper";
 import FileUpload from "./FileUpload";
 import Button from "@material-ui/core/Button";
 
+import dbx from './dropbox.js';
+
 const styles = theme => ({
     root: {
         flexGrow: 1,
@@ -30,6 +32,30 @@ const styles = theme => ({
 
 
 });
+
+const dbxImageOptions = {
+    success: function(files) {
+        alert("Here's the file link: " + files[0].link)
+    },
+    cancel: function() { },
+    linkType: "preview", // or "direct"
+    multiselect: false,
+    extensions: ['images'],
+    folderselect: false,
+    sizeLimit: 1024 * 1024 * 1024, // in bytes
+};
+
+const dbxAudioOptions = {
+    success: function(files) {
+        alert("Here's the file link: " + files[0].link)
+    },
+    cancel: function() { },
+    linkType: "preview", // or "direct"
+    multiselect: false,
+    extensions: ['audio'],
+    folderselect: false,
+    sizeLimit: 1024 * 1024 * 1024, // in bytes
+};
 
 class MediaUpload extends Component {
     constructor(props) {
@@ -62,7 +88,15 @@ class MediaUpload extends Component {
         let fileIndex = 0;
         let fileUploads = this.state.filesList.map((isUploaded) => {
             fileIndex++;
-            return (<FileUpload key={fileIndex} fileName={fileIndex}/>);
+            let dbxOptions;
+            if (this.props.uploadName === "Images") {
+                dbxOptions = dbxImageOptions;
+            } else if (this.props.uploadName === "Audio") {
+                dbxOptions = dbxAudioOptions;
+            } else if (this.props.uploadName === "Video") {
+                dbxOptions = {};
+            }
+            return (<FileUpload key={fileIndex} fileName={fileIndex} dbxOptions={dbxOptions} uploadName={this.props.uploadName} appKey={dbx.app.appKey}/>);
         });
 
         return (

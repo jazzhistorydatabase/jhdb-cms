@@ -4,6 +4,7 @@ const dbx = {
 
     // Must be called in componentWillMount in App.js
     initialize: function (callback) {
+        window.Dropbox = {};
         var config = {
             appKey: "l3bfhq15xjjtxqp",
             clientId: "jhbdlvkjabsdkljvna",
@@ -43,7 +44,6 @@ const dbx = {
         const params = new URLSearchParams(str);
         return params.get('#access_token');
     }
-
 }
 
 export default dbx;

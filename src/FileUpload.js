@@ -5,6 +5,7 @@ import FormGroup from "@material-ui/core/FormGroup";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import TextField from "@material-ui/core/TextField";
+import DropboxChooser from "react-dropbox-chooser";
 
 const styles = theme => ({
     root: {
@@ -17,7 +18,6 @@ const styles = theme => ({
     fab: {
         margin: theme.spacing.unit,
     },
-
 });
 
 class FileUpload extends Component {
@@ -27,7 +27,7 @@ class FileUpload extends Component {
         this.state = {
             contribText: '',
         };
-    }
+    };
     handleTextChange = event => {
         this.setState({contribText: event.target.value});
     };
@@ -37,10 +37,18 @@ class FileUpload extends Component {
         return (
             <div className={classes.root}>
 
-                <FormGroup row>
+                <FormGroup row id={this.props.uploadName + this.props.fileName}>
                     <Fab size="small" color="primary" aria-label="Add" className={classes.fab}>
                         <AddIcon/>
                     </Fab>
+                    <DropboxChooser
+                        appKey={this.props.appKey}
+                        success={this.props.dbxOptions.success}
+                        cancel={this.props.dbxOptions.cancel}
+                        multiselect={this.props.dbxOptions.multiselect}
+                        extensions={this.props.dbxOptions.extensions} >
+                        <button className="dropbox">Choose from Dropbox</button>      
+                    </DropboxChooser>
                     {this.props.fileName || ''}
                     <TextField
                         id="standard-multiline-static"
