@@ -56,12 +56,19 @@ const styles = theme => ({
         width: 600,
     },
     button2: {
-        width: 200,
+        width: '40%',
+        marginLeft: 'auto',
+        marginRight: 'auto'
     },
     button3: {
         margin: 20,
-    }
-
+    },
+    reviewOptionLeft: {
+        marginLeft: 'auto',
+    },
+    reviewOptionRight: {
+        marginRight: 'auto',
+    },
 });
 
 class EditContributionView extends Component {
@@ -185,14 +192,14 @@ class EditContributionView extends Component {
                 <FormControl className={classes.uploadWidth}>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false}>
-                        <FormGroup row>
-                            <FormControlLabel
+                        <FormGroup row >
+                            <FormControlLabel className={classes.reviewOptionLeft}
                                 control={
                                     <Checkbox checked={mediaProcess} onChange={this.handleEndBoxChange('mediaProcess')}
                                               value="Media Processing"/>
                                 }
                                 label="Additional Media Processing Required"/>
-                            <FormControlLabel
+                            <FormControlLabel className={classes.reviewOptionRight}
                                 control={
                                     <Checkbox checked={contentEditing}
                                               onChange={this.handleEndBoxChange('contentEditing')}
@@ -200,13 +207,13 @@ class EditContributionView extends Component {
                                 label="Additional Content Editing Required"/>
                         </FormGroup>
                         <FormGroup row>
-                            <Button variant="contained" color="primary" className={classes.button3}>
+                            <Button variant="contained" color="primary" className={classes.button3+ ' ' +classes.reviewOptionLeft}>
                                 Submit for Review
                             </Button>
                             <Button variant="contained" color="primary" className={classes.button3}>
                                 Preview
                             </Button>
-                            <Button variant="contained" color="primary" className={classes.button3}>
+                            <Button variant="contained" color="primary" className={classes.button3+ ' ' +classes.reviewOptionRight}>
                                 Save
                             </Button>
                         </FormGroup>

@@ -29,6 +29,10 @@ const styles = theme => ({
     },
     cardColor: {
         backgroundColor: '#fce4ec',
+    },
+    mediaUploadTitle: {
+        width: '10vw',
+        textAlign: 'left',
     }
 
 
@@ -73,9 +77,9 @@ class MediaUpload extends Component {
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     <FormGroup row>
-                        <h3>
+                        <h2 className={classes.mediaUploadTitle}>
                             {this.props.uploadName || ""}
-                        </h3>
+                        </h2>
                         <FormControlLabel
                             control={
                                 <Switch
@@ -94,6 +98,8 @@ class MediaUpload extends Component {
                             onClick={this.addFileUpload.bind(this)}>
                         + ADD MORE
                     </Button>
+                    <br/>
+                    <br/>
                 </Paper>
             </div>
         );
