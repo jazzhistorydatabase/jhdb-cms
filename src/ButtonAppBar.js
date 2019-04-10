@@ -28,7 +28,7 @@ const styles = {
         marginRight: 20,
     },
     accountButton: {
-        backgroundColor: "#2E40A4"
+        backgroundColor: "#A10C32"
     }
 };
 
