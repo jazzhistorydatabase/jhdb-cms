@@ -4,10 +4,20 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import React, {Component} from 'react';
 import {withStyles} from '@material-ui/core/styles';
-import './MainPageTB.css';
-
+import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
+import Paper from "@material-ui/core/Paper";
+import FormControl from "@material-ui/core/FormControl";
 import dbx from './dropbox.js';
 
+import './MainPageTB.css';
+
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+            main: '#c51162',
+        },
+    },
+});
 
 const styles = theme => ({
     root: {
@@ -15,6 +25,37 @@ const styles = theme => ({
         maxWidth: 360,
         backgroundColor: theme.palette.background.paper,
     },
+    button: {
+        marginLeft: '10px'
+    },
+    paper: {
+        ...theme.mixins.gutters(),
+        paddingTop: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing.unit * 2,
+        width: '70%',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+    },
+    contributionList: {
+        display: 'block',
+        width: 'wrap',
+        align: 'center',
+    },
+    contributionListName: {
+        width: '20vw',
+        textAlign: 'right',
+        marginLeft: 'auto',
+        paddingRight: '3vw'
+    },
+    contributionListStatus: {
+        width: '20vw',
+        textAlign: 'left',
+        paddingLeft: '3vw',
+        marginRight: 'auto'
+    },
+    cardColor: {
+        backgroundColor: '#fce4ec',
+    }
 });
 
 class MainPageTB extends Component {
@@ -31,34 +72,33 @@ class MainPageTB extends Component {
         const classes = this.props.classes;
         let contrib = this.props.contributions;
         return (
-            <div className={" MainPage-format"}>
-                <h1>My Contributions</h1>
-                <Button onClick={evt => {
-                    return this.handleAddEditButtonClick.bind(this);
-                }} variant="outlined" color={"primary"}
-                        className={classes.button}>Add Contribution </Button>
-                <List component="nav">
+            <MuiThemeProvider theme={theme}>
+                <br/>
+                <br/>
+                <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
+                    <div className={" MainPage-format"}>
+                        <h1>My Contributions</h1>
+                        <Button onClick={() => {return this.handleAddEditButtonClick.bind(this)()}} variant="outlined" color={"primary"}
+                                className={classes.button}>Add Contribution </Button>
+                        <List className-={classes.contributionList}>
+                            {contrib.map((e) => {
+                                return (
+                                    <ListItem key={e.id || e.name} className={classes.contributionListItem}>
+                                        <h3 className={classes.contributionListName}>{e.name}</h3>
+                                        <Button variant="outlined" color={"primary"}
+                                                onClick={() => {return this.handleAddEditButtonClick.bind(this)(e)}}
+                                                className={classes.button}>Edit </Button>
+                                        <Button variant="outlined" color={"primary"}
+                                                className={classes.button}>Preview </Button>
+                                        <h3 className={classes.contributionListStatus}>{e.status}</h3>
+                                    </ListItem>
+                                )
 
-                    {contrib.map((e) => {
-
-                        return (
-                            <ListItem key={e.id || e.name}>
-                                <ListItemText primary={e.name}/>
-                                <Button variant="outlined"
-                                        color={"primary"}
-                                        className={classes.button}
-                                        onClick={evt => {
-                                            return this.handleAddEditButtonClick.bind(this)(e);
-                                        }}>
-                                    Edit
-                                </Button>
-                                <Button variant="outlined" color={"primary"}
-                                        className={classes.button}>Preview </Button>
-                                <ListItemText primary={e.status}/>
-                            </ListItem>);
-                    })}
-                </List>
-            </div>
+                            })}
+                        </List>
+                    </div>
+                </Paper>
+            </MuiThemeProvider>
         );
     }
 }

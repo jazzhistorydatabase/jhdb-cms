@@ -5,6 +5,7 @@ import MainPageTB from './MainPageTB';
 import EditContributionView from "./EditContributionView";
 
 import fb from './firebase.js';
+import Paper from "@material-ui/core/Paper";
 import dbx from './dropbox.js';
 
 class App extends Component {
@@ -73,6 +74,7 @@ class App extends Component {
             <h3>Sign in to continue</h3>
         );
         return (
+
             <div className="App">
                 <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
                 {appContent}

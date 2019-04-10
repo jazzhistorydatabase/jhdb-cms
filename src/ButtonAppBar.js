@@ -5,8 +5,16 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {withStyles} from '@material-ui/core/styles';
 import './App.css';
-
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import 'typeface-roboto';
 import fb from './firebase';
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+         main: '#c51162',
+        } ,
+    },
+});
 
 const styles = {
     root: {
@@ -20,7 +28,7 @@ const styles = {
         marginRight: 20,
     },
     accountButton: {
-        backgroundColor: "#2E40A4"
+        backgroundColor: "#A10C32"
     }
 };
 
@@ -31,6 +39,7 @@ class ButtonAppBar extends Component {
         const classes = this.props.classes;
 
         return (
+            <MuiThemeProvider theme={theme}>
             <div className={classes.root}>
                 <AppBar position="static">
                     <Toolbar>
@@ -59,6 +68,7 @@ class ButtonAppBar extends Component {
                     </Toolbar>
                 </AppBar>
             </div>
+            </MuiThemeProvider>
         );
     }
 
