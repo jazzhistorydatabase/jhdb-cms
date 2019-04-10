@@ -2,10 +2,12 @@ import React, {Component} from 'react';
 import './App.css';
 import ButtonAppBar from './ButtonAppBar';
 import MainPageTB from './MainPageTB';
+import EditContributionView from "./EditContributionView";
 
 import fb from './firebase.js';
-import EditContributionView from "./EditContributionView";
 import Paper from "@material-ui/core/Paper";
+import dbx from './dropbox.js';
+
 class App extends Component {
 
     constructor(props) {
@@ -13,7 +15,8 @@ class App extends Component {
         this.state = {
             user: null,
             contributions: [],
-            showEditWindow: false
+            showEditWindow: false,
+            selectedContribution: undefined
         }
     }
 
@@ -28,6 +31,14 @@ class App extends Component {
         }
     }
 
+    handleUserSignOut() {
+        if (!window.confirm("Sign out of " + this.state.user.displayName + "?")) {
+            return;
+        }
+        this.setState({user: null});
+        fb.auth.signOut();
+    }
+
     componentWillMount() {
         if (!fb.app) {
             fb.initialize(this.handleUserAuth.bind(this));
@@ -37,23 +48,36 @@ class App extends Component {
             state: 'contributions',
             withRefs: true
         });
+        if (!dbx.app) {
+            dbx.initialize();
+        }
     }
 
-    windowSwap() {
+    windowSwap(selectedContribution) {
         this.setState({
+            selectedContribution: selectedContribution,
             showEditWindow: !this.state.showEditWindow
         });
     }
 
     render() {
-        let currentWindow = this.state.showEditWindow ? <EditContributionView windowSwap={this.windowSwap.bind(this)} /> :
+        let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
+                                                                              windowSwap={this.windowSwap.bind(this)} /> :
                                                         <MainPageTB contributions={this.state.contributions}
                                                                     windowSwap={this.windowSwap.bind(this)}/> ;
+        
+        const appContent = this.state.user ? (
+            <div>
+                {currentWindow}
+            </div>
+        ) : (
+            <h3>Sign in to continue</h3>
+        );
         return (
 
             <div className="App">
-                <ButtonAppBar/>
-                {currentWindow}
+                <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
+                {appContent}
             </div>
         );
     }

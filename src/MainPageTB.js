@@ -5,9 +5,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import React, {Component} from 'react';
 import {withStyles} from '@material-ui/core/styles';
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
-import './MainPageTB.css';
 import Paper from "@material-ui/core/Paper";
 import FormControl from "@material-ui/core/FormControl";
+import dbx from './dropbox.js';
+
+import './MainPageTB.css';
 
 const theme = createMuiTheme({
     palette: {
@@ -15,8 +17,8 @@ const theme = createMuiTheme({
             main: '#c51162',
         },
     },
-
 });
+
 const styles = theme => ({
     root: {
         width: '100%',
@@ -57,10 +59,15 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
-    handleAddButtonClick() {
-        this.props.windowSwap();
+    // // Testing purposes. Attach this to a button's onClick to see in action - it opens a file attached to the collection, in dropbox.
+    // onBioDocumentClick = function(documentName) {
+    //     this.props.dropbox.openFile(documentName);
+    // };
+  
+    handleAddEditButtonClick(selectedContribution) {
+        this.props.windowSwap(selectedContribution);
     }
-
+  
     render() {
         const classes = this.props.classes;
         let contrib = this.props.contributions;
@@ -71,7 +78,7 @@ class MainPageTB extends Component {
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     <div className={" MainPage-format"}>
                         <h1>My Contributions</h1>
-                        <Button onClick={this.handleAddButtonClick.bind(this)} variant="outlined" color={"primary"}
+                        <Button onClick={() => {return this.handleAddEditButtonClick.bind(this)()}} variant="outlined" color={"primary"}
                                 className={classes.button}>Add Contribution </Button>
                         <List className-={classes.contributionList}>
                             {contrib.map((e) => {
@@ -79,6 +86,7 @@ class MainPageTB extends Component {
                                     <ListItem key={e.id || e.name} className={classes.contributionListItem}>
                                         <h3 className={classes.contributionListName}>{e.name}</h3>
                                         <Button variant="outlined" color={"primary"}
+                                                onClick={() => {return this.handleAddEditButtonClick.bind(this)(e)}}
                                                 className={classes.button}>Edit </Button>
                                         <Button variant="outlined" color={"primary"}
                                                 className={classes.button}>Preview </Button>
