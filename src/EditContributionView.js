@@ -12,8 +12,18 @@ import MediaUpload from "./MediaUpload";
 import Paper from "@material-ui/core/Paper";
 import FormGroup from "@material-ui/core/FormGroup";
 import Checkbox from "@material-ui/core/Checkbox";
-
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import 'typeface-roboto';
 import fb from "./firebase";
+
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+            main: '#c51162',
+        } ,
+    },
+
+});
 
 const styles = theme => ({
     container: {
@@ -46,12 +56,19 @@ const styles = theme => ({
         width: 600,
     },
     button2: {
-        width: 200,
+        width: '40%',
+        marginLeft: 'auto',
+        marginRight: 'auto'
     },
     button3: {
         margin: 20,
-    }
-
+    },
+    reviewOptionLeft: {
+        marginLeft: 'auto',
+    },
+    reviewOptionRight: {
+        marginRight: 'auto',
+    },
 });
 
 class EditContributionView extends Component {
@@ -94,7 +111,7 @@ class EditContributionView extends Component {
     componentWillMount() {
         console.log(this.props && this.props.selectedContribution);
         console.log(fb.base);
-        if (this.props.selectedContribution) {
+        if (this.props.selectedContribution && this.props.selectedContribution.ref) {
             fb.base.syncDoc(this.props.selectedContribution.ref.path, {
                 context: this,
                 state: 'contributionData',
@@ -109,6 +126,7 @@ class EditContributionView extends Component {
         const contrib = this.state.contributionData;
         const {mediaProcess, contentEditing} = this.state;
         return (
+            <MuiThemeProvider theme={theme}>
             <div>
                 <h1> Contribution </h1>
                 <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
@@ -174,14 +192,14 @@ class EditContributionView extends Component {
                 <FormControl className={classes.uploadWidth}>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false}>
-                        <FormGroup row>
-                            <FormControlLabel
+                        <FormGroup row >
+                            <FormControlLabel className={classes.reviewOptionLeft}
                                 control={
                                     <Checkbox checked={mediaProcess} onChange={this.handleEndBoxChange('mediaProcess')}
                                               value="Media Processing"/>
                                 }
                                 label="Additional Media Processing Required"/>
-                            <FormControlLabel
+                            <FormControlLabel className={classes.reviewOptionRight}
                                 control={
                                     <Checkbox checked={contentEditing}
                                               onChange={this.handleEndBoxChange('contentEditing')}
@@ -189,20 +207,20 @@ class EditContributionView extends Component {
                                 label="Additional Content Editing Required"/>
                         </FormGroup>
                         <FormGroup row>
-                            <Button variant="contained" color="primary" className={classes.button3}>
+                            <Button variant="contained" color="primary" className={classes.button3+ ' ' +classes.reviewOptionLeft}>
                                 Submit for Review
                             </Button>
                             <Button variant="contained" color="primary" className={classes.button3}>
                                 Preview
                             </Button>
-                            <Button variant="contained" color="primary" className={classes.button3}>
+                            <Button variant="contained" color="primary" className={classes.button3+ ' ' +classes.reviewOptionRight}>
                                 Save
                             </Button>
                         </FormGroup>
                     </Paper>
                 </FormControl>
             </div>
-
+            </MuiThemeProvider>
         );
     }
 
