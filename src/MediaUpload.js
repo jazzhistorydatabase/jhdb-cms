@@ -8,8 +8,6 @@ import Paper from "@material-ui/core/Paper";
 import FileUpload from "./FileUpload";
 import Button from "@material-ui/core/Button";
 
-import dbx from './dropbox.js';
-
 const styles = theme => ({
     root: {
         flexGrow: 1,
@@ -103,7 +101,7 @@ class MediaUpload extends Component {
             } else if (this.props.uploadName === "Video") {
                 dbxOptions = {};
             }
-            return (<FileUpload key={fileIndex} fileName={fileIndex} dbxOptions={dbxOptions} uploadName={this.props.uploadName} appKey={dbx.app.appKey}/>);
+            return (<FileUpload key={fileIndex} fileName={fileIndex} dbxOptions={dbxOptions} uploadName={this.props.uploadName} />);
         });
 
         return (

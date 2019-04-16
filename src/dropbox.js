@@ -1,11 +1,17 @@
 import dropbox from 'dropbox';
+import loadScript from 'load-script';
+
+const DROPBOX_SDK_URL = 'https://www.dropbox.com/static/api/2/dropins.js';
+const SCRIPT_ID = 'dropboxjs';
+
+let scriptLoadingStarted = false;
+
 
 const dbx = {
 
     // Must be called in componentWillMount in App.js
     initialize: function (callback) {
-        window.Dropbox = {};
-        var config = {
+        let config = {
             appKey: "l3bfhq15xjjtxqp",
             clientId: "jhbdlvkjabsdkljvna",
             clientSecret: "t523msf8d0pr610",
@@ -17,7 +23,25 @@ const dbx = {
         } else  {
             config.accessToken = accessToken;
             this.app = new dropbox.Dropbox(config);
+            if (!this.isDropboxReady() && !scriptLoadingStarted) {
+                scriptLoadingStarted = true;
+                loadScript(DROPBOX_SDK_URL, {
+                  attrs : {
+                    id: SCRIPT_ID,
+                    'data-app-key': config.appKey
+                  }
+                });
+              }
         }
+    },
+
+    isDropboxReady() {
+        return !!window.Dropbox;
+    },
+
+    onChoose(options) {
+        if (!this.isDropboxReady()) return null;
+        window.Dropbox.choose(options);
     },
 
     getAccessTokenFromCode: function (redirectUri, code) {

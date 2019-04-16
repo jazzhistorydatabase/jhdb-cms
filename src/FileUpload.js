@@ -5,7 +5,9 @@ import FormGroup from "@material-ui/core/FormGroup";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import TextField from "@material-ui/core/TextField";
-import DropboxChooser from "react-dropbox-chooser";
+import Button from "@material-ui/core/Button";
+
+import dbx from './dropbox.js';
 
 const styles = theme => ({
     root: {
@@ -41,14 +43,11 @@ class FileUpload extends Component {
                     <Fab size="small" color="primary" aria-label="Add" className={classes.fab}>
                         <AddIcon/>
                     </Fab>
-                    <DropboxChooser
-                        appKey={this.props.appKey}
-                        success={this.props.dbxOptions.success}
-                        cancel={this.props.dbxOptions.cancel}
-                        multiselect={this.props.dbxOptions.multiselect}
-                        extensions={this.props.dbxOptions.extensions} >
-                        <button className="dropbox">Choose from Dropbox</button>      
-                    </DropboxChooser>
+                    <Button
+                        className={classes.button}
+                        onClick={() => dbx.onChoose(this.props.dbxOptions)} >
+                        Choose from Dropbox
+                    </Button>
                     {this.props.fileName || ''}
                     <TextField
                         id="standard-multiline-static"

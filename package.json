@@ -17,6 +17,7 @@
     "@material-ui/icons": "^3.0.2",
     "dropbox": "^4.0.17",
     "firebase": "^5.9.0",
+    "load-script": "^1.0.0",
     "re-base": "^4.0.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
