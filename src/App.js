@@ -5,6 +5,7 @@ import MainPageTB from './MainPageTB';
 import EditContributionView from "./EditContributionView";
 
 import fb from './firebase.js';
+import Paper from "@material-ui/core/Paper";
 import dbx from './dropbox.js';
 
 class App extends Component {
@@ -14,7 +15,8 @@ class App extends Component {
         this.state = {
             user: null,
             contributions: [],
-            showEditWindow: false
+            showEditWindow: false,
+            selectedContribution: undefined
         }
     }
 
@@ -57,21 +59,16 @@ class App extends Component {
         }
     }
 
-    windowSwap() {
+    windowSwap(selectedContribution) {
         this.setState({
+            selectedContribution: selectedContribution,
             showEditWindow: !this.state.showEditWindow
         });
     }
 
     render() {
-
-        if(this.state.render && this.state.preview) {
-            return (
-
-            )
-        }
-
-        let currentWindow = this.state.showEditWindow ? <EditContributionView windowSwap={this.windowSwap.bind(this)} /> :
+        let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
+                                                                              windowSwap={this.windowSwap.bind(this)} /> :
                                                         <MainPageTB contributions={this.state.contributions}
                                                                     windowSwap={this.windowSwap.bind(this)}/> ;
         
@@ -83,6 +80,7 @@ class App extends Component {
             <h3>Sign in to continue</h3>
         );
         return (
+
             <div className="App">
                 <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
                 {appContent}
