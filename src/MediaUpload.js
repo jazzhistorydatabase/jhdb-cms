@@ -76,7 +76,9 @@ class MediaUpload extends Component {
         fb.base.addToCollection(this.props.collection, {
             name: "",
             url: "",
-            caption: ""
+            caption: "",
+            icon: "",
+            thumbnail: "",
         });
     };
 
@@ -97,8 +99,9 @@ class MediaUpload extends Component {
             fileIndex++;
             return (
                 <FileUpload key={fileIndex}
+                            fileType={this.props.uploadName}
+                            fileIndex={fileIndex}
                             fileDoc={fileDoc}
-                            onChooserSuccess={files => alert("here's the link to your file: " + files[0].link)}
                 />);
         });
 
