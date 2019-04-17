@@ -19,7 +19,14 @@
 const express = require('express');
 var exphbs  = require('express-handlebars');
 
-const fb = require('src/firebase');
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./fb-server-creds.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://testproj-34045.firebaseio.com"
+});;
 
 const app = express();
 
@@ -30,7 +37,7 @@ const app = express();
 //     .end();
 // });
 // fb.initialize();
-app.use(express.static('build'));
+app.use('/portal', express.static('build'));
 
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
 app.set('view engine', 'handlebars');
@@ -39,6 +46,7 @@ app.set('view engine', 'handlebars');
 app.get('/', function (req, res) {
     res.render('preview', {name: "Tom Belino", description: "A human person"});
 });
+
 
 
 // Start the server
