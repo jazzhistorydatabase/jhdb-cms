@@ -37,13 +37,13 @@ const app = express();
 //     .end();
 // });
 // fb.initialize();
-app.use('/portal', express.static('build'));
+app.use('/', express.static('build'));
 
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
 app.set('view engine', 'handlebars');
 
 
-app.get('/', function (req, res) {
+app.get('/preview', function (req, res) {
     res.render('preview', {name: "Tom Belino", description: "A human person"});
 });
 
