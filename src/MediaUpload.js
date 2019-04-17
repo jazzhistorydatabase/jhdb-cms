@@ -8,6 +8,8 @@ import Paper from "@material-ui/core/Paper";
 import FileUpload from "./FileUpload";
 import Button from "@material-ui/core/Button";
 
+import dbx from './dropbox.js';
+
 const styles = theme => ({
     root: {
         flexGrow: 1,
@@ -69,7 +71,8 @@ class MediaUpload extends Component {
         let fileIndex = 0;
         let fileUploads = this.state.filesList.map((isUploaded) => {
             fileIndex++;
-            return (<FileUpload key={fileIndex} fileName={fileIndex}/>);
+            // insert chooser success callback here. Placeholder lambda for now
+            return (<FileUpload key={fileIndex} fileName={fileIndex} onChooserSuccess={files => alert("here's the link to your file: " + files[0].link)} uploadName={this.props.uploadName} />);
         });
 
         return (
