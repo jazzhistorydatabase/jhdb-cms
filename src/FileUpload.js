@@ -40,14 +40,14 @@ class FileUpload extends Component {
             <div className={classes.root}>
 
                 <FormGroup row id={this.props.uploadName + this.props.fileName}>
-                    <Fab size="small" color="primary" aria-label="Add" className={classes.fab}>
+                    <Fab
+                        size="small"
+                        color="primary"
+                        aria-label="Add"
+                        className={classes.fab}
+                        onClick={() => dbx.onChoose(this.props.uploadName, this.props.onChooserSuccess)}>
                         <AddIcon/>
                     </Fab>
-                    <Button
-                        className={classes.button}
-                        onClick={() => dbx.onChoose(this.props.dbxOptions)} >
-                        Choose from Dropbox
-                    </Button>
                     {this.props.fileName || ''}
                     <TextField
                         id="standard-multiline-static"

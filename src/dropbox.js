@@ -39,8 +39,12 @@ const dbx = {
         return !!window.Dropbox;
     },
 
-    onChoose(options) {
-        if (!this.isDropboxReady()) return null;
+    onChoose(fileType, successCallback) {
+        if (!this.isDropboxReady() || !successCallback || (fileType !== 'Images' && fileType !== 'Audio')) return null;
+        let options;
+        if (fileType === 'Images') options = this.dbxImageOptions;
+        else if (fileType === 'Audio') options = this.dbxAudioOptions;
+        options.success = successCallback;
         window.Dropbox.choose(options);
     },
 
@@ -67,7 +71,27 @@ const dbx = {
     getTokenFromRedirectUrl: function (str) {
         const params = new URLSearchParams(str);
         return params.get('#access_token');
-    }
+    },
+
+    dbxImageOptions: {
+        success: null,
+        cancel: null,
+        linkType: "preview", // or "direct"
+        multiselect: false,
+        extensions: ['images'],
+        folderselect: false,
+        sizeLimit: 1024 * 1024 * 1024, // in bytes
+    },
+    
+    dbxAudioOptions: {
+        success: null,
+        cancel: null,
+        linkType: "preview", // or "direct"
+        multiselect: false,
+        extensions: ['audio'],
+        folderselect: false,
+        sizeLimit: 1024 * 1024 * 1024, // in bytes
+    },
 }
 
 export default dbx;
