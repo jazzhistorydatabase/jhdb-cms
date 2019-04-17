@@ -4,7 +4,9 @@ import './App.css';
 import FormGroup from "@material-ui/core/FormGroup";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from "@material-ui/core/TextField";
+import fb from "./firebase";
 
 const styles = theme => ({
     root: {
@@ -25,12 +27,31 @@ class FileUpload extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            contribText: '',
+            fileDoc: undefined,
         };
     }
     handleTextChange = event => {
-        this.setState({contribText: event.target.value});
+        let fileDoc = this.state.fileDoc;
+        fileDoc.caption = event.target.value;
+        this.setState({fileDoc: fileDoc});
     };
+
+    handleDelete() {
+        if(window.confirm("Are you sure you want to remove this file? This can not be undone!")) {
+            fb.base.removeDoc(this.props.fileDoc.ref);
+        }
+    }
+
+    componentWillMount() {
+        if(this.props && this.props.fileDoc) {
+            fb.base.syncDoc(this.props.fileDoc.ref, {
+                context: this,
+                state: 'fileDoc',
+                withRefs: true
+            });
+        }
+    }
+
     render() {
         const classes = this.props.classes;
 
@@ -38,16 +59,16 @@ class FileUpload extends Component {
             <div className={classes.root}>
 
                 <FormGroup row>
-                    <Fab size="small" color="primary" aria-label="Add" className={classes.fab}>
+                    <Fab size="small" color="primary" aria-label="Upload" className={classes.fab}>
                         <AddIcon/>
                     </Fab>
-                    {this.props.fileName || ''}
+                    {(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)}
                     <TextField
                         id="standard-multiline-static"
                         label="Caption"
                         style={{margin: 5}}
                         multiline
-                        value={this.state.contribText}
+                        value={(this.state.fileDoc && this.state.fileDoc.caption) || ""}
                         onChange={this.handleTextChange}
                         margin="normal"
                         variant="filled"
@@ -55,6 +76,12 @@ class FileUpload extends Component {
                             shrink: true,
                         }}
                     />
+                    <Fab size="small"
+                         aria-label="Delete"
+                         onClick={this.handleDelete.bind(this)}
+                         className={classes.fab}>
+                        <DeleteIcon />
+                    </Fab>
                 </FormGroup>
 
             </div>
