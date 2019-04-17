@@ -7,6 +7,7 @@ import Switch from "@material-ui/core/Switch";
 import Paper from "@material-ui/core/Paper";
 import FileUpload from "./FileUpload";
 import Button from "@material-ui/core/Button";
+import fb from "./firebase";
 
 import dbx from './dropbox.js';
 
@@ -46,33 +47,62 @@ class MediaUpload extends Component {
         this.state = {
             makeSubpage: '',
             contribText: '',
-            filesList: [],
+            collection: [],
             add: '',
         };
     }
 
     handleSubpage(event) {
-        this.setState({
-            makeSubpage: event.target.checked
-        });
+        console.log("Callback: "+event.target.checked);
+        let newState =  {};
+        switch(this.props && this.props.uploadName) {
+            case "Images":
+                newState["imagesSubpage"] = event.target.checked;
+                break;
+            case "Audio":
+                newState["audioSubpage"] = event.target.checked;
+                break;
+            case "Video":
+                break;
+            default:
+                newState["videoSubpage"] = event.target.checked;
+                break;
+        }
+        this.props.onChange(newState);
     };
 
     addFileUpload(event) {
-        console.log(this.state);
-        let lst = this.state.filesList;
-        lst.push(false);
-        this.setState({
-            filesList: lst
+        let lst = this.state.collection;
+        fb.base.addToCollection(this.props.collection, {
+            name: "",
+            url: "",
+            caption: "",
+            icon: "",
+            thumbnail: "",
         });
     };
+
+    componentWillMount() {
+        if(this.props && this.props.collection) {
+            fb.base.bindCollection(this.props.collection, {
+                context: this,
+                state: 'collection',
+                withRefs: true
+            });
+        }
+    }
 
     render() {
         const classes = this.props.classes;
         let fileIndex = 0;
-        let fileUploads = this.state.filesList.map((isUploaded) => {
+        let fileUploads = this.state.collection.map((fileDoc) => {
             fileIndex++;
-            // insert chooser success callback here. Placeholder lambda for now
-            return (<FileUpload key={fileIndex} fileName={fileIndex} onChooserSuccess={files => alert("here's the link to your file: " + files[0].link)} uploadName={this.props.uploadName} />);
+            return (
+                <FileUpload key={fileIndex}
+                            fileType={this.props.uploadName}
+                            fileIndex={fileIndex}
+                            fileDoc={fileDoc}
+                />);
         });
 
         return (
@@ -86,9 +116,8 @@ class MediaUpload extends Component {
                         <FormControlLabel
                             control={
                                 <Switch
-                                    checked={this.state.makeSubpage}
+                                    checked={(this.props && this.props.isSubpage) || false}
                                     onChange={this.handleSubpage.bind(this)}
-                                    value="make subpage"
                                 />
                             }
                             label="Make Subpage"

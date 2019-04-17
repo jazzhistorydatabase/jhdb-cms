@@ -61,13 +61,16 @@ const styles = theme => ({
         marginRight: 'auto'
     },
     button3: {
+        display: 'inline-block',
+        width: '200px',
+        height: '40px',
         margin: 20,
     },
     reviewOptionLeft: {
-        marginLeft: 'auto',
+        marginLeft: '10%',
     },
     reviewOptionRight: {
-        marginRight: 'auto',
+        marginRight: '10%',
     },
 });
 
@@ -107,6 +110,14 @@ class EditContributionView extends Component {
     handleEndBoxChange = name => event => {
         this.setState({[name]: event.target.checked});
     };
+
+    handleChildChange = newState => {
+        let contrib = this.state.contributionData;
+        Object.keys(newState).forEach(key => {
+            contrib[key] = newState[key];
+        });
+        this.setState({contributionData: contrib});
+    }
 
     componentWillMount() {
         console.log(this.props && this.props.selectedContribution);
@@ -184,39 +195,48 @@ class EditContributionView extends Component {
                 </FormControl>
                 <br/>
                 <FormControl className={classes.uploadWidth}>
-                    <MediaUpload uploadName="Images"/>
-                    <MediaUpload uploadName="Audio"/>
-                    <MediaUpload uploadName="Video"/>
+                    <MediaUpload uploadName="Images"
+                                 isSubpage={contrib && contrib.imagesSubpage}
+                                 collection={this.props.selectedContribution.ref.collection("Images")}
+                                 onChange={this.handleChildChange}/>
+                    <MediaUpload uploadName="Audio"
+                                 isSubpage={contrib && contrib.audioSubpage}
+                                 collection={this.props.selectedContribution.ref.collection("Audio")}
+                                 onChange={this.handleChildChange}/>
+                    <MediaUpload uploadName="Video"
+                                 isSubpage={contrib && contrib.videoSubpage}
+                                 collection={this.props.selectedContribution.ref.collection("Video")}
+                                 onChange={this.handleChildChange}/>
                 </FormControl>
                 <br/>
                 <FormControl className={classes.uploadWidth}>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false}>
+                        <br />
                         <FormGroup row >
-                            <FormControlLabel className={classes.reviewOptionLeft}
+                            <FormControlLabel className={classes.button2}
                                 control={
                                     <Checkbox checked={mediaProcess} onChange={this.handleEndBoxChange('mediaProcess')}
                                               value="Media Processing"/>
                                 }
                                 label="Additional Media Processing Required"/>
-                            <FormControlLabel className={classes.reviewOptionRight}
+                            <FormControlLabel className={classes.button2}
                                 control={
                                     <Checkbox checked={contentEditing}
                                               onChange={this.handleEndBoxChange('contentEditing')}
                                               value="Content Editing"/>}
                                 label="Additional Content Editing Required"/>
                         </FormGroup>
+                        <br />
                         <FormGroup row>
-                            <Button variant="contained" color="primary" className={classes.button3+ ' ' +classes.reviewOptionLeft}>
+                            <Button variant="contained" color="primary" className={classes.button2}>
                                 Submit for Review
                             </Button>
-                            <Button variant="contained" color="primary" className={classes.button3}>
+                            <Button variant="contained" color="primary" className={classes.button2}>
                                 Preview
                             </Button>
-                            <Button variant="contained" color="primary" className={classes.button3+ ' ' +classes.reviewOptionRight}>
-                                Save
-                            </Button>
                         </FormGroup>
+                        <br />
                     </Paper>
                 </FormControl>
             </div>
