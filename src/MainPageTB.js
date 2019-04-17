@@ -7,6 +7,8 @@ import {withStyles} from '@material-ui/core/styles';
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
 import FormControl from "@material-ui/core/FormControl";
+
+import fb from './firebase';
 import dbx from './dropbox.js';
 
 import './MainPageTB.css';
@@ -63,8 +65,25 @@ class MainPageTB extends Component {
     // onBioDocumentClick = function(documentName) {
     //     this.props.dropbox.openFile(documentName);
     // };
+    
+    handleAddButtonClick() {
+        let contribName = window.prompt("Enter collection name:");
+        if(contribName) {
+            fb.base.addToCollection(`Contributions`, {
+                name: contribName,
+                description: '',
+                type: 'collection',
+                imagesSubpage: false,
+                videoSubpage: false,
+                audioSubpage: false,
+                status: 'unpublished',
+            });
+        } else {
+            window.alert("Collection name can not be blank!");
+        }
+    }
   
-    handleAddEditButtonClick(selectedContribution) {
+    handleEditButtonClick(selectedContribution) {
         this.props.windowSwap(selectedContribution);
     }
   
@@ -78,7 +97,7 @@ class MainPageTB extends Component {
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     <div className={" MainPage-format"}>
                         <h1>My Contributions</h1>
-                        <Button onClick={() => {return this.handleAddEditButtonClick.bind(this)()}} variant="outlined" color={"primary"}
+                        <Button onClick={() => {return this.handleAddButtonClick.bind(this)()}} variant="outlined" color={"primary"}
                                 className={classes.button}>Add Contribution </Button>
                         <List className-={classes.contributionList}>
                             {contrib.map((e) => {
@@ -86,14 +105,13 @@ class MainPageTB extends Component {
                                     <ListItem key={e.id || e.name} className={classes.contributionListItem}>
                                         <h3 className={classes.contributionListName}>{e.name}</h3>
                                         <Button variant="outlined" color={"primary"}
-                                                onClick={() => {return this.handleAddEditButtonClick.bind(this)(e)}}
+                                                onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}
                                                 className={classes.button}>Edit </Button>
                                         <Button variant="outlined" color={"primary"}
                                                 className={classes.button}>Preview </Button>
                                         <h3 className={classes.contributionListStatus}>{e.status}</h3>
                                     </ListItem>
-                                )
-
+                                );
                             })}
                         </List>
                     </div>
