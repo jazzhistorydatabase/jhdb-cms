@@ -6,7 +6,9 @@ import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from "@material-ui/core/TextField";
+
 import fb from "./firebase";
+import dbx from './dropbox.js';
 
 const styles = theme => ({
     root: {
@@ -19,7 +21,6 @@ const styles = theme => ({
     fab: {
         margin: theme.spacing.unit,
     },
-
 });
 
 class FileUpload extends Component {
@@ -29,7 +30,7 @@ class FileUpload extends Component {
         this.state = {
             fileDoc: undefined,
         };
-    }
+    };
     handleTextChange = event => {
         let fileDoc = this.state.fileDoc;
         fileDoc.caption = event.target.value;
@@ -57,9 +58,13 @@ class FileUpload extends Component {
 
         return (
             <div className={classes.root}>
-
-                <FormGroup row>
-                    <Fab size="small" color="primary" aria-label="Upload" className={classes.fab}>
+                <FormGroup row id={this.props.uploadName + this.props.fileName}>
+                    <Fab
+                        size="small"
+                        color="primary"
+                        aria-label="Upload"
+                        className={classes.fab}
+                        onClick={() => dbx.onChoose(this.props.uploadName, this.props.onChooserSuccess)}>
                         <AddIcon/>
                     </Fab>
                     {(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)}

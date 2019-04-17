@@ -1,10 +1,17 @@
 import dropbox from 'dropbox';
+import loadScript from 'load-script';
+
+const DROPBOX_SDK_URL = 'https://www.dropbox.com/static/api/2/dropins.js';
+const SCRIPT_ID = 'dropboxjs';
+
+let scriptLoadingStarted = false;
+
 
 const dbx = {
 
     // Must be called in componentWillMount in App.js
     initialize: function (callback) {
-        var config = {
+        let config = {
             appKey: "l3bfhq15xjjtxqp",
             clientId: "jhbdlvkjabsdkljvna",
             clientSecret: "t523msf8d0pr610",
@@ -16,7 +23,29 @@ const dbx = {
         } else  {
             config.accessToken = accessToken;
             this.app = new dropbox.Dropbox(config);
+            if (!this.isDropboxReady() && !scriptLoadingStarted) {
+                scriptLoadingStarted = true;
+                loadScript(DROPBOX_SDK_URL, {
+                  attrs : {
+                    id: SCRIPT_ID,
+                    'data-app-key': config.appKey
+                  }
+                });
+              }
         }
+    },
+
+    isDropboxReady() {
+        return !!window.Dropbox;
+    },
+
+    onChoose(fileType, successCallback) {
+        if (!this.isDropboxReady() || !successCallback || (fileType !== 'Images' && fileType !== 'Audio')) return null;
+        let options;
+        if (fileType === 'Images') options = this.dbxImageOptions;
+        else if (fileType === 'Audio') options = this.dbxAudioOptions;
+        options.success = successCallback;
+        window.Dropbox.choose(options);
     },
 
     getAccessTokenFromCode: function (redirectUri, code) {
@@ -42,8 +71,27 @@ const dbx = {
     getTokenFromRedirectUrl: function (str) {
         const params = new URLSearchParams(str);
         return params.get('#access_token');
-    }
+    },
 
+    dbxImageOptions: {
+        success: null,
+        cancel: null,
+        linkType: "preview", // or "direct"
+        multiselect: false,
+        extensions: ['images'],
+        folderselect: false,
+        sizeLimit: 1024 * 1024 * 1024, // in bytes
+    },
+    
+    dbxAudioOptions: {
+        success: null,
+        cancel: null,
+        linkType: "preview", // or "direct"
+        multiselect: false,
+        extensions: ['audio'],
+        folderselect: false,
+        sizeLimit: 1024 * 1024 * 1024, // in bytes
+    },
 }
 
 export default dbx;

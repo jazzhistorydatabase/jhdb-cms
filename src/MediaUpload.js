@@ -9,6 +9,8 @@ import FileUpload from "./FileUpload";
 import Button from "@material-ui/core/Button";
 import fb from "./firebase";
 
+import dbx from './dropbox.js';
+
 const styles = theme => ({
     root: {
         flexGrow: 1,
@@ -96,6 +98,7 @@ class MediaUpload extends Component {
             return (
                 <FileUpload key={fileIndex}
                             fileDoc={fileDoc}
+                            onChooserSuccess={files => alert("here's the link to your file: " + files[0].link)}
                 />);
         });
 
