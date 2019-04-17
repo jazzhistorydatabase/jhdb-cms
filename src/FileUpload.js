@@ -74,7 +74,6 @@ class FileUpload extends Component {
         if(!doc) {
             return <div />;
         }
-        console.log(doc);
         let fileUploadIcon = doc.url ?
                 ((doc.thumbnail || doc.icon) ?
                     (<img className={classes.fabImg} src={(doc.thumbnail || doc.icon)} />) :
@@ -92,7 +91,6 @@ class FileUpload extends Component {
                         onClick={
                             () => {
                                 if (this.state.fileDoc) {
-                                console.log("YOTE");
                                     dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
                                 }
                             }
