@@ -1,396 +1,202 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en-US">
 <head>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-7589884-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'UA-7589884-1');
-</script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-7589884-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<meta name="author" content="JazzHistoryDatabase" />
-
-    <!-- Media player javascript -->
-    <link rel="stylesheet" type="text/css" href="http://www.jazzhistorydatabase.com/content/global.css">
-    <script type="text/javascript" src="http://www.jazzhistorydatabase.com/java/FWDRAP.js"></script>
-    <script type="text/javascript">
-        FWDRAPUtils.onReady(function(){
-            new FWDRAP({
-                //main settings
-                instanceName:"player1",
-                parentId:"audioPlayer",
-                playlistsId:"playlists",
-                mainFolderPath:"content",
-                skinPath:"minimal_skin_dark",
-                showSoundCloudUserNameInTitle:"no",
-                useDeepLinking:"yes",
-                useYoutube:"yes",
-                useVideo:"yes",
-                rightClickContextMenu:"default",
-                showButtonsToolTips:"yes",
-                autoPlay:"no",
-                loop:"no",
-                shuffle:"no",
-                useHEXColorsForSkin:"yes",
-                soundCloudAPIKey:"",
-                normalHEXButtonsColor:"#FF0000",
-                selectedHEXButtonsColor:"#00FF00",
-                maxWidth:501,
-                volume:.5,
-                toolTipsButtonsHideDelay:1.5,
-                toolTipsButtonFontColor:"#5a5a5a",
-                //controller settings
-                animateOnIntro:"yes",
-                showNextAndPrevButtons:"yes",
-                showThumbnail:"yes",
-                showSoundAnimation:"yes",
-                showLoopButton:"yes",
-                showShuffleButton:"yes",
-                showDownloadMp3Button:"no",
-                showBuyButton:"no",
-                showShareButton:"no",
-                disableAudioScrubbar:"no",
-                expandBackground:"no",
-                titleColor:"#FFFFFF",
-                timeColor:"#888888",
-                //controller align and size settings (described in detail in the documentation!)
-                controllerHeight:76,
-                startSpaceBetweenButtons:9,
-                spaceBetweenButtons:8,
-                separatorOffsetOutSpace:5,
-                separatorOffsetInSpace:9,
-                lastButtonsOffsetTop:14,
-                allButtonsOffsetTopAndBottom:14,
-                titleBarOffsetTop:13,
-                mainScrubberOffsetTop:47,
-                spaceBetweenMainScrubberAndTime:10,
-                startTimeSpace:10,
-                scrubbersOffsetWidth:2,
-                scrubbersOffestTotalWidth:0,
-                volumeButtonAndScrubberOffsetTop:47,
-                spaceBetweenVolumeButtonAndScrubber:6,
-                volumeScrubberOffestWidth:4,
-                scrubberOffsetBottom:10,
-                equlizerOffsetLeft:1,
-                //playlists window settings
-                usePlaylistsSelectBox:"yes",
-                showPlaylistsSelectBoxNumbers:"yes",
-                showPlaylistsButtonAndPlaylists:"yes",
-                showPlaylistsByDefault:"no",
-                thumbnailSelectedType:"opacity",
-                startAtPlaylist:0,
-                startAtTrack:0,
-                startAtRandomTrack:"no",
-                buttonsMargins:0,
-                thumbnailMaxWidth:350, 
-                thumbnailMaxHeight:350,
-                horizontalSpaceBetweenThumbnails:40,
-                verticalSpaceBetweenThumbnails:40,
-                mainSelectorBackgroundSelectedColor:"#FFFFFF",
-                mainSelectorTextNormalColor:"#FFFFFF",
-                mainSelectorTextSelectedColor:"#000000",
-                mainButtonTextNormalColor:"#888888",
-                mainButtonTextSelectedColor:"#FFFFFF",                      
-                //playlist settings
-                showPlayListButtonAndPlaylist:"yes",
-                showPlayListOnAndroid:"yes",
-                showPlayListByDefault:"yes",
-                showPlaylistItemPlayButton:"yes",
-                showPlaylistItemDownloadButton:"yes",
-                showPlaylistItemBuyButton:"yes",
-                forceDisableDownloadButtonForPodcast:"yes",
-                forceDisableDownloadButtonForOfficialFM:"yes",
-                forceDisableDownloadButtonForFolder:"yes",
-                addScrollBarMouseWheelSupport:"yes",
-                showTracksNumbers:"yes",
-                playlistBackgroundColor:"#000000",
-                trackTitleNormalColor:"#888888",
-                trackTitleSelectedColor:"#FFFFFF",
-                trackDurationColor:"#888888",
-                maxPlaylistItems:100,
-                nrOfVisiblePlaylistItems:12,
-                trackTitleOffsetLeft:0,
-                playPauseButtonOffsetLeftAndRight:11,
-                durationOffsetRight:9,
-                downloadButtonOffsetRight:11,
-                scrollbarOffestWidth:7,
-                //search bar settings
-                showSearchBar:"yes",
-                showSortButtons:"yes",
-                searchInputColor:"#999999",
-                searchBarHeight:38,
-                inputSearchTextOffsetTop:1,
-                inputSearchOffsetLeft:0,
-                //popup settings
-                showPopupButton:"yes",
-                popupWindowBackgroundColor:"#878787",
-                popupWindowWidth:750,
-                popupWindowHeight:392
-            });
-        });
+        function gtag() {
+            dataLayer.push( arguments );
+        }
+        gtag( 'js', new Date() );
+        gtag( 'config', 'UA-7589884-1' );
     </script>
 
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="author" content="JazzHistoryDatabase"/>
 
-	<!-- Stylesheets
-	============================================= -->
-	<link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/bootstrap.css" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/style.css" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/dark.css" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css" />
-	<link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/JHDB.css" type="text/css" />
-    
 
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-	<!-- Document Title
-	============================================= -->
+
+    <!-- Stylesheets
+    ============================================= -->
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/style.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/dark.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/JHDB.css" type="text/css"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <!-- Document Title
+    ============================================= -->
     <title>Jazz History Database</title>
 
 </head>
 
-<body class="">
-<div class="">
+<body>
 
-    <!-- Document Wrapper
-  ============================================= -->
+<!-- Document Wrapper
+============================================= -->
 
-    <div id="wrapper" class="clearfix">
-
+<div id="wrapper" class="clearfix">
 
 
-        <!-- Header
-        ============================================= -->
 
-        <!--<?php-->
-        <!--include '../../header-new.php';-->
-        <!--?>-->
-        <!-- Page Title
-		============================================= -->
-        <!-- Intro -->
-        <style>
-            #page-title{
-                padding: 0 0;
-            }
+    <!-- Header
+    ============================================= -->
 
-            img.resize {
-                width:auto; /* you can use % */
-                height: 300px;
-            }
+    {{header}}
 
-            a.resize {
-                max-height: 300px;
-                height: 300px;
-            }
-            li>a{
-                cursor: pointer;
-            }
-        </style>
-        <!-- <section id="page-title" class="page-title" data-stellar-background-ratio="0.4">
+    <!-- Page Title
+    ============================================= -->
+    <!-- Intro -->
+    <style>
+        #page-title {
+            padding: 0 0;
+        }
+
+        img.resize {
+            width: auto;
+            /* you can use % */
+            height: 300px;
+        }
+
+        a.resize {
+            max-height: 300px;
+            height: 300px;
+        }
+
+        li>a {
+            cursor: pointer;
+        }
+    </style>
 
 
-        </section>#page-title end -->
+    <!-- Content
+    ============================================= -->
+    <section id="content">
 
-        <!-- Content
-        ============================================= -->
-        <section id="content">
+        <br>
 
-            <br>
-
-            <!-- Collection nav bar start-->
-            <div id="page-menu">
-                <div id="page-menu-wrap">
-                    <div class="container clearfix">
-                        <div class="menu-title" style="cursor:pointer;" onclick="goToByScroll('section-bio')">{{name}} Collection</div>
-                        <nav>
-                            <ul>
-                                <li>
-                                    <a onclick="goToByScroll('bio')">
-                                        <div>Biography</div>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a onClick="goToByScroll('images')">
-                                        <div>Images</div>
-
-                                    </a>
-                                </li>
-
-                            </ul>
-                        </nav>
-                        <div id="page-submenu-trigger"><i class="icon-reorder"></i></div>
-                    </div>
-                </div>
-            </div>
-            <!-- Collection nav bar end -->
-            <!-- Content Wrap starts -->
-            <div class="content-wrap">
-                <!-- Bio -->
+        <!-- Collection nav bar start-->
+        <div id="page-menu">
+            <div id="page-menu-wrap">
                 <div class="container clearfix">
-                    <div class="fancy-title title-bottom-border" id="bio">
-                        <h2>Biography of {{name}}</h2>
-                    </div>
-                    <!-- Insert bio -->
-                    <div class="coll-main-bio">
+                    <div class="menu-title" style="cursor:pointer;" onclick="goToByScroll('section-bio')"> {{name}} Collection </div>
+                    <nav>
+                        <ul>
+                            <li>
+                                <a onclick="goToByScroll('bio')">
+                                    <div>Biography</div>
+                                </a>
+                            </li>
 
-                        <div class="col_three_fifth bottommargin-sm">
+                            <li>
+                                <a onClick="goToByScroll('images')">
+                                    <div>Images</div>
 
-
-                            <p class="bio">A Working-Class Hero
-                                <br> Born: October 13th, 1937
-                                <br> Educated in: Worcester Public Schools
-                            </p>
-                            <p class="bio">
-                                {{description}}
-
-                            <div class="collapse" id="fullBio">
-                                <p>
-                                    “My mother had a washing machine that had an agitator,” he said. “I listened to the rhythm. It went -- boom-chick, boom-chick. I would sit there at three and four years old and put my hand on the machine and listen to the rhythm.”
-                                </p>
-                                <p> Lareau became interested in playing a drum kit at the age of six after discovering that his father was a drummer. “He walked away from the family when I was five. I identified with [drums] right away. I managed to get a pair of sticks and practice and practiced.”
-                                </p>
-                                <p>Largely self-taught, Lareau played in bands with kids from the neighborhood. “Al Arsenault lived across the street. We played together on a talent show on local television show when were 12 years-old.”
-                                </p>
-                                <p>When asked who he listened to coming up, Lareau named Gene Krupa, Cozy Cole and Louie Bellson.</p>
-                                <p>“Krupa came to Worcester with a quartet with Eddie Shu on tenor,” Lareau recalled. “They played at White City at pavilion outside. A friend of mine told me he was in town so I ran from Belmont Street down to the park. He hadn’t started playing yet.</p>
-                                <p>“His drums were set up on the stand and I was standing waiting for Krupa to come and play. I was there for about 15 minutes. Somebody came up behind me and said, ‘Hey what are you doing?” I thought it was a park guard. I said, ‘I’m waiting to see Gene Krupa.’ He said, ‘Oh, yeah. I’m Gene Krupa.’ So I ran over the hill to get my camera, came back and took a picture of him and me. I don’t have it anymore. That was back in 1953.”</p>
-                                <p>Lareau went to Commerce High School, but dropped out to join the National Guard in May of ‘54. He stayed for six months before transferring into the United States Air Force. While stationed in Clovis, New Mexico, Lareau said he purchased his first set of drums and made his professional debut there with the Ralph Williams Trio.</p>
-                                <p>At the same time, Lareau became a staff drummer at Norman Petty Studios in Clovis and provided drum tracks for recording projects and jingles. Additionally, he became the house drummer on the “Diggin’ with Deacon” television show, broadcast over KICA-TV. While still in New Mexico, Lareau also worked Hersh Alrick from Toledo, Ohio.</p>
-                                <p>It was during this period that Lareau began to study drums via correspondence with Shelly Manne. “I studied with him by mail. He sent me a brochure with instructions. There was a record and you played along with it. I did that for few years,” Lareau said.</p>
-                                <p>After being discharged from the Air Force in 1958, Lareau returned to Worcester, married Barbara Blaisdell and started a family, eventually raising six children.</p>
-                                <p>His first gig upon returning to town was with the Andy Mason Quartet. Andy was the brother of Johnny Mason of Emil Haddad and Notables fame. “He was a tenor player,” Lareau said of Andy. “We played the Moors. We did all the shows there. Sally Keith, the famous stripper was there.”</p>
-                                <p>He also worked with Tony Casino. “That was also the year I got out of the service. It was the year I got married. We played at the Valhalla. The band was Larry Patriarca, Duckie DeFlorio, and Tony on bass. He also sang.”</p>
-                                <p>Lareau also toured up and down the East Coast as a freelance drummer with various bands contracted by the Oscar Schwartz Booking Agency.</p>
-                                <p>In 1959 traveled to Texas and other southern states with the Bobby Burns Orchestra and later toured upstate New York and around New England with Carol Rene and Ron Ernst.  </p>
-                                <p>In the early 1960s, Lareau worked with a variety of bands in and around the Worcester region. He cites a stint at the Office Lounge with pianist Bill Clemmer, bassist Joe Holovnia, reedman Ray Starr and vocalist Pat Goodwin as a particular highlight. “There is a recording of us that Fred Holovnia did somewhere,” Lareau said. “We cut one record.”</p>
-                                <p>He also mentions his time at the Driftwood on Rte. 9 with saxophonist Howie Jefferson. “Howie was great. He was kind and soft spoken. He played tenor, alto and soprano on the gig,” Lareau said.</p>
-                                <p>Lareau’s professional name was spelled, “Donn.” For more than 15 years he was hired out by the Perry Conte Orchestra Service. He also worked in a duo with singer/keyboardist Ginger Pruneau. “We worked the Anchor Lounge,” Lareau said. “She’s the daughter of Polly Pruneau, the music store owner.”</p>
-                                <p>Lareau formed his own agency, The Donn Lareau Orchestral Service and performed with his own small groups at Driftwood Lounge, Office Lounge, the lounge of the Monticello, and other clubs throughout the region.</p>
-                                <p>To make ends meet, Lareau also had a day job. “I worked in construction,” he said “I worked at places like Wyman Gordon when it was at Kelly Square. I ran a jack-hammer.”  </p>
-                                <p>Always looking to improve his playing, Lareau was a regular at the Kitty Kat Lounge’s Thursday and Sunday jam sessions hosted by Reggie Walley.</p>
-                                <p>Writing in the Worcester Evening Gazette, entertainment columnist, Jack Tubert described Lareau “a splendid drummer,” noting that Lareau’s swinging cymbal work was much in demand by the region’s jazz musicians. His talents were often utilized by visiting jazz musicians like vocalist Al Hibbler and pianist Roland Hanna.</p>
-                                <p>Lareau was a longstanding member the American Federation of Musicians, Local 143, Worcester, MA and was a member in good standing until 1986, retired due to disability.</p>
-                                <p>“I’m a diabetic,” Lareau said. “And I can’t cheat. When I do, look what happens. He look down to where one of his leg used to be. A few years ago I lost my drums, music, everything in a 5 alarm fire. I played up until I came here.”</p>
-                                <p>Here is the Golden Living Center, a nursing facility on Mill Street. He may no longer be able to play, but Lareau says he continues to listen to the jazz he loves.</p>
-                                <p>“I listen to WICN everyday,” he said. “I like what I hear. There is some good young blood coming up.”</p>
-                            </div>
-
-                        </div>
-
-                        <div class="col_two_fifth bottommargin-sm col_last">
-                            <!--BIO IMAGE
-                            <img src="bellino bio.jpg">
-                            -->
-                            <img src="{{name}}.jpg">
-                        </div>
-
-
-                    </div>
-                </div>
-                <!-- Images Section -->
-                <div class="row common-height clearfix" style="padding-bottom:8%;">
-                    <div class="col-sm-5 col-padding">
-                        <div class="fancy-title title-bottom-border" id="images">
-                            <h2> Images</h2>
-                        </div>
-                        <!--Carousel-->
-                        <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="1" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
-                            <div class="oc-item">
-                                <div class="iportfolio">
-                                    <div class="portfolio-image">
-                                        <a class="resize" href="#">
-                                            <img src="{{name}} and Ginger Pruneau.jpg" alt="{{name}} and Ginger Pruneau" height="200px">
-                                        </a>
-                                        <div class="portfolio-overlay">
-                                            <a href="{{name}} and Ginger Pruneau.jpg" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
-                                        </div>
-                                    </div>
-                                    <div class="portfolio-desc center nobottompadding">
-                                        <h3><a href="portfolio-single.html">{{name}} and Ginger Pruneau</a></h3>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="oc-item">
-                                <div class="iportfolio">
-                                    <div class="portfolio-image">
-                                        <a href="portfolio-single.html">
-                                            <img src="{{name}}.jpg" width="400px" height="300px" alt="{{name}}">
-                                        </a>
-                                        <div class="portfolio-overlay">
-                                            <a href="{{name}}.jpg" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
-                                        </div>
-                                    </div>
-                                    <div class="portfolio-desc center nobottompadding">
-                                        <h3><a href="portfolio-single.html">{{name}}</a></h3>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="oc-item">
-                                <div class="iportfolio">
-                                    <div class="portfolio-image">
-                                        <a href="portfolio-single.html">
-                                            <img src="{{name}} Trio and guests.jpg" width="400px" height="300px" alt="{{name}} trio and guests">
-                                        </a>
-                                        <div class="portfolio-overlay">
-                                            <a href="{{name}} Trio and guests.jpg" class="center-icon" data-	lightbox="image"><i class="icon-line-plus"></i></a>
-                                        </div>
-                                    </div>
-                                    <div class="portfolio-desc center nobottompadding">
-                                        <h3><a href="portfolio-single.html">{{name}} trio and guests</a></h3>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="oc-item">
-                                <div class="iportfolio">
-                                    <div class="portfolio-image">
-                                        <a href="portfolio-single.html">
-                                            <img src="The {{name}} Trio wBill Clemmer piano and Don Morrow bass.jpg" width="400px" height="300px" alt="{{name}} Trio with Bill Clemmer piano and Don Morrow bass">
-                                        </a>
-                                        <div class="portfolio-overlay">
-                                            <a href="The {{name}} Trio wBill Clemmer piano and Don Morrow bass.jpg" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
-                                        </div>
-                                    </div>
-                                    <div class="portfolio-desc center nobottompadding">
-                                        <h3><a href="portfolio-single.html">The {{name}} Trio with Bill Clemmer (piano) and Don Morrow (bass)</a></h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-7 col-padding">
-                        <div>
-                            <div class="fancy-title title-bottom-border">
-                                <h2 id="section-interviews">Interviews</h2>
-                            </div>
-                            <iframe width="1483" height="684" src="https://www.youtube.com/embed/09Dw6gu49Z8?ecver=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                        </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div id="page-submenu-trigger"><i class="icon-reorder"></i>
                     </div>
                 </div>
             </div>
-    </div>
+        </div>
+        <!-- Collection nav bar end -->
+        <!-- Content Wrap starts -->
+        <div class="content-wrap">
+            <!-- Bio -->
+            <div class="container clearfix">
+                <div class="fancy-title title-bottom-border" id="bio">
+                    <h2>Biography of {{ name }} </h2>
+                </div>
+                <!-- Insert bio -->
+                <div class="coll-main-bio">
+                    <div class="col_three_fifth bottommargin-sm">
+                        <p class="bio">
+                            {{ description }}
+                        </p>
+                        <!--<p>-->
+                            <!--<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#fullBio">-->
+                                <!--Read Full Biography-->
+                            <!--</button>-->
+
+                        <!--</p>-->
+                        <!--<div class="collapse" id="fullBio">-->
+                            <!--{{ description }}-->
+                        <!--</div>-->
+                    </div>
+
+                    <div class="col_two_fifth bottommargin-sm col_last">
+                        <img src="">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images Section -->
+            <div class="row common-height clearfix" style="padding-bottom:8%;">
+                <div class="col-sm-5 col-padding">
+                    <div class="fancy-title title-bottom-border" id="images">
+                        <h2> Images</h2>
+                    </div>
+                    <!--Carousel-->
+                    <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="1" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
+                        {{#each images }}
+                        <div class="oc-item">
+                            <div class="iportfolio">
+                                <div class="portfolio-image">
+                                    <a class="resize" href="#">
+                                        <img src="{{url}}" alt="{{name}}" height="200px">
+                                    </a>
+
+                                    <div class="portfolio-overlay">
+                                        <a href="{{url}}" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
+                                    </div>
+                                </div>
+                                <div class="portfolio-desc center nobottompadding">
+                                    <h3><a href="portfolio-single.html">{{caption}}</a></h3>
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+
+                <div class="col-sm-7 col-padding">
+                    <div>
+                        <div class="fancy-title title-bottom-border">
+                            <h2 id="section-interviews">Interviews</h2>
+                        </div>
+                        {{#each audio}}
+                            <p>{{name}}</p>
+                            <p>{{url}}</p>
+                        {{/each}}
+                        <!-- Insert Youtube Link here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
 </div>
 
 <!-- Footer
-============================================= -->
+    ============================================= -->
 
-<?php
-include '../../footer-new.php';
-?>
+{{footer}}
 
 
 
 
-</div><!-- #wrapper end -->
+</div>
+<!-- #wrapper end -->
 
 <!-- Go To Top
 ============================================= -->
@@ -400,11 +206,16 @@ include '../../footer-new.php';
 ============================================= -->
 <script type="text/javascript" src="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/jquery.js"></script>
 <script type="text/javascript" src="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/plugins.js"></script>
-<script>function goToByScroll(id){$('html,body').animate({scrollTop: $("#"+id).offset().top - 115},'slow');}</script>
+<script>
+    function goToByScroll( id ) {
+        $( 'html,body' ).animate( {
+            scrollTop: $( "#" + id ).offset().top - 115
+        }, 'slow' );
+    }
+</script>
 <!-- Footer Scripts
 ============================================= -->
 <script type="text/javascript" src="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/functions.js"></script>
 
-</div>
 </body>
 </html>
