@@ -15,6 +15,7 @@ class App extends Component {
         this.state = {
             user: null,
             contributions: [],
+            users: [],
             showEditWindow: false,
             selectedContribution: undefined
         }
@@ -29,11 +30,11 @@ class App extends Component {
                 withRefs: true
             });
 
-            fb.base.bindDoc('Contributions/EmRPI7wYBKcT8fVdAKzk', {
+            fb.base.bindCollection(`Users`, {
                 context: this,
-                state: 'render',
+                state: 'users',
                 withRefs: true
-            })
+            });
         }
     }
 
@@ -54,6 +55,7 @@ class App extends Component {
             state: 'contributions',
             withRefs: true
         });
+
         if (!dbx.app) {
             dbx.initialize();
         }
@@ -67,18 +69,34 @@ class App extends Component {
     }
 
     render() {
+
+        console.log("Trying to update user");
+        if(this.state.user && this.state.user.uid) {
+            let user = {
+                uid: this.state.user.uid,
+                name: this.state.user.displayName,
+                email: this.state.user.email,
+                displayPhoto: this.state.user.photoURL,
+            };
+            fb.base.addToCollection('Users', user, this.state.user.uid);
+        }
+
         let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
                                                                               windowSwap={this.windowSwap.bind(this)} /> :
                                                         <MainPageTB contributions={this.state.contributions}
                                                                     windowSwap={this.windowSwap.bind(this)}/> ;
         
-        const appContent = this.state.user ? (
-            <div>
-                {currentWindow}
-            </div>
-        ) : (
+        const appContent = this.state.user ?
+            (this.state.contributions.length > 0) ? (
+                <div>
+                    {currentWindow}
+                </div>
+            ) : (
+                <h3>No contributions found - contact administrator to enable your account then refresh</h3>
+            ) : (
             <h3>Sign in to continue</h3>
         );
+
         return (
 
             <div className="App">
