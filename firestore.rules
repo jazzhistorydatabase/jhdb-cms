@@ -1,3 +1,5 @@
+// Deploy via Firebase Console or with firebase deploy --only firestore:rules
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
