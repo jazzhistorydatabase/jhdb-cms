@@ -7,6 +7,8 @@ import {withStyles} from '@material-ui/core/styles';
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
 import FormControl from "@material-ui/core/FormControl";
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
 
 import fb from './firebase';
 import dbx from './dropbox.js';
@@ -81,12 +83,15 @@ class MainPageTB extends Component {
         } else {
             window.alert("Collection name can not be blank!");
         }
-    }
+    };
   
     handleEditButtonClick(selectedContribution) {
         this.props.windowSwap(selectedContribution);
-    }
-  
+    };
+
+    handleAdminButtonClick(){
+        this.props.adminSwap();
+    };
     render() {
         const classes = this.props.classes;
         let contrib = this.props.contributions;
@@ -116,6 +121,12 @@ class MainPageTB extends Component {
                         </List>
                     </div>
                 </Paper>
+                {/*<Fab color="primary" aria-label="Add" className={classes.fab} onClick={() => {return this.handleAdminButtonClick.bind(this)()}}>*/}
+                    {/*<AddIcon />*/}
+                {/*</Fab>*/}
+                <Button variant="outlined" color={"primary"}
+                        onClick={this.handleAdminButtonClick.bind(this)}
+                        className={classes.button}>Admin </Button>
             </MuiThemeProvider>
         );
     }

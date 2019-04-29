@@ -7,6 +7,7 @@ import EditContributionView from "./EditContributionView";
 import fb from './firebase.js';
 import Paper from "@material-ui/core/Paper";
 import dbx from './dropbox.js';
+import AdminPage from "./AdminPage";
 
 class App extends Component {
 
@@ -16,7 +17,10 @@ class App extends Component {
             user: null,
             contributions: [],
             showEditWindow: false,
-            selectedContribution: undefined
+            showAdminWindow: false,
+            //showWindow: false,
+            selectedContribution: undefined,
+            adminPanel: undefined,
         }
     }
 
@@ -57,30 +61,65 @@ class App extends Component {
         this.setState({
             selectedContribution: selectedContribution,
             showEditWindow: !this.state.showEditWindow
+            //showWindow: !this.state.showWindow
         });
     }
 
-    render() {
-        let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
-                                                                              windowSwap={this.windowSwap.bind(this)} /> :
-                                                        <MainPageTB contributions={this.state.contributions}
-                                                                    windowSwap={this.windowSwap.bind(this)}/> ;
-        
-        const appContent = this.state.user ? (
-            <div>
-                {currentWindow}
-            </div>
-        ) : (
-            <h3>Sign in to continue</h3>
-        );
-        return (
-
-            <div className="App">
-                <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
-                {appContent}
-            </div>
-        );
+    adminSwap() {
+        this.setState({
+            //adminPanel: adminPanel,
+            showAdminWindow: !this.state.showAdminWindow
+            //showWindow: !this.state.showWindow
+        });
     }
+
+
+
+    render() {
+        // let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
+        //                                                                       windowSwap={this.windowSwap.bind(this)} /> :
+        //                                                 <MainPageTB contributions={this.state.contributions}
+        //                                                             windowSwap={this.windowSwap.bind(this)}/>
+        //  <AdminPage adminPanel={this.state.adminPanel}
+        //      adminSwap={this.adminSwap.bind(this)} />
+        //  ;
+        let currentWindow = this.state.showAdminWindow ? 2 : this.state.showEditWindow ? 1 : 0;
+        let x;
+
+        switch (currentWindow) {
+            case 1:
+                x = <EditContributionView selectedContribution={this.state.selectedContribution}
+                                             windowSwap={this.windowSwap.bind(this)}/>;
+                                             break;
+            case 2:
+                x = <AdminPage adminPanel={this.state.adminPanel}
+                                  adminSwap={this.adminSwap.bind(this)}/>;
+                                  break;
+            default:
+                x = <MainPageTB contributions={this.state.contributions}
+                                   windowSwap={this.windowSwap.bind(this)}
+                                    adminSwap={this.adminSwap.bind(this)}/>;
+        }
+            return <div className="App">
+                <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
+                {x}
+            </div>;
+
+        const appContent = this.state.user ? (
+                    <div>
+                        {currentWindow}
+                    </div>
+                ) : (
+                    <h3>Sign in to continue</h3>
+                );
+
+                return (
+                    <div className="App">
+                        <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
+                        {appContent}
+                    </div>
+                );
+        }
 }
 
 export default App;
