@@ -17,6 +17,18 @@
 
 // [START gae_node_request_example]
 const express = require('express');
+var exphbs  = require('express-handlebars');
+
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./fb-server-creds.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://testproj-34045.firebaseio.com"
+});;
+
+
 
 const app = express();
 
@@ -26,7 +38,44 @@ const app = express();
 //     .send('Jazz!')
 //     .end();
 // });
-app.use(express.static('build'));
+// fb.initialize();
+app.use('/', express.static('build'));
+
+
+app.engine('handlebars', exphbs({defaultLayout: 'template'}));
+app.set('view engine', 'handlebars');
+
+
+app.get('/preview', function (req, res) {
+
+    const collRef = admin.firestore().collection('Contributions').doc('jta5LD3nt4AagdRv5jql');
+
+    collRef.get().then(snapshot => {
+        collRef.collection('Images').get().then( imgSnapshot => {
+            let images = [];
+            imgSnapshot.forEach(doc => {
+                images.push(doc.data());
+            });
+            collRef.collection('Audio').get().then( audioSnapshot => {
+                let audio = [];
+                audioSnapshot.forEach(doc => {
+                    audio.push(doc.data());
+                });
+
+                console.log("Render template with doc: " + snapshot.id);
+
+                let collectionDoc = snapshot.data();
+                // collectionDoc.shortDescription = collectionDoc.description.substr(200);
+                console.log(images);
+                collectionDoc.images = images;
+                collectionDoc.audio = audio;
+                res.render('preview', collectionDoc);
+            });
+        });
+    });
+});
+
+
 
 // Start the server
 const PORT = process.env.PORT || 8080;
