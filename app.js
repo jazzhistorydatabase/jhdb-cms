@@ -110,8 +110,6 @@ let renderFromFirebase = function (req, res, collectionName) {
 };
 
 
-app.use('/', express.static('static'));
-
 // Set up collection routing function
 let collectionReqHandler = function (req, res) {
     let filename = req.params.collection.toLowerCase();
@@ -142,6 +140,9 @@ let collectionReqHandler = function (req, res) {
       });
 };
 
+app.get('/', function(req, res) {
+    res.sendFile('templates/landing-page.html', {root: __dirname});
+});
 app.get('/:collection', collectionReqHandler);
 app.get('/:collection/:subpage', collectionReqHandler);
 
