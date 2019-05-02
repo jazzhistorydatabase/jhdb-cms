@@ -39,6 +39,9 @@ class App extends Component {
                 state: 'users',
                 withRefs: true
             });
+            if (!dbx.app) {
+                dbx.initialize();
+            }
         }
     }
 
@@ -60,9 +63,6 @@ class App extends Component {
             withRefs: true
         });
 
-        if (!dbx.app) {
-            dbx.initialize();
-        }
     }
 
     windowSwap(selectedContribution) {
