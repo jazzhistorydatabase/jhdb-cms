@@ -18,6 +18,8 @@
 // [START gae_node_request_example]
 const express = require('express');
 var exphbs  = require('express-handlebars');
+var fs = require("fs");
+// must specify options hash even if no options provided!
 
 var admin = require("firebase-admin");
 
@@ -32,49 +34,116 @@ admin.initializeApp({
 
 const app = express();
 
-// app.get('/', (req, res) => {
-//   res
-//     .status(200)
-//     .send('Jazz!')
-//     .end();
-// });
-// fb.initialize();
-app.use('/', express.static('build'));
+// Host compiled contributor portal
+app.use('/cms', express.static('build'));
 
-
+// Configure handlebars
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
 app.set('view engine', 'handlebars');
 
 
-app.get('/preview', function (req, res) {
+// Define function to pull contribution from firebase and render with handlebars
+let renderFromFirebase = function (req, res, collectionName) {
+    const collRoot = admin.firestore().collection('Contributions');
+    let collName = collectionName.toLowerCase().replace(/\-/g, ' ')
+        .split(' ')
+        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+        .join(' ');
 
-    const collRef = admin.firestore().collection('Contributions').doc('jta5LD3nt4AagdRv5jql');
+    const collsRef = collRoot.where('name', '==', collName);
+    console.log(collsRef);
 
-    collRef.get().then(snapshot => {
-        collRef.collection('Images').get().then( imgSnapshot => {
-            let images = [];
-            imgSnapshot.forEach(doc => {
-                images.push(doc.data());
-            });
-            collRef.collection('Audio').get().then( audioSnapshot => {
-                let audio = [];
-                audioSnapshot.forEach(doc => {
-                    audio.push(doc.data());
+    collsRef.get().then(snapshots => {
+        if(snapshots.empty) {
+            // No such collection
+            console.log("No matching collections found");
+            res.send('No matching collections found');
+            return;
+        } else {
+            console.log("Found "+snapshots.size + " matching collections");
+            snapshots.forEach(collRef => {
+                // TODO: What to do if more than one?
+
+                let collectionDoc = collRef.data();
+
+
+                console.log(collRef);
+
+                let images = [];
+                collRef.ref.collection('Images').get().then( imgSnapshot => {
+                    console.log(imgSnapshot);
+                    imgSnapshot.forEach(doc => {
+                        images.push(doc.data());
+                    });
+                    let audio = [];
+                    collRef.ref.collection('Audio').get().then( audioSnapshot => {
+                        audioSnapshot.forEach(doc => {
+                            audio.push(doc.data());
+                        });
+
+                        console.log("Render template with doc: " + collRef.id);
+
+                        collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+
+                        collectionDoc.images = images;
+                        collectionDoc.audio = audio;
+                        res.render('preview', collectionDoc);
+
+                        return;
+                    }).catch( err => {
+                        console.log("ERROR\n");
+                        console.log(err);
+                        res.render('preview', collectionDoc);
+                    });
+                }).catch( err => {
+                    console.log("ERROR\n");
+                    console.log(err);
+                    res.render('preview', collectionDoc);
                 });
 
-                console.log("Render template with doc: " + snapshot.id);
+            })
+        }
+     }).catch( err => {
+        console.log("ERROR\n");
+        console.log(err);
+     });
+};
 
-                let collectionDoc = snapshot.data();
-                // collectionDoc.shortDescription = collectionDoc.description.substr(200);
-                console.log(images);
-                collectionDoc.images = images;
-                collectionDoc.audio = audio;
-                res.render('preview', collectionDoc);
+
+app.use('/', express.static('static'));
+
+// Set up collection routing function
+let collectionReqHandler = function (req, res) {
+    let filename = req.params.collection.toLowerCase();
+    let subpage = req.params['subpage'] && req.params.subpage.toLowerCase();
+    // Check if static content is available
+    fs.stat('static/' + filename, function(err, stats) {
+        if(err){
+            switch(err.code){
+                case 'ENOENT':
+                    console.log(filename + ' does not exist');
+                    break;
+                default:
+                    console.log('Unexpected error code in app.get(/:collection).');
+            }
+            // If static files DNE, try to load from firebase
+            return renderFromFirebase(req, res, filename);
+        }
+        // If static files exist, check if request includes index.html
+        if (stats.isDirectory()) {
+
+            fs.stat('static/' + filename + '/index.html', function(err, stats) {
+                res.sendFile('static/' + filename + '/index.html',{ root: __dirname });
             });
-        });
-    });
-});
 
+        } else {
+            res.render('static/' + filename);
+        }
+      });
+};
+
+app.get('/:collection', collectionReqHandler);
+app.get('/:collection/:subpage', collectionReqHandler);
 
 
 // Start the server
