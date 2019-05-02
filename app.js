@@ -140,6 +140,10 @@ let collectionReqHandler = function (req, res) {
       });
 };
 
+app.get('/header-new.html', function(req, res) {
+    res.sendFile('templates/header-new.html', {root: __dirname});
+});
+
 app.get('/', function(req, res) {
     res.sendFile('templates/landing-page.html', {root: __dirname});
 });
