@@ -57,38 +57,56 @@ let renderFromFirebase = function (req, res, collectionName) {
         if(snapshots.empty) {
             // No such collection
             console.log("No matching collections found");
+            res.send('No matching collections found');
             return;
         } else {
             console.log("Found "+snapshots.size + " matching collections");
             snapshots.forEach(collRef => {
                 // TODO: What to do if more than one?
+
+                let collectionDoc = collRef.data();
+
+
                 console.log(collRef);
-                collRef.collection('Images').get().then( imgSnapshot => {
+
+                let images = [];
+                collRef.ref.collection('Images').get().then( imgSnapshot => {
                     console.log(imgSnapshot);
-                    let images = [];
                     imgSnapshot.forEach(doc => {
                         images.push(doc.data());
                     });
-                    collRef.collection('Audio').get().then( audioSnapshot => {
-                        let audio = [];
+                    let audio = [];
+                    collRef.ref.collection('Audio').get().then( audioSnapshot => {
                         audioSnapshot.forEach(doc => {
                             audio.push(doc.data());
                         });
 
                         console.log("Render template with doc: " + collRef.id);
 
-                        let collectionDoc = collRef.data();
-                        // collectionDoc.shortDescription = collectionDoc.description.substr(200);
-                        console.log(images);
+                        collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+
                         collectionDoc.images = images;
                         collectionDoc.audio = audio;
                         res.render('preview', collectionDoc);
+
                         return;
-                    }).catch( err => {});
-                }).catch( err => {});
+                    }).catch( err => {
+                        console.log("ERROR\n");
+                        console.log(err);
+                        res.render('preview', collectionDoc);
+                    });
+                }).catch( err => {
+                    console.log("ERROR\n");
+                    console.log(err);
+                    res.render('preview', collectionDoc);
+                });
+
             })
         }
-     }).catch( err => {});
+     }).catch( err => {
+        console.log("ERROR\n");
+        console.log(err);
+     });
 };
 
 

@@ -176,8 +176,11 @@
                             <h2 id="section-interviews">Interviews</h2>
                         </div>
                         {{#each audio}}
-                            <p>{{name}}</p>
-                            <p>{{url}}</p>
+                            <h5>{{name}}</h5>
+                            <audio controls>
+                                <source src={{url}} type="audio/mp3">
+                                Your browser does not support the audio element.
+                            </audio>
                         {{/each}}
                         <!-- Insert Youtube Link here -->
                     </div>
