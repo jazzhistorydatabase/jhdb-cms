@@ -105,11 +105,6 @@ class App extends Component {
             fb.base.addToCollection('Users', user, this.state.user.uid);
         }
 
-        let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
-                                                                              windowSwap={this.windowSwap.bind(this)} /> :
-                                                        <MainPageTB contributions={this.state.contributions}
-                                                                    windowSwap={this.windowSwap.bind(this)}/> ;
-
         switch (currentWindow) {
             case 1:
                 x = <EditContributionView selectedContribution={this.state.selectedContribution}
