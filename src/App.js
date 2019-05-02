@@ -84,13 +84,7 @@ class App extends Component {
 
 
     render() {
-        // let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
-        //                                                                       windowSwap={this.windowSwap.bind(this)} /> :
-        //                                                 <MainPageTB contributions={this.state.contributions}
-        //                                                             windowSwap={this.windowSwap.bind(this)}/>
-        //  <AdminPage adminPanel={this.state.adminPanel}
-        //      adminSwap={this.adminSwap.bind(this)} />
-        //  ;
+
         let currentWindow = this.state.showAdminWindow ? 2 : this.state.showEditWindow ? 1 : 0;
         let x;
 
@@ -117,7 +111,8 @@ class App extends Component {
             default:
                 x = <MainPageTB contributions={this.state.contributions}
                                    windowSwap={this.windowSwap.bind(this)}
-                                    adminSwap={this.adminSwap.bind(this)}/>;
+                                    adminSwap={this.adminSwap.bind(this)}
+                                    adminButton={this.state.users.length > 2}/>;
         }
             
 

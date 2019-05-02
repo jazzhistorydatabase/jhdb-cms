@@ -8,7 +8,7 @@ import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
 import FormControl from "@material-ui/core/FormControl";
 import Fab from '@material-ui/core/Fab';
-import AddIcon from '@material-ui/icons/Add';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 import fb from './firebase';
 import dbx from './dropbox.js';
@@ -31,6 +31,11 @@ const styles = theme => ({
     },
     button: {
         marginLeft: '10px'
+    },
+    adminFab: {
+      position: 'fixed',
+        right: '2vw',
+        bottom: '2vw',
     },
     paper: {
         ...theme.mixins.gutters(),
@@ -95,6 +100,13 @@ class MainPageTB extends Component {
     render() {
         const classes = this.props.classes;
         let contrib = this.props.contributions;
+
+        let adminButton = this.props.adminButton ? (
+            <Fab color="primary" aria-label="Admin" className={classes.fab + " " + classes.adminFab} onClick={() => {return this.handleAdminButtonClick.bind(this)()}}>
+                <SettingsIcon />
+            </Fab>
+        ) : (<div />);
+
         return (
             <MuiThemeProvider theme={theme}>
                 <br/>
@@ -121,12 +133,7 @@ class MainPageTB extends Component {
                         </List>
                     </div>
                 </Paper>
-                {/*<Fab color="primary" aria-label="Add" className={classes.fab} onClick={() => {return this.handleAdminButtonClick.bind(this)()}}>*/}
-                    {/*<AddIcon />*/}
-                {/*</Fab>*/}
-                <Button variant="outlined" color={"primary"}
-                        onClick={this.handleAdminButtonClick.bind(this)}
-                        className={classes.button}>Admin </Button>
+                {adminButton}
             </MuiThemeProvider>
         );
     }
