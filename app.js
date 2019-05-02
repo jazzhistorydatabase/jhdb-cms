@@ -18,15 +18,21 @@
 // [START gae_node_request_example]
 const express = require('express');
 var exphbs  = require('express-handlebars');
+var fs = require("fs");
+// must specify options hash even if no options provided!
+var phpExpress = require('php-express')({
+    // assumes php is in your PATH
+    binPath: 'php'
+});
 
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./fb-server-creds.json");
+// var serviceAccount = require("./fb-server-creds.json");
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://testproj-34045.firebaseio.com"
-});;
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+//     databaseURL: "https://testproj-34045.firebaseio.com"
+// });;
 
 
 
@@ -40,7 +46,12 @@ const app = express();
 // });
 // fb.initialize();
 app.use('/', express.static('build'));
-
+// set view engine to php-express
+app.set('views', './public');
+app.engine('php', phpExpress.engine);
+app.set('view engine', 'php');
+// routing all .php file to php-express
+app.all(/.+\.php$/, phpExpress.router);
 
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
 app.set('view engine', 'handlebars');
@@ -75,7 +86,37 @@ app.get('/preview', function (req, res) {
     });
 });
 
-
+app.get('/preview/:collection', function (req, res) {
+    let filename = req.params.collection;
+    fs.stat('public/' + filename, function(err, stats) { 
+        if(err){
+            switch(err.code){
+                case 'ENOENT':
+                    console.log(filename + ' does not exist');
+                    break;
+                default:
+                    console.log('unexpected error code in app.get(/preview/:contribution).');
+            }
+            return;
+        }
+        if (stats.isDirectory()) {
+            fs.stat('public/' + filename + '/index', function(err, stats) { 
+                // if(err){
+                //     switch(err.code){
+                //         case 'ENOENT':
+                //             console.log(filename + '/index.html does not exist');
+                //             break;
+                //         default:
+                //             console.log('unexpected error code in app.get(/preview/:contribution).');
+                //     }
+                // } else
+                res.sendFile('public/' + filename + '/index.html');
+            });
+        } else {
+            res.render('public/' + filename);
+        }
+      });
+});
 
 // Start the server
 const PORT = process.env.PORT || 8080;
