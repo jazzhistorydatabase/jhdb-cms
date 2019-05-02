@@ -20,103 +20,113 @@ const express = require('express');
 var exphbs  = require('express-handlebars');
 var fs = require("fs");
 // must specify options hash even if no options provided!
-var phpExpress = require('php-express')({
-    // assumes php is in your PATH
-    binPath: 'php'
-});
 
 var admin = require("firebase-admin");
 
-// var serviceAccount = require("./fb-server-creds.json");
+var serviceAccount = require("./fb-server-creds.json");
 
-// admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount),
-//     databaseURL: "https://testproj-34045.firebaseio.com"
-// });;
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://testproj-34045.firebaseio.com"
+});;
 
 
 
 const app = express();
 
-// app.get('/', (req, res) => {
-//   res
-//     .status(200)
-//     .send('Jazz!')
-//     .end();
-// });
-// fb.initialize();
-app.use('/', express.static('build'));
-// set view engine to php-express
-app.set('views', './public');
-app.engine('php', phpExpress.engine);
-app.set('view engine', 'php');
-// routing all .php file to php-express
-app.all(/.+\.php$/, phpExpress.router);
+// Host compiled contributor portal
+app.use('/cms', express.static('build'));
 
+// Configure handlebars
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
 app.set('view engine', 'handlebars');
 
 
-app.get('/preview', function (req, res) {
+// Define function to pull contribution from firebase and render with handlebars
+let renderFromFirebase = function (req, res, collectionName) {
+    const collRoot = admin.firestore().collection('Contributions');
+    let collName = collectionName.toLowerCase().replace(/\-/g, ' ')
+        .split(' ')
+        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+        .join(' ');
 
-    const collRef = admin.firestore().collection('Contributions').doc('jta5LD3nt4AagdRv5jql');
+    const collsRef = collRoot.where('name', '==', collName);
+    console.log(collsRef);
 
-    collRef.get().then(snapshot => {
-        collRef.collection('Images').get().then( imgSnapshot => {
-            let images = [];
-            imgSnapshot.forEach(doc => {
-                images.push(doc.data());
-            });
-            collRef.collection('Audio').get().then( audioSnapshot => {
-                let audio = [];
-                audioSnapshot.forEach(doc => {
-                    audio.push(doc.data());
-                });
+    collsRef.get().then(snapshots => {
+        if(snapshots.empty) {
+            // No such collection
+            console.log("No matching collections found");
+            return;
+        } else {
+            console.log("Found "+snapshots.size + " matching collections");
+            snapshots.forEach(collRef => {
+                // TODO: What to do if more than one?
+                console.log(collRef);
+                collRef.collection('Images').get().then( imgSnapshot => {
+                    console.log(imgSnapshot);
+                    let images = [];
+                    imgSnapshot.forEach(doc => {
+                        images.push(doc.data());
+                    });
+                    collRef.collection('Audio').get().then( audioSnapshot => {
+                        let audio = [];
+                        audioSnapshot.forEach(doc => {
+                            audio.push(doc.data());
+                        });
 
-                console.log("Render template with doc: " + snapshot.id);
+                        console.log("Render template with doc: " + collRef.id);
 
-                let collectionDoc = snapshot.data();
-                // collectionDoc.shortDescription = collectionDoc.description.substr(200);
-                console.log(images);
-                collectionDoc.images = images;
-                collectionDoc.audio = audio;
-                res.render('preview', collectionDoc);
-            });
-        });
-    });
-});
+                        let collectionDoc = collRef.data();
+                        // collectionDoc.shortDescription = collectionDoc.description.substr(200);
+                        console.log(images);
+                        collectionDoc.images = images;
+                        collectionDoc.audio = audio;
+                        res.render('preview', collectionDoc);
+                        return;
+                    }).catch( err => {});
+                }).catch( err => {});
+            })
+        }
+     }).catch( err => {});
+};
 
-app.get('/preview/:collection', function (req, res) {
-    let filename = req.params.collection;
-    fs.stat('public/' + filename, function(err, stats) { 
+
+app.use('/', express.static('static'));
+
+// Set up collection routing function
+let collectionReqHandler = function (req, res) {
+    let filename = req.params.collection.toLowerCase();
+    let subpage = req.params['subpage'] && req.params.subpage.toLowerCase();
+    // Check if static content is available
+    fs.stat('static/' + filename, function(err, stats) {
         if(err){
             switch(err.code){
                 case 'ENOENT':
                     console.log(filename + ' does not exist');
                     break;
                 default:
-                    console.log('unexpected error code in app.get(/preview/:contribution).');
+                    console.log('Unexpected error code in app.get(/:collection).');
             }
-            return;
+            // If static files DNE, try to load from firebase
+            return renderFromFirebase(req, res, filename);
         }
+        // If static files exist, check if request includes index.html
         if (stats.isDirectory()) {
-            fs.stat('public/' + filename + '/index', function(err, stats) { 
-                // if(err){
-                //     switch(err.code){
-                //         case 'ENOENT':
-                //             console.log(filename + '/index.html does not exist');
-                //             break;
-                //         default:
-                //             console.log('unexpected error code in app.get(/preview/:contribution).');
-                //     }
-                // } else
-                res.sendFile('public/' + filename + '/index.html');
+
+            fs.stat('static/' + filename + '/index.html', function(err, stats) {
+                res.sendFile('static/' + filename + '/index.html',{ root: __dirname });
             });
+
         } else {
-            res.render('public/' + filename);
+            res.render('static/' + filename);
         }
       });
-});
+};
+
+app.get('/:collection', collectionReqHandler);
+app.get('/:collection/:subpage', collectionReqHandler);
+
 
 // Start the server
 const PORT = process.env.PORT || 8080;
