@@ -1,15 +1,14 @@
 import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import React, {Component} from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
+import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
-import FormControl from "@material-ui/core/FormControl";
+import Fab from '@material-ui/core/Fab';
+import SettingsIcon from '@material-ui/icons/Settings';
+
 
 import fb from './firebase';
-import dbx from './dropbox.js';
 
 import './MainPageTB.css';
 
@@ -29,6 +28,11 @@ const styles = theme => ({
     },
     button: {
         marginLeft: '10px'
+    },
+    adminFab: {
+      position: 'fixed',
+        right: '2vw',
+        bottom: '2vw',
     },
     paper: {
         ...theme.mixins.gutters(),
@@ -81,15 +85,25 @@ class MainPageTB extends Component {
         } else {
             window.alert("Collection name can not be blank!");
         }
-    }
+    };
   
     handleEditButtonClick(selectedContribution) {
         this.props.windowSwap(selectedContribution);
-    }
-  
+    };
+
+    handleAdminButtonClick(){
+        this.props.adminSwap();
+    };
     render() {
         const classes = this.props.classes;
         let contrib = this.props.contributions;
+
+        let adminButton = this.props.adminButton ? (
+            <Fab color="primary" aria-label="Admin" className={classes.fab + " " + classes.adminFab} onClick={() => {return this.handleAdminButtonClick.bind(this)()}}>
+                <SettingsIcon />
+            </Fab>
+        ) : (<div />);
+
         return (
             <MuiThemeProvider theme={theme}>
                 <br/>
@@ -99,7 +113,7 @@ class MainPageTB extends Component {
                         <h1>My Contributions</h1>
                         <Button onClick={() => {return this.handleAddButtonClick.bind(this)()}} variant="outlined" color={"primary"}
                                 className={classes.button}>Add Contribution </Button>
-                        <List className-={classes.contributionList}>
+                        <List className={classes.contributionList}>
                             {contrib.map((e) => {
                                 return (
                                     <ListItem key={e.id || e.name} className={classes.contributionListItem}>
@@ -116,6 +130,7 @@ class MainPageTB extends Component {
                         </List>
                     </div>
                 </Paper>
+                {adminButton}
             </MuiThemeProvider>
         );
     }

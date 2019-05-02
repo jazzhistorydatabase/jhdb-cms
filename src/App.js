@@ -7,6 +7,7 @@ import EditContributionView from "./EditContributionView";
 import fb from './firebase.js';
 import Paper from "@material-ui/core/Paper";
 import dbx from './dropbox.js';
+import AdminPage from "./AdminPage";
 
 class App extends Component {
 
@@ -17,7 +18,10 @@ class App extends Component {
             contributions: [],
             users: [],
             showEditWindow: false,
-            selectedContribution: undefined
+            showAdminWindow: false,
+            //showWindow: false,
+            selectedContribution: undefined,
+            adminPanel: undefined,
         }
     }
 
@@ -35,6 +39,9 @@ class App extends Component {
                 state: 'users',
                 withRefs: true
             });
+            if (!dbx.app) {
+                dbx.initialize();
+            }
         }
     }
 
@@ -50,25 +57,31 @@ class App extends Component {
         if (!fb.app) {
             fb.initialize(this.handleUserAuth.bind(this));
         }
-        fb.base.bindCollection(`Contributions`, {
-            context: this,
-            state: 'contributions',
-            withRefs: true
-        });
 
-        if (!dbx.app) {
-            dbx.initialize();
-        }
     }
 
     windowSwap(selectedContribution) {
         this.setState({
             selectedContribution: selectedContribution,
             showEditWindow: !this.state.showEditWindow
+            //showWindow: !this.state.showWindow
         });
     }
 
+    adminSwap() {
+        this.setState({
+            //adminPanel: adminPanel,
+            showAdminWindow: !this.state.showAdminWindow
+            //showWindow: !this.state.showWindow
+        });
+    }
+
+
+
     render() {
+
+        let currentWindow = this.state.showAdminWindow ? 2 : this.state.showEditWindow ? 1 : 0;
+        let x;
 
         console.log("Trying to update user");
         if(this.state.user && this.state.user.uid) {
@@ -81,15 +94,28 @@ class App extends Component {
             fb.base.addToCollection('Users', user, this.state.user.uid);
         }
 
-        let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
-                                                                              windowSwap={this.windowSwap.bind(this)} /> :
-                                                        <MainPageTB contributions={this.state.contributions}
-                                                                    windowSwap={this.windowSwap.bind(this)}/> ;
-        
+        switch (currentWindow) {
+            case 1:
+                x = <EditContributionView selectedContribution={this.state.selectedContribution}
+                                             windowSwap={this.windowSwap.bind(this)}/>;
+                                             break;
+            case 2:
+                x = <AdminPage adminPanel={this.state.adminPanel}
+                               users={this.state.users}
+                                  adminSwap={this.adminSwap.bind(this)}/>;
+                                  break;
+            default:
+                x = <MainPageTB contributions={this.state.contributions}
+                                   windowSwap={this.windowSwap.bind(this)}
+                                    adminSwap={this.adminSwap.bind(this)}
+                                    adminButton={this.state.users.length > 2}/>;
+        }
+            
+
         const appContent = this.state.user ?
             (this.state.contributions.length > 0) ? (
                 <div>
-                    {currentWindow}
+                    {x}
                 </div>
             ) : (
                 <h3>No contributions found - contact administrator to enable your account then refresh</h3>
@@ -98,7 +124,6 @@ class App extends Component {
         );
 
         return (
-
             <div className="App">
                 <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
                 {appContent}
