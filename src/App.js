@@ -57,11 +57,6 @@ class App extends Component {
         if (!fb.app) {
             fb.initialize(this.handleUserAuth.bind(this));
         }
-        fb.base.bindCollection(`Contributions`, {
-            context: this,
-            state: 'contributions',
-            withRefs: true
-        });
 
     }
 
@@ -106,6 +101,7 @@ class App extends Component {
                                              break;
             case 2:
                 x = <AdminPage adminPanel={this.state.adminPanel}
+                               users={this.state.users}
                                   adminSwap={this.adminSwap.bind(this)}/>;
                                   break;
             default:

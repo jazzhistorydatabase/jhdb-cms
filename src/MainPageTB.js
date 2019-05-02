@@ -113,7 +113,7 @@ class MainPageTB extends Component {
                         <h1>My Contributions</h1>
                         <Button onClick={() => {return this.handleAddButtonClick.bind(this)()}} variant="outlined" color={"primary"}
                                 className={classes.button}>Add Contribution </Button>
-                        <List className-={classes.contributionList}>
+                        <List className={classes.contributionList}>
                             {contrib.map((e) => {
                                 return (
                                     <ListItem key={e.id || e.name} className={classes.contributionListItem}>
