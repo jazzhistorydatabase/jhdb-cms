@@ -13,8 +13,6 @@ const dbx = {
     initialize: function (callback) {
         let config = {
             appKey: "l3bfhq15xjjtxqp",
-            clientId: "jhbdlvkjabsdkljvna",
-            clientSecret: "t523msf8d0pr610",
             redirectUri: "http://localhost:3000/"
         };
         let accessToken = this.getAccessTokenFromUrl();

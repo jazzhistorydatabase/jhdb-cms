@@ -1,0 +1,40 @@
+// Deploy via Firebase Console or with firebase deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+  	function userExists() {
+      return (exists(/databases/$(database)/documents/Users/$(request.auth.uid)) == true);
+    }
+
+  	function userIsAuthorized() {
+      return (request.auth.uid in get(/databases/$(database)/documents/Users/authorized).data) &&
+      				(get(/databases/$(database)/documents/Users/authorized).data[request.auth.uid] == true);
+    }
+
+    function userIsAdmin() {
+      return (request.auth.uid in get(/databases/$(database)/documents/Users/admin).data) &&
+      			(get(/databases/$(database)/documents/Users/admin).data[request.auth.uid] == true);
+    }
+
+  	match /Contributions/{document=**} {
+    	allow read, write: if userExists() && userIsAuthorized();
+    }
+
+    match /Users/admin {
+    	allow read;
+      allow write: if userExists() && userIsAdmin();
+    }
+
+    match /Users/authorized {
+    	allow read;
+      allow write: if userExists() && userIsAdmin();
+    }
+
+    match /Users/{uid} {
+    	allow read, write: if (userExists() && userIsAdmin()) || (request.auth.uid == uid);
+    }
+  }
+
+
+}

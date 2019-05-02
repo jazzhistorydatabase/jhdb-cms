@@ -16,6 +16,7 @@ class App extends Component {
         this.state = {
             user: null,
             contributions: [],
+            users: [],
             showEditWindow: false,
             showAdminWindow: false,
             //showWindow: false,
@@ -30,6 +31,12 @@ class App extends Component {
             fb.base.bindCollection(`Contributions`, {
                 context: this,
                 state: 'contributions',
+                withRefs: true
+            });
+
+            fb.base.bindCollection(`Users`, {
+                context: this,
+                state: 'users',
                 withRefs: true
             });
         }
@@ -52,6 +59,7 @@ class App extends Component {
             state: 'contributions',
             withRefs: true
         });
+
         if (!dbx.app) {
             dbx.initialize();
         }
@@ -86,6 +94,22 @@ class App extends Component {
         let currentWindow = this.state.showAdminWindow ? 2 : this.state.showEditWindow ? 1 : 0;
         let x;
 
+        console.log("Trying to update user");
+        if(this.state.user && this.state.user.uid) {
+            let user = {
+                uid: this.state.user.uid,
+                name: this.state.user.displayName,
+                email: this.state.user.email,
+                displayPhoto: this.state.user.photoURL,
+            };
+            fb.base.addToCollection('Users', user, this.state.user.uid);
+        }
+
+        let currentWindow = this.state.showEditWindow ? <EditContributionView selectedContribution={this.state.selectedContribution}
+                                                                              windowSwap={this.windowSwap.bind(this)} /> :
+                                                        <MainPageTB contributions={this.state.contributions}
+                                                                    windowSwap={this.windowSwap.bind(this)}/> ;
+
         switch (currentWindow) {
             case 1:
                 x = <EditContributionView selectedContribution={this.state.selectedContribution}
@@ -100,26 +124,26 @@ class App extends Component {
                                    windowSwap={this.windowSwap.bind(this)}
                                     adminSwap={this.adminSwap.bind(this)}/>;
         }
-            return <div className="App">
+            
+
+        const appContent = this.state.user ?
+            (this.state.contributions.length > 0) ? (
+                <div>
+                    {x}
+                </div>
+            ) : (
+                <h3>No contributions found - contact administrator to enable your account then refresh</h3>
+            ) : (
+            <h3>Sign in to continue</h3>
+        );
+
+        return (
+            <div className="App">
                 <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
-                {x}
-            </div>;
-
-        const appContent = this.state.user ? (
-                    <div>
-                        {currentWindow}
-                    </div>
-                ) : (
-                    <h3>Sign in to continue</h3>
-                );
-
-                return (
-                    <div className="App">
-                        <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
-                        {appContent}
-                    </div>
-                );
-        }
+                {appContent}
+            </div>
+        );
+    }
 }
 
 export default App;
