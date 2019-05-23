@@ -36,6 +36,7 @@ const app = express();
 
 // Host compiled contributor portal
 app.use('/cms', express.static('build'));
+app.use('/static', express.static('build/static'));
 
 // Configure handlebars
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
@@ -115,7 +116,7 @@ let collectionReqHandler = function (req, res) {
     let filename = req.params.collection.toLowerCase();
     let subpage = req.params['subpage'] && req.params.subpage.toLowerCase();
     // Check if static content is available
-    fs.stat('static/' + filename, function(err, stats) {
+    fs.stat('legacy/' + filename, function(err, stats) {
         if(err){
             switch(err.code){
                 case 'ENOENT':
@@ -130,12 +131,12 @@ let collectionReqHandler = function (req, res) {
         // If static files exist, check if request includes index.html
         if (stats.isDirectory()) {
 
-            fs.stat('static/' + filename + '/index.html', function(err, stats) {
-                res.sendFile('static/' + filename + '/index.html',{ root: __dirname });
+            fs.stat('legacy/' + filename + '/index.html', function(err, stats) {
+                res.sendFile('legacy/' + filename + '/index.html',{ root: __dirname });
             });
 
         } else {
-            res.render('static/' + filename);
+            res.render('legacy/' + filename);
         }
       });
 };
