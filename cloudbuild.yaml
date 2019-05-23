@@ -1,4 +1,6 @@
 steps:
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', 'gs://jhdb-cms_cloudbuild/server-creds.json', '.']
 - name: "gcr.io/cloud-builders/npm"
   args: ["install"]
 - name: "gcr.io/cloud-builders/npm"
