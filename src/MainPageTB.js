@@ -54,7 +54,7 @@ const styles = theme => ({
         paddingRight: '3vw'
     },
     contributionListStatus: {
-        width: '20vw',
+        width: '7vw',
         textAlign: 'left',
         paddingLeft: '3vw',
         marginRight: 'auto'
@@ -123,7 +123,7 @@ class MainPageTB extends Component {
                                                 className={classes.button}>Edit </Button>
                                         <Button variant="outlined" color={"primary"}
                                                 className={classes.button}>Preview </Button>
-                                        <h3 className={classes.contributionListStatus}>{e.status}</h3>
+                                        <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
                                     </ListItem>
                                 );
                             })}
