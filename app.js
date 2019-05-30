@@ -82,15 +82,29 @@ let renderFromFirebase = function (req, res, collectionName) {
                             audio.push(doc.data());
                         });
 
-                        console.log("Render template with doc: " + collRef.id);
+                        let video = [];
+                        collRef.ref.collection('Video').get().then( videoSnapshot => {
+                            videoSnapshot.forEach(doc => {
+                                let data = doc.data();
+                                data.url = "https://www.youtube.com/embed/" + data.url.split('/')[3];
+                                video.push(data);
+                            });
 
-                        collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+                            console.log("Render template with doc: " + collRef.id);
 
-                        collectionDoc.images = images;
-                        collectionDoc.audio = audio;
-                        res.render('preview', collectionDoc);
+                            collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
 
-                        return;
+                            collectionDoc.images = images;
+                            collectionDoc.audio = audio;
+                            collectionDoc.video = video;
+                            res.render('preview', collectionDoc);
+
+                            return;
+                        }).catch( err => {
+                            console.log("ERROR\n");
+                            console.log(err);
+                            res.render('preview', collectionDoc);
+                        });
                     }).catch( err => {
                         console.log("ERROR\n");
                         console.log(err);

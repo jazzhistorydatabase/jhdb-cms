@@ -37,10 +37,12 @@ class FileUpload extends Component {
             fileDoc: undefined,
         };
     };
-    handleTextChange = event => {
+
+    handleTextChange = async event => {
         let fileDoc = this.state.fileDoc;
-        fileDoc.caption = event.target.value;
-        this.setState({fileDoc: fileDoc});
+        if (this.props.fileType === 'Video' && event.target.id.indexOf('multiline') === -1) fileDoc.url = event.target.value;
+        else fileDoc.caption = event.target.value;
+        await this.setState({fileDoc: fileDoc});
     };
 
     handleDelete() {
@@ -80,23 +82,43 @@ class FileUpload extends Component {
                     (<CheckIcon />)):
                 (<AddIcon/>);
 
+        let fileUploadComponent;
+        if (this.props.fileType !== 'Video') {
+            fileUploadComponent =
+                <Fab
+                    size="small"
+                    color={doc.url ? 'none' : 'primary'}
+                    aria-label="Upload"
+                    className={classes.fab}
+                    onClick={
+                        () => {
+                            if (this.state.fileDoc) {
+                                dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
+                            }
+                        }
+                    }>
+                    {fileUploadIcon}
+                </Fab>
+        } else {
+            fileUploadComponent =
+                <TextField
+                    id="standard-static"
+                    label="Link"
+                    style={{margin: 5}}
+                    value={(this.state.fileDoc && this.state.fileDoc.url) || ""}
+                    onChange={this.handleTextChange}
+                    margin="normal"
+                    variant="filled"
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                />
+        }
+
         return (
             <div className={classes.root}>
                 <FormGroup row id={(this.state.fileDoc && this.state.fileDoc.name) || this.props.fileIndex}>
-                    <Fab
-                        size="small"
-                        color={doc.url ? 'none' : 'primary'}
-                        aria-label="Upload"
-                        className={classes.fab}
-                        onClick={
-                            () => {
-                                if (this.state.fileDoc) {
-                                    dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
-                                }
-                            }
-                        }>
-                        {fileUploadIcon}
-                    </Fab>
+                    {fileUploadComponent}
                     {(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)}
                     <TextField
                         id="standard-multiline-static"
