@@ -38,11 +38,14 @@ class FileUpload extends Component {
         };
     };
 
-    handleTextChange = async event => {
+    handleTextChange = event => {
         let fileDoc = this.state.fileDoc;
-        if (this.props.fileType === 'Video' && event.target.id.indexOf('multiline') === -1) fileDoc.url = event.target.value;
-        else fileDoc.caption = event.target.value;
-        await this.setState({fileDoc: fileDoc});
+        if (this.props.fileType === 'Video' && event.target.id.indexOf('multiline') === -1)  {
+            fileDoc.url = event.target.value;
+        } else {
+            fileDoc.caption = event.target.value;
+        }
+        this.setState({fileDoc: fileDoc});
     };
 
     handleDelete() {
