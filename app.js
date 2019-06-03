@@ -42,6 +42,16 @@ app.use('/static', express.static('build/static'));
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
 app.set('view engine', 'handlebars');
 
+// Enforce https
+let requireHTTPS = function(req, res, next) {
+    // The 'x-forwarded-proto' check is for Heroku
+    if (!req.secure && req.get('x-forwarded-proto') !== 'https' && process.env.NODE_ENV !== "development") {
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+}
+
+app.use(requireHTTPS);
 
 // Define function to pull contribution from firebase and render with handlebars
 let renderFromFirebase = function (req, res, collectionName) {
