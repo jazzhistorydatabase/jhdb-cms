@@ -10,6 +10,7 @@ import Button from "@material-ui/core/Button";
 import fb from "./firebase";
 
 import dbx from './dropbox.js';
+import { randomBytes } from 'crypto';
 
 const styles = theme => ({
     root: {
@@ -79,6 +80,7 @@ class MediaUpload extends Component {
             caption: "",
             icon: "",
             thumbnail: "",
+            index: lst.length || randomBytes(2).toString(),
         });
     };
 
@@ -98,7 +100,7 @@ class MediaUpload extends Component {
         let fileUploads = this.state.collection.map((fileDoc) => {
             fileIndex++;
             return (
-                <FileUpload key={fileIndex}
+                <FileUpload key={fileDoc.index || fileDoc.name || randomBytes(2)}
                             fileType={this.props.uploadName}
                             fileIndex={fileIndex}
                             fileDoc={fileDoc}
@@ -115,12 +117,12 @@ class MediaUpload extends Component {
                         </h2>
                         <FormControlLabel
                             control={
-                                <Switch
+                                <Switch disabled
                                     checked={(this.props && this.props.isSubpage) || false}
                                     onChange={this.handleSubpage.bind(this)}
                                 />
                             }
-                            label="Make Subpage"
+                            label="Make Subpage (Coming Soon)"
                         />
                     </FormGroup>
                     <h4>

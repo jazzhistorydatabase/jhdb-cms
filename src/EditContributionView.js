@@ -188,10 +188,6 @@ class EditContributionView extends Component {
                             shrink: true,
                         }}
                     />
-                    <Button variant="contained" size="small" color="default" className={classes.button2}>
-                        Upload Bio Photo
-                        <CloudUploadIcon className={classes.rightIcon}/>
-                    </Button>
                 </FormControl>
                 <br/>
                 <FormControl className={classes.uploadWidth}>
@@ -209,7 +205,9 @@ class EditContributionView extends Component {
                                  onChange={this.handleChildChange}/>
                 </FormControl>
                 <br/>
-                <FormControl className={classes.uploadWidth}>
+                <br/>
+                <br/>
+                {/* <FormControl className={classes.uploadWidth}>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false}>
                         <br />
@@ -228,17 +226,8 @@ class EditContributionView extends Component {
                                 label="Additional Content Editing Required"/>
                         </FormGroup>
                         <br />
-                        <FormGroup row>
-                            <Button variant="contained" color="primary" className={classes.button2}>
-                                Submit for Review
-                            </Button>
-                            <Button variant="contained" color="primary" className={classes.button2}>
-                                Preview
-                            </Button>
-                        </FormGroup>
-                        <br />
                     </Paper>
-                </FormControl>
+                </FormControl> */}
             </div>
             </MuiThemeProvider>
         );
