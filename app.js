@@ -23,7 +23,7 @@ var fs = require("fs");
 
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./fb-server-creds.json");
+var serviceAccount = require("./server-creds.json");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
