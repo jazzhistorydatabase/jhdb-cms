@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/bootstrap.css" type="text/css"/>
     <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/style.css" type="text/css"/>
     <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/dark.css" type="text/css"/>
-    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/css"/>
+    <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/x-font-woff"/>
     <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css"/>
     <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css"/>
     <link rel="stylesheet" href="http://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css"/>
@@ -186,7 +186,11 @@
                                 Your browser does not support the audio element.
                             </audio>
                         {{/each}}
-                        <!-- Insert Youtube Link here -->
+                        {{#each video}}
+                            <h5>{{name}}</h5>
+                            <iframe frameborder="0" scrolling="no" marginheight="0" marginwidth="0"width="356" height="200" type="text/html" 
+                            src={{url}}><div><small><a href="https://youtubeembedcode.com/pl/">youtubeembedcode.com/pl/</a></small></div><div><small><a href="http://add-link-exchange.com">http://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/nl/">youtubeembedcode nl</a></small></div><div><small><a href="http://add-link-exchange.com">http://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/en">youtubeembedcode.com/en/</a></small></div><div><small><a href="http://add-link-exchange.com">add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/es/">youtubeembedcode es</a></small></div><div><small><a href="http://add-link-exchange.com">w://add-link-exchange.com</a></small></div></iframe>
+                        {{/each}}
                     </div>
                 </div>
             </div>
