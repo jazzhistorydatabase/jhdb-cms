@@ -175,4 +175,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Legacy credentials file
 fb-server-creds.json
+
+# Dev credentials:
+server-creds.json
+src/client-creds.json
+**/*-creds.json
