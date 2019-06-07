@@ -14,8 +14,3 @@
 
 # Node.js dependencies:
 node_modules/
-
-# Dev credentials:
-server-creds.json
-src/client-creds.json
-**/*-creds.json
