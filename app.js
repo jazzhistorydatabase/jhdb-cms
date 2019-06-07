@@ -37,6 +37,8 @@ const app = express();
 // Host compiled contributor portal
 app.use('/cms', express.static('build'));
 app.use('/static', express.static('build/static'));
+app.use('/images', express.static('templates/images'));
+
 
 // Configure handlebars
 app.engine('handlebars', exphbs({defaultLayout: 'template'}));
@@ -51,7 +53,8 @@ let requireHTTPS = function(req, res, next) {
     next();
 }
 
-app.use(requireHTTPS);
+// app.use(requireHTTP);
+app.use('/cms', requireHTTPS);
 
 // Define function to pull contribution from firebase and render with handlebars
 let renderFromFirebase = function (req, res, collectionName) {
@@ -156,8 +159,13 @@ app.get('/header-new.html', function(req, res) {
 });
 
 app.get('/', function(req, res) {
+    res.sendFile('templates/CMS-landing-page.html', {root: __dirname});
+});
+
+app.get('/branch', function(req, res) {
     res.sendFile('templates/landing-page.html', {root: __dirname});
 });
+
 app.get('/:collection', collectionReqHandler);
 app.get('/:collection/:subpage', collectionReqHandler);
 
