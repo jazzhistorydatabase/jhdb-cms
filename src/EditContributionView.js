@@ -205,7 +205,9 @@ class EditContributionView extends Component {
                                  onChange={this.handleChildChange}/>
                 </FormControl>
                 <br/>
-                <FormControl className={classes.uploadWidth}>
+                <br/>
+                <br/>
+                {/* <FormControl className={classes.uploadWidth}>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false}>
                         <br />
@@ -225,7 +227,7 @@ class EditContributionView extends Component {
                         </FormGroup>
                         <br />
                     </Paper>
-                </FormControl>
+                </FormControl> */}
             </div>
             </MuiThemeProvider>
         );
