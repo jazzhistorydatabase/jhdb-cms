@@ -181,4 +181,4 @@ fb-server-creds.json
 # Dev credentials:
 server-creds.json
 src/client-creds.json
-**/*-creds.json
+**/*-creds*.json
