@@ -1,20 +1,15 @@
-import React, {Component} from 'react';
-import {withStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import FormLabel from "@material-ui/core/FormLabel";
+import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormLabel from "@material-ui/core/FormLabel";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControl from "@material-ui/core/FormControl";
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import MediaUpload from "./MediaUpload";
-import Paper from "@material-ui/core/Paper";
-import FormGroup from "@material-ui/core/FormGroup";
-import Checkbox from "@material-ui/core/Checkbox";
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import React, { Component } from 'react';
 import 'typeface-roboto';
 import fb from "./firebase";
+import MediaUpload from "./MediaUpload";
 
 const theme = createMuiTheme({
     palette: {

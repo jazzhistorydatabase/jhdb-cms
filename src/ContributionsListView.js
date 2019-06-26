@@ -10,7 +10,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 
 import fb from './firebase';
 
-import './MainPageTB.css';
+import './ContributionsListView.css';
 
 const theme = createMuiTheme({
     palette: {

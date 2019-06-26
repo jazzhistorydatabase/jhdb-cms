@@ -54,7 +54,7 @@ const styles = theme => ({
 
 });
 
-class AdminPage extends Component {
+class AdminView extends Component {
     handleBeforeButtonClick() {
         this.props.adminSwap();
     }
@@ -178,5 +178,5 @@ class AdminPage extends Component {
 
 }
 
-export default withStyles(styles)(AdminPage);
+export default withStyles(styles)(AdminView);
 
