@@ -3,17 +3,12 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import Rebase from 're-base'
 
+import clientConfig from './client-creds.json';
+
 const fb = {
     // Must be bound to component — ie call initialize.bind(this)(callback) from App.componentWillMount()
     initialize: function (callback) {
-        var config = {
-            apiKey: "AIzaSyBnkU1O4VkRUkbZS8LXuR7MYIBv2WQAupY",
-            authDomain: "testproj-34045.firebaseapp.com",
-            databaseURL: "https://testproj-34045.firebaseio.com",
-            projectId: "testproj-34045",
-            storageBucket: "testproj-34045.appspot.com",
-            messagingSenderId: "461322757899"
-        };
+        var config = clientConfig.firebaseConfig;
         this.app = firebase.initializeApp(config);
 
         fb.db = firebase.firestore(this.app);

@@ -130,7 +130,6 @@ class EditContributionView extends Component {
     render() {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
-        const {mediaProcess, contentEditing} = this.state;
         return (
             <MuiThemeProvider theme={theme}>
             <div>
@@ -142,14 +141,14 @@ class EditContributionView extends Component {
                     id="standard-name"
                     label="Contribution Title"
                     className={classes.textField}
-                    value={contrib && contrib.name || ""}
+                    value={(contrib && contrib.name) || ""}
                     onChange={this.handleNameChange}
                     margin="normal"
                 />
                 <FormControl component={"fieldset"} className={classes.formControl}>
                     <FormLabel component="legend"> Contribution Type</FormLabel>
                     <RadioGroup row
-                                value={contrib && contrib.type || ""}
+                                value={(contrib && contrib.type) || ""}
                                 onChange={this.handleCheckBoxChange}>
                         <FormControlLabel
                             value="artist"
@@ -172,7 +171,7 @@ class EditContributionView extends Component {
                         label="Biography"
                         style={{margin: 5}}
                         multiline
-                        value={contrib && contrib.description || ""}
+                        value={(contrib && contrib.description) || ""}
                         onChange={this.handleBioChange}
                         fullWidth
                         margin="normal"

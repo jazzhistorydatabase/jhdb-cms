@@ -1,5 +1,6 @@
 import dropbox from 'dropbox';
 import loadScript from 'load-script';
+import clientConfig from './client-creds.json';
 
 const DROPBOX_SDK_URL = 'https://www.dropbox.com/static/api/2/dropins.js';
 const SCRIPT_ID = 'dropboxjs';
@@ -8,25 +9,21 @@ let scriptLoadingStarted = false;
 
 
 const dbx = {
-
     // Must be called in componentWillMount in App.js
     initialize: function (callback) {
-        let config = {
-            appKey: "l3bfhq15xjjtxqp",
-            redirectUri: "http://localhost:3000/"
-        };
+        const dbconf = clientConfig.dropboxConfig;
         let accessToken = this.getAccessTokenFromUrl();
         if (!accessToken) {
-            window.location.href = "http://dropbox.com/oauth2/authorize?client_id=" + config.appKey + "&response_type=token&redirect_uri=" + window.location.href;
+            window.location.href = "http://dropbox.com/oauth2/authorize?client_id=" + dbconf.appKey + "&response_type=token&redirect_uri=" + window.location.href;
         } else  {
-            config.accessToken = accessToken;
-            this.app = new dropbox.Dropbox(config);
+            dbconf.accessToken = accessToken;
+            this.app = new dropbox.Dropbox(dbconf);
             if (!this.isDropboxReady() && !scriptLoadingStarted) {
                 scriptLoadingStarted = true;
                 loadScript(DROPBOX_SDK_URL, {
                   attrs : {
                     id: SCRIPT_ID,
-                    'data-app-key': config.appKey
+                    'data-app-key': dbconf.appKey
                   }
                 });
               }

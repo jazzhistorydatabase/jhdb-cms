@@ -89,6 +89,7 @@ class AdminView extends Component {
         let authorized = this.state.authorized;
 
         switch(evt.target.value) {
+            default:
             case 1:
                 delete admin[user.uid];
                 delete authorized[user.uid];
@@ -137,7 +138,7 @@ class AdminView extends Component {
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     {this.props.users.map( (user) => {
-                        if(!user.uid || user.uid == fb.auth.currentUser.uid) {
+                        if(!user.uid || user.uid === fb.auth.currentUser.uid) {
                             return (<div></div>)
                         };
                         console.log("elem for user "+user.name);
