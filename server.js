@@ -3,7 +3,6 @@ const exphbs  = require('express-handlebars');
 const fb = require("firebase-admin");
 const fs = require("fs");
 const proxy = require("express-http-proxy");
-const request = require("http").request;
 
 const serviceAccount = require("./server-creds-staging.json");
 
