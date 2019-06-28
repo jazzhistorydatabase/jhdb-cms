@@ -1,8 +1,14 @@
+# Jazz History Database Content Management System
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 You can clone the project by running
 ### `git clone https://github.com/jazzhistorydatabase/jhdb-cms.git`
 
+*NOTE: Running this app requires unchecked credentials files for the server and client. (Development access to Google Cloud is required in order to download using the links below)*
+- [Server credentials](https://storage.cloud.google.com/jhdb-cms_cloudbuild/server-creds-dev.json): rename to `server-creds.json` and place in project root 
+- [Client credentials](https://storage.cloud.google.com/jhdb-cms_cloudbuild/client-creds-dev.json): rename to `client-creds.json` and place in `src/` 
+#
 
 ## Available Scripts
 
@@ -15,9 +21,9 @@ Installs all dependencies
 ### `npm run dev`
 
 Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Open [http://localhost:8080](http://localhost:8080) to view it in the browser.
 
-The page will reload if you make edits.<br>
+The page should reload if you make edits.<br>
 You will also see any lint errors in the console.
 
 ### `npm test`
@@ -37,15 +43,38 @@ Your app is ready to be deployed!
 
 Runs app in production mode. This will serve the content in the build` folder statically. To apply code changes, rebuild.
 
-## Automatic Deployment
+#
 
-All commits to the `master` branch are auto-deployed to the [staging environment](https://jhdb-cms.appspot.com)
+## Workflow
+- Tasks are tracked via issues - if you come across a bug or would like to request a feature, please submit it in the [issues tab](https://github.com/jazzhistorydatabase/jhdb-cms/issues)
+- Kanban boards for the active and past development cycle reside in the [projects tab](https://github.com/jazzhistorydatabase/jhdb-cms/projects)
+- Development is tracked in the [#db-dev channel on the JazzHistoryDatabase Slack](https://jhdb.slack.com/messages/CFRMA6BBK/) (accessible to WPI students and by invitation)
 
-## Manual Deployment
+#
+
+## Production Environment
+
+### Google Cloud Platform
+This application is hosted on Google Cloud Platform and Firebase. Permissioned users can deploy, troubleshoot, and otherwise manage production services at [https://console.cloud.google.com/home/dashboard?project=jhdb-cms](https://console.cloud.google.com/home/dashboard?project=jhdb-cms)
+
+### Firebase
+Data and authentication is handled by firebase, and can be managed via the Firebase console at [https://console.firebase.google.com/u/0/project/jhdb-cms/](https://console.firebase.google.com/u/0/project/jhdb-cms/)
+
+#### There are also Staging and Dev Firebase Instances
+- Staging: [https://console.firebase.google.com/u/0/project/jhdb-staging/](https://console.firebase.google.com/u/0/project/jhdb-cms/)
+- Development: [https://console.firebase.google.com/u/0/project/jhdb-dev/](https://console.firebase.google.com/u/0/project/jhdb-dev/)
+
+### **Automatic Deployment**
+
+All commits to the `master` branch are auto-deployed to the [production environment](https://jhdb-cms.appspot.com) on GCP's App Engine. This is the correct workflow for regular releases.
+
+### **Manual Deployment**
 
 Authenticated users with the Google Cloud SDK installed can run
 `gcloud builds submit --config cloudbuild.yaml .`
-This should be used in extreme circumstances only! All releases should be peer reviewed and auto-deployed via pull request.
+This should be used in extreme circumstances only (i.e. in case of service outage)! All releases should be peer reviewed and auto-deployed via pull request.
+
+#
 
 ## Learn More
 
