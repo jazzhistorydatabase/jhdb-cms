@@ -4,7 +4,7 @@ const fb = require("firebase-admin");
 const fs = require("fs");
 const proxy = require("express-http-proxy");
 
-const serviceAccount = require("./server-creds-staging.json");
+const serviceAccount = require("./server-creds.json");
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),

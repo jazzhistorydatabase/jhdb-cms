@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import MainPageTB from "./MainPageTB";
+import ContributionsListView from "./ContributionsListView";
 
 it('renders without crashing', () => {
     const div = document.createElement('div');
-    ReactDOM.render(<MainPageTB/>, div);
+    ReactDOM.render(<ContributionsListView/>, div);
     ReactDOM.unmountComponentAtNode(div);
 });
