@@ -1,13 +1,12 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import AdminView from "./AdminView";
 import './App.css';
-import ButtonAppBar from './ButtonAppBar';
-import MainPageTB from './MainPageTB';
-import EditContributionView from "./EditContributionView";
-
-import fb from './firebase.js';
-import Paper from "@material-ui/core/Paper";
+import Header from './Header';
 import dbx from './dropbox.js';
-import AdminPage from "./AdminPage";
+import EditContributionView from "./EditContributionView";
+import fb from './firebase.js';
+import ContributionsListView from './ContributionsListView';
+
 
 class App extends Component {
 
@@ -19,7 +18,6 @@ class App extends Component {
             users: [],
             showEditWindow: false,
             showAdminWindow: false,
-            //showWindow: false,
             selectedContribution: undefined,
             adminPanel: undefined,
         }
@@ -100,12 +98,12 @@ class App extends Component {
                                              windowSwap={this.windowSwap.bind(this)}/>;
                                              break;
             case 2:
-                x = <AdminPage adminPanel={this.state.adminPanel}
+                x = <AdminView adminPanel={this.state.adminPanel}
                                users={this.state.users}
                                   adminSwap={this.adminSwap.bind(this)}/>;
                                   break;
             default:
-                x = <MainPageTB contributions={this.state.contributions}
+                x = <ContributionsListView contributions={this.state.contributions}
                                    windowSwap={this.windowSwap.bind(this)}
                                     adminSwap={this.adminSwap.bind(this)}
                                     adminButton={this.state.users.length > 2}/>;
@@ -125,7 +123,7 @@ class App extends Component {
 
         return (
             <div className="App">
-                <ButtonAppBar user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
+                <Header user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
                 {appContent}
             </div>
         );
