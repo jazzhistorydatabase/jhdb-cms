@@ -1,16 +1,15 @@
-import React, {Component} from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import './App.css';
+import Button from "@material-ui/core/Button";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormGroup from "@material-ui/core/FormGroup";
-import Switch from "@material-ui/core/Switch";
 import Paper from "@material-ui/core/Paper";
+import { withStyles } from '@material-ui/core/styles';
+import Switch from "@material-ui/core/Switch";
+import { randomBytes } from 'crypto';
+import React, { Component } from 'react';
+import './App.css';
 import FileUpload from "./FileUpload";
-import Button from "@material-ui/core/Button";
 import fb from "./firebase";
 
-import dbx from './dropbox.js';
-import { randomBytes } from 'crypto';
 
 const styles = theme => ({
     root: {

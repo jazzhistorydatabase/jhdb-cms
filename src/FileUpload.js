@@ -57,9 +57,10 @@ class FileUpload extends Component {
     onChooserSuccess(file) {
         let fileDoc = this.state.fileDoc;
         fileDoc['name'] = file[0].name || "";
-        fileDoc['url'] = file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent') || "";
+        fileDoc['url'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
         fileDoc['icon'] = file[0].icon || "";
-        fileDoc['thumbnail'] = file[0].thumbnailLink && file[0].thumbnailLink.replace('www.dropbox', 'dl.dropboxusercontent') || "";
+        fileDoc['thumbnail'] = (file[0].thumbnailLink && 
+                file[0].thumbnailLink.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
         this.setState({fileDoc: fileDoc});
     }
 
@@ -81,7 +82,7 @@ class FileUpload extends Component {
         }
         let fileUploadIcon = doc.url ?
                 ((doc.thumbnail || doc.icon) ?
-                    (<img className={classes.fabImg} src={(doc.thumbnail || doc.icon)} />) :
+                    (<img className={classes.fabImg} alt="Upload preview" src={(doc.thumbnail || doc.icon)} />) :
                     (<CheckIcon />)):
                 (<AddIcon/>);
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import MainPageTB from "./MainPageTB";
+import Header from './Header';
 
 it('renders without crashing', () => {
     const div = document.createElement('div');
-    ReactDOM.render(<MainPageTB/>, div);
+    ReactDOM.render(<Header/>, div);
     ReactDOM.unmountComponentAtNode(div);
 });

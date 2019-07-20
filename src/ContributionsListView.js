@@ -10,8 +10,6 @@ import SettingsIcon from '@material-ui/icons/Settings';
 
 import fb from './firebase';
 
-import './MainPageTB.css';
-
 const theme = createMuiTheme({
     palette: {
         primary: {
@@ -65,10 +63,6 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
-    // // Testing purposes. Attach this to a button's onClick to see in action - it opens a file attached to the collection, in dropbox.
-    // onBioDocumentClick = function(documentName) {
-    //     this.props.dropbox.openFile(documentName);
-    // };
     
     handleAddButtonClick() {
         let contribName = window.prompt("Enter collection name:");
@@ -96,7 +90,7 @@ class MainPageTB extends Component {
     };
     render() {
         const classes = this.props.classes;
-        let contrib = this.props.contributions;
+        const contrib = this.props.contributions;
 
         let adminButton = this.props.adminButton ? (
             <Fab color="primary" aria-label="Admin" className={classes.fab + " " + classes.adminFab} onClick={() => {return this.handleAdminButtonClick.bind(this)()}}>

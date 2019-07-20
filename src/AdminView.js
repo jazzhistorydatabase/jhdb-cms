@@ -54,7 +54,7 @@ const styles = theme => ({
 
 });
 
-class AdminPage extends Component {
+class AdminView extends Component {
     handleBeforeButtonClick() {
         this.props.adminSwap();
     }
@@ -89,6 +89,7 @@ class AdminPage extends Component {
         let authorized = this.state.authorized;
 
         switch(evt.target.value) {
+            default:
             case 1:
                 delete admin[user.uid];
                 delete authorized[user.uid];
@@ -137,7 +138,7 @@ class AdminPage extends Component {
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     {this.props.users.map( (user) => {
-                        if(!user.uid || user.uid == fb.auth.currentUser.uid) {
+                        if(!user.uid || user.uid === fb.auth.currentUser.uid) {
                             return (<div></div>)
                         };
                         console.log("elem for user "+user.name);
@@ -178,5 +179,5 @@ class AdminPage extends Component {
 
 }
 
-export default withStyles(styles)(AdminPage);
+export default withStyles(styles)(AdminView);
 

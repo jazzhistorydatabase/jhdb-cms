@@ -4,7 +4,13 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App/>, document.getElementById('root'));
+console.log(window.location.port);
+if(window.location.port === "3000") {
+    ReactDOM.render(<p>-  Error: Use <a href="http://localhost:8080">localhost:8080</a> to route requests through express server in dev -</p>,
+            document.getElementById('root'));
+} else {
+    ReactDOM.render(<App/>, document.getElementById('root'));
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

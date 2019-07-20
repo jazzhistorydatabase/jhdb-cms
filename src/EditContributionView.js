@@ -1,20 +1,15 @@
-import React, {Component} from 'react';
-import {withStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import FormLabel from "@material-ui/core/FormLabel";
+import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormLabel from "@material-ui/core/FormLabel";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControl from "@material-ui/core/FormControl";
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import MediaUpload from "./MediaUpload";
-import Paper from "@material-ui/core/Paper";
-import FormGroup from "@material-ui/core/FormGroup";
-import Checkbox from "@material-ui/core/Checkbox";
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import React, { Component } from 'react';
 import 'typeface-roboto';
 import fb from "./firebase";
+import MediaUpload from "./MediaUpload";
 
 const theme = createMuiTheme({
     palette: {
@@ -135,7 +130,6 @@ class EditContributionView extends Component {
     render() {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
-        const {mediaProcess, contentEditing} = this.state;
         return (
             <MuiThemeProvider theme={theme}>
             <div>
@@ -147,14 +141,14 @@ class EditContributionView extends Component {
                     id="standard-name"
                     label="Contribution Title"
                     className={classes.textField}
-                    value={contrib && contrib.name || ""}
+                    value={(contrib && contrib.name) || ""}
                     onChange={this.handleNameChange}
                     margin="normal"
                 />
                 <FormControl component={"fieldset"} className={classes.formControl}>
                     <FormLabel component="legend"> Contribution Type</FormLabel>
                     <RadioGroup row
-                                value={contrib && contrib.type || ""}
+                                value={(contrib && contrib.type) || ""}
                                 onChange={this.handleCheckBoxChange}>
                         <FormControlLabel
                             value="artist"
@@ -177,7 +171,7 @@ class EditContributionView extends Component {
                         label="Biography"
                         style={{margin: 5}}
                         multiline
-                        value={contrib && contrib.description || ""}
+                        value={(contrib && contrib.description) || ""}
                         onChange={this.handleBioChange}
                         fullWidth
                         margin="normal"
@@ -208,7 +202,7 @@ class EditContributionView extends Component {
                 <br/>
                 <br/>
                 {/* <FormControl className={classes.uploadWidth}>
-                    <br/>
+                    <br/>github
                     <Paper className={classes.paper} elevation={3} square={false}>
                         <br />
                         <FormGroup row >
