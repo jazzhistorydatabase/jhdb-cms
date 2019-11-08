@@ -201,27 +201,7 @@ class EditContributionView extends Component {
                 <br/>
                 <br/>
                 <br/>
-                {/* <FormControl className={classes.uploadWidth}>
-                    <br/>github
-                    <Paper className={classes.paper} elevation={3} square={false}>
-                        <br />
-                        <FormGroup row >
-                            <FormControlLabel className={classes.button2}
-                                control={
-                                    <Checkbox checked={mediaProcess} onChange={this.handleEndBoxChange('mediaProcess')}
-                                              value="Media Processing"/>
-                                }
-                                label="Additional Media Processing Required"/>
-                            <FormControlLabel className={classes.button2}
-                                control={
-                                    <Checkbox checked={contentEditing}
-                                              onChange={this.handleEndBoxChange('contentEditing')}
-                                              value="Content Editing"/>}
-                                label="Additional Content Editing Required"/>
-                        </FormGroup>
-                        <br />
-                    </Paper>
-                </FormControl> */}
+                <a className={classes.button2} href={"/"+this.props.selectedContribution.name.toLowerCase().replace(" ", "-")}><Button>Preview</Button></a>
             </div>
             </MuiThemeProvider>
         );

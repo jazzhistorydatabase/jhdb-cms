@@ -12,10 +12,15 @@ const dbx = {
     // Must be called in componentWillMount in App.js
     initialize: function (callback) {
         const dbconf = clientConfig.dropboxConfig;
-        let accessToken = this.getAccessTokenFromUrl();
+        let accessToken = window.sessionStorage.getItem("access_token");
+        if(!accessToken) {
+            accessToken = this.getAccessTokenFromUrl();
+            window.location.href = "#";
+        }
         if (!accessToken) {
             window.location.href = "http://dropbox.com/oauth2/authorize?client_id=" + dbconf.appKey + "&response_type=token&redirect_uri=" + window.location.href;
         } else  {
+            window.sessionStorage.setItem("access_token", accessToken);
             dbconf.accessToken = accessToken;
             this.app = new dropbox.Dropbox(dbconf);
             if (!this.isDropboxReady() && !scriptLoadingStarted) {

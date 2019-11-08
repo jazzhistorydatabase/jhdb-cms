@@ -8,48 +8,44 @@ const serviceAccount = require("./server-creds.json");
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
-    databaseURL: "https://testproj-34045.firebaseio.com"
+    databaseURL: "https://" + fb.credential.project_id + "firebaseio.com"
 });
 
 
 
 const app = express();
 
-if (process.argv.length > 2 && process.argv[2] === "--dev") {   
-    // Running in dev, proxy to react dev server
-    app.use("/", proxy("localhost:3000"));
-} else {
-    // Host compiled contributor portal
-    app.use("/", express.static("build"));
-    app.use("/static", express.static("build/static"));
-    app.use("/images", express.static("templates/images"));
-}
-
-
 // Configure handlebars
 app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set("view engine", "handlebars");
 
 // Define function to pull contribution from firebase and render with handlebars
-let renderFromFirebase = (req, res, collectionName) => {
+let renderFromFirebase = (req, res, collectionName, collectionId="") => {
+    let collsRef;
     const collRoot = fb.firestore().collection("Contributions");
     let collName = collectionName.toLowerCase().replace(/-/g, " ")
         .split(" ")
         .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
         .join(" ");
 
-    const collsRef = collRoot.where("name", "==", collName);
+    if(collectionId) {
+        collsRef = collRoot.doc(collectionId);
+    } else {
+        collsRef = collRoot.where("name", "==", collName);
+    }
     console.log(collsRef);
 
     collsRef.get().then(snapshots => {
-        if(snapshots.empty) {
+        if(!collectionId && snapshots.empty) {
             // No such collection
             console.log("No matching collections found");
             res.send("No matching collections found");
+            console.log(snapshots.data);
             return;
         } else {
+            let snap = collectionId ?  [snapshots] : snapshots;
             console.log("Found "+snapshots.size + " matching collections");
-            snapshots.forEach(collRef => {
+            snap.forEach(collRef => {
                 // TODO: What to do if more than one?
 
                 let collectionDoc = collRef.data();
@@ -143,11 +139,16 @@ let collectionReqHandler = (req, res) => {
       });
 };
 
+let previewReqHandler = (req, res) => {
+    let filename = req.params.collection.toLowerCase();
+    return renderFromFirebase(req, res, filename);
+}
+
 app.get("/header-new.html", (req, res) => {
     res.sendFile("templates/header-new.html", {root: __dirname});
 });
 
-app.get("/", (req, res) => {
+app.get("/home", (req, res) => {
     res.sendFile("templates/CMS-landing-page.html", {root: __dirname});
 });
 
@@ -155,8 +156,19 @@ app.get("/branch", (req, res) => {
     res.sendFile("templates/landing-page.html", {root: __dirname});
 });
 
-app.get("/:collection", collectionReqHandler);
-app.get("/:collection/:subpage", collectionReqHandler);
+// app.get("/collection/:collection", collectionReqHandler);
+// app.get("/collection/:collection/:subpage", collectionReqHandler);
+app.get("/:collection", previewReqHandler);
+
+if (process.argv.length > 2 && process.argv[2] === "--dev") {   
+    // Running in dev, proxy to react dev server
+    app.use("/", proxy("http://localhost:3000/"));
+} else {
+    // Host compiled contributor portal
+    app.use("/", express.static("build"));
+    app.use("/static", express.static("build/static"));
+    app.use("/images", express.static("templates/images"));
+}
 
 
 // Start the server
