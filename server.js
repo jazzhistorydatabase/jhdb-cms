@@ -40,7 +40,7 @@ let renderFromFirebase = (req, res, collectionName, collectionId="") => {
             // No such collection
             console.log("No matching collections found");
             res.send("No matching collections found");
-            console.log(snapshots.data());
+            console.log(snapshots.data);
             return;
         } else {
             let snap = collectionId ?  [snapshots] : snapshots;
@@ -140,7 +140,8 @@ let collectionReqHandler = (req, res) => {
 };
 
 let previewReqHandler = (req, res) => {
-    return renderFromFirebase(req, res, "", req.params.collectionId);
+    let filename = req.params.collection.toLowerCase();
+    return renderFromFirebase(req, res, filename);
 }
 
 app.get("/header-new.html", (req, res) => {
@@ -155,9 +156,9 @@ app.get("/branch", (req, res) => {
     res.sendFile("templates/landing-page.html", {root: __dirname});
 });
 
-app.get("/:collection", collectionReqHandler);
-app.get("/:collection/:subpage", collectionReqHandler);
-app.get("/preview/:collection", previewReqHandler);
+// app.get("/collection/:collection", collectionReqHandler);
+// app.get("/collection/:collection/:subpage", collectionReqHandler);
+app.get("/:collection", previewReqHandler);
 
 if (process.argv.length > 2 && process.argv[2] === "--dev") {   
     // Running in dev, proxy to react dev server

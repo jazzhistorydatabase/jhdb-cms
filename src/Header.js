@@ -29,6 +29,9 @@ const styles = {
     },
     accountButton: {
         backgroundColor: "#A10C32"
+    },
+    backButton: {
+        backgroundColor: "#a02c49"
     }
 };
 
@@ -46,13 +49,15 @@ class Header extends Component {
                                 Collaborator Portal
                             </Typography>
                             <Typography variant="h6" align="left" color="inherit">
-                                Philly Branch
+                                WPI Branch
                             </Typography>
                         </div>
                         <div>
-                            <Button color="inherit">Main Branch </Button>
-                            <Button color="inherit">Philly Branch </Button>
+                            <a href="http://www.jazzhistorydatabase.com" style={{"color": "white"}}>
+                                <Button color="inherit" className={classes.backButton}>Return to JHDB </Button>
+                            </a>
                         </div>
+                        <div style={{"width": "5vw"}}></div>
                         <div>
                             <Button color="inherit"
                                     className={classes.accountButton}

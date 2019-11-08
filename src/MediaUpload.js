@@ -73,13 +73,17 @@ class MediaUpload extends Component {
 
     addFileUpload(event) {
         let lst = this.state.collection;
+        let maxIndex = 0;
+        lst.forEach( (e) => {
+            if(e.index > maxIndex) maxIndex = e.index;
+        })
         fb.base.addToCollection(this.props.collection, {
             name: "",
             url: "",
             caption: "",
             icon: "",
             thumbnail: "",
-            index: lst.length || randomBytes(2).toString(),
+            index: maxIndex + 1,
         });
     };
 
@@ -94,14 +98,15 @@ class MediaUpload extends Component {
     }
 
     render() {
+        console.log("!!!" + this.state.collection);
         const classes = this.props.classes;
-        let fileIndex = 0;
+        // this.fileIndex = 0;
         let fileUploads = this.state.collection.map((fileDoc) => {
-            fileIndex++;
+            // this.fileIndex++;
             return (
                 <FileUpload key={fileDoc.index || fileDoc.name || randomBytes(2)}
                             fileType={this.props.uploadName}
-                            fileIndex={fileIndex}
+                            fileIndex={fileDoc.index}
                             fileDoc={fileDoc}
                 />);
         });
