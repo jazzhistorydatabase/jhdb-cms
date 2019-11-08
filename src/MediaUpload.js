@@ -98,7 +98,6 @@ class MediaUpload extends Component {
     }
 
     render() {
-        console.log("!!!" + this.state.collection);
         const classes = this.props.classes;
         // this.fileIndex = 0;
         let fileUploads = this.state.collection.map((fileDoc) => {
