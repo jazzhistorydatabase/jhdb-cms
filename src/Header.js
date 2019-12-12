@@ -8,6 +8,10 @@ import './App.css';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import 'typeface-roboto';
 import fb from './firebase';
+
+import googleLoginIcon from './google-signin.png';
+import msLoginIcon from './ms-signin.png';
+
 const theme = createMuiTheme({
     palette: {
         primary: {
@@ -28,7 +32,11 @@ const styles = {
         marginRight: 20,
     },
     accountButton: {
-        backgroundColor: "#A10C32"
+        backgroundColor: "#A10C32",
+        display: 'inline-block'
+    },
+    accountButtonImg: {
+        height: 30
     },
     backButton: {
         backgroundColor: "#a02c49"
@@ -38,6 +46,29 @@ const styles = {
 class Header extends Component {
     render() {
         const classes = this.props.classes;
+
+        let loginButton = this.props.user ? (
+            <Button color="inherit"
+                    className={classes.accountButton}
+                    onClick={this.props.handleSignOut}>
+
+                {this.props.user.displayName}
+            </Button>
+        ) : (
+            <div>
+                <Button color="inherit"
+                        className={classes.signinButton}
+                        onClick={() => {return fb.showAuthPopup('Google')}} >
+                            <img src={googleLoginIcon} className={classes.accountButtonImg}/>
+                </Button>
+                <Button color="inherit"
+                        className={classes.signinButton}
+                        onClick={() => {return fb.showAuthPopup('Microsoft')}} >
+                            <img src={msLoginIcon} className={classes.accountButtonImg}/>
+                </Button>
+            </div>
+
+        );
 
         return (
             <MuiThemeProvider theme={theme}>
@@ -59,12 +90,7 @@ class Header extends Component {
                         </div>
                         <div style={{"width": "5vw"}}></div>
                         <div>
-                            <Button color="inherit"
-                                    className={classes.accountButton}
-                                    onClick={this.props.user ? this.props.handleSignOut : fb.showAuthPopup.bind(fb)}>
-
-                                {this.props.user ? this.props.user.displayName : "Sign In"}
-                            </Button>
+                            {loginButton}
                             <br/>
                         </div>
 
