@@ -201,7 +201,7 @@ class EditContributionView extends Component {
                 <br/>
                 <br/>
                 <br/>
-                <a className={classes.button2} href={"/"+this.props.selectedContribution.name.toLowerCase().replace(" ", "-")}><Button>Preview</Button></a>
+                <a className={classes.button2} href={"/"+this.props.selectedContribution.name.toLowerCase().replace(/ /g, "-")}><Button>Preview</Button></a>
             </div>
             </MuiThemeProvider>
         );

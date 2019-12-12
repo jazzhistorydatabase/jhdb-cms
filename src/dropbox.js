@@ -48,6 +48,16 @@ const dbx = {
         window.Dropbox.choose(options);
     },
 
+    onChooseMulti(fileType, successCallback) {
+        if (!this.isDropboxReady() || !successCallback || (fileType !== 'Images' && fileType !== 'Audio')) return null;
+        let options;
+        if (fileType === 'Images') options = this.dbxImageOptions;
+        else if (fileType === 'Audio') options = this.dbxAudioOptions;
+        options.success = successCallback;
+        options.multiselect = true;
+        window.Dropbox.choose(options);
+    },
+
     getAccessTokenFromCode: function (redirectUri, code) {
         this.app.getAccessTokenFromCode(redirectUri, code)
             .catch(function(error) {

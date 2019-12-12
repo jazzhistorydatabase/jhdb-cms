@@ -116,6 +116,7 @@ class MainPageTB extends Component {
                                                 onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}
                                                 className={classes.button}>Edit </Button>
                                         <Button variant="outlined" color={"primary"}
+                                                href={"/"+e.name.toLowerCase().replace(/ /g, "-")}
                                                 className={classes.button}>Preview </Button>
                                         <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
                                     </ListItem>
