@@ -5,10 +5,10 @@ import FormGroup from "@material-ui/core/FormGroup";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import CheckIcon from '@material-ui/icons/Check';
-import DeleteIcon from '@material-ui/icons/Delete';
+import LinkOffIcon from '@material-ui/icons/LinkOff';
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-
+import Tooltip from '@material-ui/core/Tooltip';
 
 import fb from "./firebase";
 import dbx from './dropbox.js';
@@ -52,7 +52,7 @@ class FileUpload extends Component {
     };
 
     handleDelete() {
-        if(window.confirm("Are you sure you want to remove this file? This can not be undone!")) {
+        if(window.confirm("Are you sure you want to remove this item? This can not be undone!\n\n(This will not remove the file from dropbox or your computer)")) {
             fb.base.removeDoc(this.props.fileDoc.ref);
         }
     }
@@ -92,20 +92,22 @@ class FileUpload extends Component {
         let fileUploadComponent;
         if (this.props.fileType !== 'Video') {
             fileUploadComponent =
-                <Fab
-                    size="small"
-                    color={doc.url ? 'none' : 'primary'}
-                    aria-label="Upload"
-                    className={classes.fab}
-                    onClick={
-                        () => {
-                            if (this.state.fileDoc) {
-                                dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
+                <Tooltip title={"Click to " + (doc.url ? "change" : "select") + " file"}>
+                    <Fab
+                        size="small"
+                        color={doc.url ? 'none' : 'primary'}
+                        aria-label="Upload"
+                        className={classes.fab}
+                        onClick={
+                            () => {
+                                if (this.state.fileDoc) {
+                                    dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
+                                }
                             }
-                        }
-                    }>
-                    {fileUploadIcon}
-                </Fab>
+                        }>
+                        {fileUploadIcon}
+                    </Fab>
+                </Tooltip>
         } else {
             fileUploadComponent =
                 <TextField
@@ -149,12 +151,14 @@ class FileUpload extends Component {
                                 />
                         </Grid>
                         <Grid item xs={2}>
-                            <Fab size="small"
-                                aria-label="Delete"
-                                onClick={this.handleDelete.bind(this)}
-                                className={classes.fab}>
-                                <DeleteIcon />
-                            </Fab>
+                            <Tooltip title="Unlink file from collection (will not delete original file)">
+                                <Fab size="small"
+                                    aria-label="Delete"
+                                    onClick={this.handleDelete.bind(this)}
+                                    className={classes.fab}>
+                                    <LinkOffIcon />
+                                </Fab>
+                            </Tooltip>
                          </Grid>
                     </Grid>
                 </FormGroup>
