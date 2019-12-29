@@ -9,6 +9,8 @@ import React, { Component } from 'react';
 import './App.css';
 import FileUpload from "./FileUpload";
 import fb from "./firebase";
+import dbx from './dropbox.js';
+
 
 
 const styles = theme => ({
@@ -41,7 +43,7 @@ const styles = theme => ({
 
 });
 
-class MediaUpload extends Component {
+class MediaUpload extends Component { 
     constructor(props) {
         super(props);
         this.state = {
@@ -87,6 +89,27 @@ class MediaUpload extends Component {
         });
     };
 
+    onChooserSuccess(files) {
+        console.log(files);
+        // Get highest file index
+        let lst = this.state.collection;
+        let maxIndex = 0;
+        lst.forEach( (e) => {
+            if(e.index > maxIndex) maxIndex = e.index;
+        })
+        // create and push each doc
+        files.forEach( file => {
+            let fileDoc = {};
+            fileDoc['name'] = file.name || "";
+            fileDoc['url'] = (file.link && file.link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
+            fileDoc['caption'] = "";
+            fileDoc['icon'] = file.icon || "";
+            fileDoc['thumbnail'] = (file.link && file.link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
+            fileDoc['index'] = ++maxIndex;
+            fb.base.addToCollection(this.props.collection, fileDoc);
+        });
+    }
+
     componentWillMount() {
         if(this.props && this.props.collection) {
             fb.base.bindCollection(this.props.collection, {
@@ -128,12 +151,20 @@ class MediaUpload extends Component {
                             label="Make Subpage (Coming Soon)"
                         />
                     </FormGroup>
+                    <Button variant="contained" color="primary" className={classes.button}
+                            onClick={
+                                () => {
+                                    dbx.onChooseMulti(this.props.uploadName, this.onChooserSuccess.bind(this));
+                                }
+                            }>
+                        ++ Bulk Add
+                    </Button>
                     <h4>
                         {fileUploads}
                     </h4>
                     <Button variant="contained" color="primary" className={classes.button}
                             onClick={this.addFileUpload.bind(this)}>
-                        + ADD MORE
+                        + ADD ONE
                     </Button>
                     <br/>
                     <br/>

@@ -24,8 +24,10 @@ const fb = {
         });
     },
 
-    showAuthPopup: function () {
-        var provider = new firebase.auth.GoogleAuthProvider();
+    showAuthPopup: function (providerName) {
+        var provider = providerName == 'Microsoft' ? 
+                new firebase.auth.OAuthProvider('microsoft.com') :
+                new firebase.auth.GoogleAuthProvider();
         this.auth.signInWithPopup(provider).then(function (result) {
             // User signed in!
             this.user = result.user;

@@ -5,11 +5,14 @@ import FormGroup from "@material-ui/core/FormGroup";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import CheckIcon from '@material-ui/icons/Check';
-import DeleteIcon from '@material-ui/icons/Delete';
+import LinkOffIcon from '@material-ui/icons/LinkOff';
 import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+import Tooltip from '@material-ui/core/Tooltip';
 
 import fb from "./firebase";
 import dbx from './dropbox.js';
+import { Grid, InputLabel } from '@material-ui/core';
 
 const styles = theme => ({
     root: {
@@ -49,7 +52,7 @@ class FileUpload extends Component {
     };
 
     handleDelete() {
-        if(window.confirm("Are you sure you want to remove this file? This can not be undone!")) {
+        if(window.confirm("Are you sure you want to remove this item? This can not be undone!\n\n(This will not remove the file from dropbox or your computer)")) {
             fb.base.removeDoc(this.props.fileDoc.ref);
         }
     }
@@ -89,20 +92,22 @@ class FileUpload extends Component {
         let fileUploadComponent;
         if (this.props.fileType !== 'Video') {
             fileUploadComponent =
-                <Fab
-                    size="small"
-                    color={doc.url ? 'none' : 'primary'}
-                    aria-label="Upload"
-                    className={classes.fab}
-                    onClick={
-                        () => {
-                            if (this.state.fileDoc) {
-                                dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
+                <Tooltip title={"Click to " + (doc.url ? "change" : "select") + " file"}>
+                    <Fab
+                        size="small"
+                        color={doc.url ? 'none' : 'primary'}
+                        aria-label="Upload"
+                        className={classes.fab}
+                        onClick={
+                            () => {
+                                if (this.state.fileDoc) {
+                                    dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
+                                }
                             }
-                        }
-                    }>
-                    {fileUploadIcon}
-                </Fab>
+                        }>
+                        {fileUploadIcon}
+                    </Fab>
+                </Tooltip>
         } else {
             fileUploadComponent =
                 <TextField
@@ -121,28 +126,41 @@ class FileUpload extends Component {
 
         return (
             <div className={classes.root}>
+                    
                 <FormGroup row id={(this.state.fileDoc && this.state.fileDoc.name) || this.props.fileIndex}>
-                    {fileUploadComponent}
-                    {(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)}
-                    <TextField
-                        id="standard-multiline-static"
-                        label="Caption"
-                        style={{margin: 5}}
-                        multiline
-                        value={(this.state.fileDoc && this.state.fileDoc.caption) || ""}
-                        onChange={this.handleTextChange}
-                        margin="normal"
-                        variant="filled"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                    />
-                    <Fab size="small"
-                         aria-label="Delete"
-                         onClick={this.handleDelete.bind(this)}
-                         className={classes.fab}>
-                        <DeleteIcon />
-                    </Fab>
+                    <Grid container spacing={3} justify="left" alignItems="center" row>
+                        <Grid item xs={1}>
+                            {fileUploadComponent}
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Typography variant={"body1"}>{(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)} </Typography>
+                        </Grid>
+                        <Grid item xs={5}>
+                            <TextField
+                                id="standard-multiline-static"
+                                label="Caption"
+                                style={{margin: 5, width: '100%'}}
+                                multiline
+                                value={(this.state.fileDoc && this.state.fileDoc.caption) || ""}
+                                onChange={this.handleTextChange}
+                                margin="normal"
+                                variant="filled"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                />
+                        </Grid>
+                        <Grid item xs={2}>
+                            <Tooltip title="Unlink file from collection (will not delete original file)">
+                                <Fab size="small"
+                                    aria-label="Delete"
+                                    onClick={this.handleDelete.bind(this)}
+                                    className={classes.fab}>
+                                    <LinkOffIcon />
+                                </Fab>
+                            </Tooltip>
+                         </Grid>
+                    </Grid>
                 </FormGroup>
 
             </div>

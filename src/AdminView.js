@@ -13,6 +13,8 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import Input from "@material-ui/core/Input";
 import fb from "./firebase";
 
+import genericUserPhoto from './generic-user.jpg';
+
 const theme = createMuiTheme({
     palette: {
         primary: {
@@ -51,7 +53,6 @@ const styles = theme => ({
         margin: theme.spacing.unit,
         minWidth: 120
     },
-
 });
 
 class AdminView extends Component {
@@ -144,27 +145,37 @@ class AdminView extends Component {
                         console.log("elem for user "+user.name);
                         return (
                             <div key={user.uid} >
-                                <Grid container justify="center" alignItems="center" row>
-                                    <Avatar alt={user.name} src={user.displayPhoto || "http://chittagongit.com/images/generic-user-icon/generic-user-icon-8.jpg"} className={classes.bigAvatar} />
-                                    {/*<h3> {user.name} </h3>*/}
-                                    <h5> {user.email} </h5>
-                                    <FormControl className={classes.formControl}>
-                                        <InputLabel htmlFor="role-helper">User Role</InputLabel>
-                                        <Select
-                                            value={this.state.admin[user.uid] ? 3 : this.state.authorized[user.uid] ? 2 : 1}
-                                            onChange={(evt) => {this.handleChange(evt, user)}}
-                                            input={<Input name="role" id="role-helper" />}
-                                        >
-                                            <MenuItem value="">
-                                                <em>User Role</em>
-                                            </MenuItem>
-                                            <MenuItem value={1}>Unauthorized</MenuItem>
-                                            <MenuItem value={2}>Contributor</MenuItem>
-                                            <MenuItem value={3}>Admin</MenuItem>
-                                            {/*<MenuItem value={4}>Super Admin </MenuItem>*/}
-                                        </Select>
-                                        <FormHelperText>User role</FormHelperText>
-                                    </FormControl>
+                                <Grid container className={classes.adminGrid} spacing={3} justify="left" alignItems="center" row>
+                                    <Grid item xs={1}>
+                                    </Grid>
+                                    <Grid item xs={1}>
+                                        <Avatar alt={user.name} src={user.displayPhoto || genericUserPhoto} className={classes.bigAvatar} />
+                                    </Grid>
+                                    <Grid item xs={3}>
+                                    <   h3> {user.name} </h3>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <h5> {user.email} </h5>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <FormControl className={classes.formControl}>
+                                            <InputLabel htmlFor="role-helper">User Role</InputLabel>
+                                            <Select
+                                                value={this.state.admin[user.uid] ? 3 : this.state.authorized[user.uid] ? 2 : 1}
+                                                onChange={(evt) => {this.handleChange(evt, user)}}
+                                                input={<Input name="role" id="role-helper" />}
+                                            >
+                                                <MenuItem value="">
+                                                    <em>User Role</em>
+                                                </MenuItem>
+                                                <MenuItem value={1}>Unauthorized</MenuItem>
+                                                <MenuItem value={2}>Contributor</MenuItem>
+                                                <MenuItem value={3}>Admin</MenuItem>
+                                                {/*<MenuItem value={4}>Super Admin </MenuItem>*/}
+                                            </Select>
+                                            {/* <FormHelperText>User role</FormHelperText> */}
+                                        </FormControl>
+                                    </Grid>
                                 </Grid>
                             </div>
                         );
