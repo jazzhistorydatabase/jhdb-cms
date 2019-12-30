@@ -38,11 +38,11 @@
   "proxy": "http://localhost:8080",
   "scripts": {
     "deploy": "gcloud app deploy",
-    "start": "node server.js",
-    "dev:react": "react-scripts start",
-    "dev:express": "node server.js --dev",
+    "start": "node server/server.js",
+    "dev:react": "parcel watch client/index.html --public-url ./",
+    "dev:express": "nodemon server/server.js --dev",
     "dev": "cross-env BROWSER=none concurrently --kill-others --names \"REACT , EXPRESS \" \"npm run dev:react\" \"npm run dev:express\"",
-    "build": "react-scripts build",
+    "build": "parcel build client/index.html --public-url ./",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

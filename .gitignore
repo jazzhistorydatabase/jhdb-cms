@@ -163,6 +163,7 @@ fabric.properties
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
