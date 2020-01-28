@@ -4,6 +4,7 @@ import React, {Component} from 'react';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Helpicon from '@material-ui/icons/Help';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import {withStyles} from '@material-ui/core/styles';
 import './App.css';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
@@ -29,6 +30,7 @@ const styles = {
     },
     grow: {
         flexGrow: 1,
+        padding: 5,
     },
     menuButton: {
         marginLeft: -12,
@@ -36,7 +38,17 @@ const styles = {
     },
     accountButton: {
         backgroundColor: "#A10C32",
-        display: 'inline-block'
+        display: 'inline-block',
+        height: 40,
+        padding: 5,
+        verticalAlign: 'middle'
+    },
+    accountButtonText: {
+        display: 'inline-block',
+        height: 40,
+        paddingLeft: 5,
+        paddingRight: 5,
+        verticalAlign: 'middle'
     },
     accountButtonImg: {
         height: 30
@@ -71,21 +83,16 @@ class Header extends Component {
                     className={classes.accountButton}
                     onClick={this.props.handleSignOut}>
 
-                {this.props.user.displayName}
+                <ExitToAppIcon />
+                <span className={classes.accountButtonText}>{this.props.user.displayName}</span>
             </Button>
         ) : (
-            <span>
-                <Button color="inherit"
-                        className={classes.signinButton}
-                        onClick={() => {return fb.showAuthPopup('Google')}} >
-                            <img src={googleLoginIcon} className={classes.accountButtonImg}/>
-                </Button>
-                <Button color="inherit"
-                        className={classes.signinButton}
-                        onClick={() => {return fb.showAuthPopup('Microsoft')}} >
-                            <img src={msLoginIcon} className={classes.accountButtonImg}/>
-                </Button>
-            </span>
+            <Button color="inherit"
+                    className={classes.accountButton}
+                    onClick={() => {return fb.showAuthPopup()}} >
+                        Sign In with Dropbox
+                        {/* <img src={googleLoginIcon} className={classes.accountButtonImg}/> */}
+            </Button>
 
         );
 
@@ -96,18 +103,18 @@ class Header extends Component {
                     <Toolbar>
                         <div className={classes.grow}>
                             <Typography variant="h5" align="left" color="inherit">
-                                Collaborator Portal
+                                <b>Global Contributor Portal</b>
                             </Typography>
                             <Typography variant="h6" align="left" color="inherit">
-                                WPI Branch
+                                Jazz History Database
                             </Typography>
                         </div>
                         <div>
                             <a href="http://www.jazzhistorydatabase.com" style={{"color": "white"}}>
-                                <Button color="inherit" className={classes.backButton}>Return to JHDB </Button>
+                                <Button color="inherit" className={classes.backButton}>Back to jazzhistorydatabase.com</Button>
                             </a>
                         </div>
-                        <div style={{"width": "5vw"}}></div>
+                        <div style={{"width": "1vw"}}></div>
                         <div>
                             {loginButton}
                             <br/>

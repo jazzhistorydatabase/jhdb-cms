@@ -64,7 +64,7 @@ class App extends Component {
             return;
         }
         this.setState({user: null});
-        fb.auth.signOut();
+        fb.signOut();
     }
 
     componentWillMount() {

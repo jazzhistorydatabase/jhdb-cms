@@ -192,9 +192,7 @@ class AdminView extends Component {
                                                 <MenuItem value={1}>Unauthorized</MenuItem>
                                                 <MenuItem value={2}>Contributor</MenuItem>
                                                 <MenuItem value={3}>Admin</MenuItem>
-                                                {/*<MenuItem value={4}>Super Admin </MenuItem>*/}
                                             </Select>
-                                            {/* <FormHelperText>User role</FormHelperText> */}
                                         </FormControl>
                                     </Grid>
                                 </Grid>

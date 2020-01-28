@@ -15,12 +15,14 @@
   "dependencies": {
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
+    "axios": "^0.19.2",
     "dropbox": "^4.0.17",
     "express": "^4.17.1",
     "express-handlebars": "^3.0.2",
     "express-http-proxy": "^1.5.1",
     "firebase": "^5.9.0",
     "firebase-admin": "^7.2.0",
+    "isomorphic-fetch": "^2.2.1",
     "load-script": "^1.0.0",
     "parcel": "^1.12.4",
     "php-express": "0.0.3",
@@ -29,6 +31,7 @@
     "react-dom": "^16.8.4",
     "react-dropbox-chooser": "0.0.5",
     "react-scripts": "2.1.8",
+    "simple-oauth2": "^3.2.0",
     "typeface-roboto": "0.0.54"
   },
   "devDependencies": {

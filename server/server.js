@@ -4,15 +4,42 @@ const fb = require("firebase-admin");
 const fs = require("fs");
 const proxy = require("express-http-proxy");
 const path = require('path');
+const axios = require('axios');
+const fetch = require('isomorphic-fetch');
+const dropbox = require('dropbox');
 
-const serviceAccount = require("./server-creds.json");
+const serverCredentials = require("./server-creds.json");
+const serviceAccount = serverCredentials.firebaseConfig;
+const dropboxKey = serverCredentials.dropboxConfig.appKey;
+const dropboxSecret = serverCredentials.dropboxConfig.appSecret;
+const dropboxToken = serverCredentials.dropboxConfig.token;
+
+const credentials = {
+    client: {
+      id: dropboxKey,
+      secret: dropboxSecret
+    },
+    auth: {
+      tokenHost: 'https://api.dropbox.com',
+      tokenPath: '1/oauth2/token',
+      authorizeHost: 'https://www.dropbox.com',
+      authorizePath: '1/oauth2/authorize'
+    }
+  
+  };
+  const oauth2 = require('simple-oauth2').create(credentials);
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
     databaseURL: "https://" + serviceAccount.project_id + "firebaseio.com"
 });
 
-
+const dbx = new dropbox.Dropbox({
+    "clientId": dropboxKey, 
+    "clientSecret": dropboxSecret, 
+    "accessToken": dropboxToken,
+    "fetch": fetch
+});
 
 const app = express();
 
@@ -159,6 +186,85 @@ app.get("/preview/branch", (req, res) => {
 });
 
 app.get("/preview/:collection", previewReqHandler);
+
+
+
+
+// Login
+
+let apiUrl = (req, suffix) => {
+    let stem = `${req.protocol}://${req.get('host')}`;
+    return `${stem}${suffix}`;
+}
+
+let callbackUri = (req) => {
+    return apiUrl(req, '/login/');
+}
+
+let createFirebaseAccount = (dropboxID, user) => {
+    // The UID we'll assign to the user.
+    // const uid = `dropbox:${dropboxID}`;
+  
+    let userData = {
+        uid: dropboxID,
+        email: (user.email || "No Email"),
+        displayName: ((user.name && user.name.display_name) || "Contributor"),
+        photoURL: user["profile_photo_url"] || undefined,
+    };
+
+    console.log("USER UPDATE "+userData);
+
+    // Create or update the user account.
+    const userCreationTask = fb.auth().updateUser(dropboxID, userData).catch(err => {
+          fb.auth().createUser(userData);
+          console.log("NO SUCH USER - CREATING NEW FB USER FOR "+dropboxID);
+      });
+      
+  
+    // Wait for all async task to complete then generate and return a custom auth token.
+    return Promise.all([userCreationTask]).then(() => {
+      // Create a Firebase custom auth token.
+      return fb.auth().createCustomToken(dropboxID);
+    });
+};
+  
+
+app.get('/redirect', (req, res) => {
+    const redirectUri = oauth2.authorizationCode.authorizeURL({
+      redirect_uri: callbackUri(req),
+    });
+    res.redirect(redirectUri);
+  });
+
+app.get("/login", (req, res) => {
+    oauth2.authorizationCode.getToken({
+        code: req.query.code,
+        redirect_uri: callbackUri(req)
+      }).then(results => {
+        // We have a Dropbox access token and the user identity now.
+        const dropboxUserID = results.account_id;
+        
+        dbx.usersGetAccount({account_id: dropboxUserID}).then( user => {
+            createFirebaseAccount(dropboxUserID, user).then( token => {
+                res.redirect("/#"+token);
+            }).catch( err => {
+                res.send(err);
+            });
+        }).catch(err => {
+            res.send(err);
+        });
+        // res.send( results );
+        // Create a Firebase account and get the Custom Auth Token.
+        // createFirebaseAccount(dropboxUserID, accessToken).then(firebaseToken => {
+        //   // Redirect to a frontend url that will log the user in
+        //   res.redirect(`${req.session.source}login?token=${firebaseToken}`)
+        // });
+      }, error => {
+        console.error(error);
+        res.send(error.context)
+      });
+});
+
 
 // Host compiled contributor portal
 app.use("/", express.static("dist"));
