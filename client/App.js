@@ -35,7 +35,23 @@ class App extends Component {
             fb.base.bindCollection(`Users`, {
                 context: this,
                 state: 'users',
-                withRefs: true
+                withRefs: true,
+                then: () => {
+                    // Get authorized
+                    fb.db.collection("Users").doc("authorized").get().then((snapshot) => {
+                        let u = this.state.user;
+                        u["authorized"] = snapshot.exists && snapshot.data()[u.uid];
+                        console.log(snapshot.data());
+                        this.setState({user: u});
+                    });
+                    // Get admin
+                    fb.db.collection("Users").doc("admin").get().then((snapshot) => {
+                        let u = this.state.user;
+                        u["admin"] = snapshot.exists && snapshot.data()[u.uid];
+                        this.setState({user: u});
+                    });
+                    
+                }
             });
             if (!dbx.app) {
                 dbx.initialize();
@@ -111,12 +127,12 @@ class App extends Component {
             
 
         const appContent = this.state.user ?
-            (this.state.contributions.length > 0) ? (
+            (this.state.user.authorized) ? (
                 <div>
                     {x}
                 </div>
             ) : (
-                <h3>No contributions found - contact administrator to enable your account then refresh</h3>
+                <h3>You are not authorized - contact administrator to enable your account then refresh</h3>
             ) : (
             <h3>Sign in to continue</h3>
         );

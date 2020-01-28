@@ -9,7 +9,7 @@ const serviceAccount = require("./server-creds.json");
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
-    databaseURL: "https://" + fb.credential.project_id + "firebaseio.com"
+    databaseURL: "https://" + serviceAccount.project_id + "firebaseio.com"
 });
 
 

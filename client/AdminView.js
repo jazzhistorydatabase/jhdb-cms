@@ -139,8 +139,29 @@ class AdminView extends Component {
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     {this.props.users.map( (user) => {
-                        if(!user.uid || user.uid === fb.auth.currentUser.uid) {
+                        if(!user.uid) {
                             return (<div></div>)
+                        } else if (user.uid === fb.auth.currentUser.uid) {
+                            return (
+                                <div key={user.uid} >
+                                <Grid container className={classes.adminGrid} spacing={3} justify="left" alignItems="center" row>
+                                    <Grid item xs={1}>
+                                    </Grid>
+                                    <Grid item xs={1}>
+                                        <Avatar alt={user.name} src={user.displayPhoto || genericUserPhoto} className={classes.bigAvatar} />
+                                    </Grid>
+                                    <Grid item xs={3}>
+                                    <   h3> {user.name} </h3>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <h5> {user.email} </h5>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <b>Admin</b>
+                                    </Grid>
+                                </Grid>
+                            </div>
+                            )
                         };
                         console.log("elem for user "+user.name);
                         return (

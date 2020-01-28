@@ -1,4 +1,3 @@
-import dropbox from 'dropbox';
 import loadScript from 'load-script';
 import clientConfig from './client-creds.json';
 
@@ -12,26 +11,14 @@ const dbx = {
     // Must be called in componentWillMount in App.js
     initialize: function (callback) {
         const dbconf = clientConfig.dropboxConfig;
-        let accessToken = window.sessionStorage.getItem("access_token");
-        if(!accessToken) {
-            accessToken = this.getAccessTokenFromUrl();
-            window.location.href = "#";
-        }
-        if (!accessToken) {
-            window.location.href = "http://dropbox.com/oauth2/authorize?client_id=" + dbconf.appKey + "&response_type=token&redirect_uri=" + window.location.href;
-        } else  {
-            window.sessionStorage.setItem("access_token", accessToken);
-            dbconf.accessToken = accessToken;
-            this.app = new dropbox.Dropbox(dbconf);
-            if (!this.isDropboxReady() && !scriptLoadingStarted) {
-                scriptLoadingStarted = true;
-                loadScript(DROPBOX_SDK_URL, {
-                  attrs : {
-                    id: SCRIPT_ID,
-                    'data-app-key': dbconf.appKey
-                  }
-                });
-              }
+        if (!this.isDropboxReady() && !scriptLoadingStarted) {
+            scriptLoadingStarted = true;
+            loadScript(DROPBOX_SDK_URL, {
+                attrs : {
+                id: SCRIPT_ID,
+                'data-app-key': dbconf.appKey
+                }
+            });
         }
     },
 
@@ -56,31 +43,6 @@ const dbx = {
         options.success = successCallback;
         options.multiselect = true;
         window.Dropbox.choose(options);
-    },
-
-    getAccessTokenFromCode: function (redirectUri, code) {
-        this.app.getAccessTokenFromCode(redirectUri, code)
-            .catch(function(error) {
-                console.log(error);
-            });
-    },
-
-     // Parses the url and gets the access token if it is in the urls hash
-    getAccessTokenFromUrl: function () {
-        return this.getTokenFromRedirectUrl(window.location.hash);
-    },
-
-    isAuthenticated: function () {
-        return !!this.getAccessTokenFromUrl();
-    },
-
-    openFile: function (fileName) {
-        window.location.href = "https://www.dropbox.com/home?preview=" + fileName;
-    },
-
-    getTokenFromRedirectUrl: function (str) {
-        const params = new URLSearchParams(str);
-        return params.get('#access_token');
     },
 
     dbxImageOptions: {
