@@ -187,6 +187,20 @@ app.get("/preview/branch", (req, res) => {
 
 app.get("/preview/:collection", previewReqHandler);
 
+app.get("/upload", (req, res) => {
+    let token = req.query["auth"];
+    fb.auth().verifyIdToken(token).then(decodedToken => {
+        let path = "/jhdb global/"+decodedToken.name.toLowerCase();
+        dbx.filesGetTemporaryUploadLink({commit_info: {path: path}}).then( (dat => {
+            res.send(dat && dat.link);
+        })).catch(err => {
+            res.send(err);
+        });
+    }).catch(err => {
+        res.sendStatus(400);
+    });
+});
+
 
 
 

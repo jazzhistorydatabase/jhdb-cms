@@ -139,7 +139,10 @@ class App extends Component {
 
         return (
             <div className="App">
-                <Header user={this.state.user} handleSignOut={this.handleUserSignOut.bind(this)}/>
+                <Header user={this.state.user} 
+                        handleSignOut={this.handleUserSignOut.bind(this)}
+                        adminSwap={this.adminSwap.bind(this)}
+                        adminButton={this.state.users.length > 2}/>
                 {appContent}
             </div>
         );

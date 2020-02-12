@@ -4,8 +4,6 @@ import ListItem from '@material-ui/core/ListItem';
 import React, {Component} from 'react';
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
-import Fab from '@material-ui/core/Fab';
-import SettingsIcon from '@material-ui/icons/Settings';
 
 
 import fb from './firebase';
@@ -85,18 +83,9 @@ class MainPageTB extends Component {
         this.props.windowSwap(selectedContribution);
     };
 
-    handleAdminButtonClick(){
-        this.props.adminSwap();
-    };
     render() {
         const classes = this.props.classes;
         const contrib = this.props.contributions;
-
-        let adminButton = this.props.adminButton ? (
-            <Fab color="primary" aria-label="Admin" className={classes.fab + " " + classes.adminFab} onClick={() => {return this.handleAdminButtonClick.bind(this)()}}>
-                <SettingsIcon />
-            </Fab>
-        ) : (<div />);
 
         return (
             <MuiThemeProvider theme={theme}>
@@ -125,7 +114,6 @@ class MainPageTB extends Component {
                         </List>
                     </div>
                 </Paper>
-                {adminButton}
             </MuiThemeProvider>
         );
     }

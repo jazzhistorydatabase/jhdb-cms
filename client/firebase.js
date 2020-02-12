@@ -16,7 +16,7 @@ const fb = {
         fb.base = Rebase.createClass(fb.db);
 
         let token = window.location.hash.substr(1) || window.sessionStorage.getItem("fbjwt");
-
+        console.log("TOKEN"+ token);
         if(window.location.hash && token) {
             fb.auth.signInWithCustomToken(token);
             window.sessionStorage.setItem("fbjwt", token);
@@ -32,6 +32,10 @@ const fb = {
                 callback(null);
             }
         });
+    },
+
+    getToken: function (callback) {
+        fb.auth.currentUser.getIdToken(true).then(callback);
     },
 
     showAuthPopup: function (providerName) {
