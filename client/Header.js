@@ -1,26 +1,21 @@
 import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
 import React, {Component} from 'react';
-import { Avatar, Divider, Drawer, IconButton, List, ListItem, ListSubheader, ListItemText } from '@material-ui/core';
+import {Avatar, Divider, Drawer, IconButton, List, ListItem, ListItemText, ListSubheader} from '@material-ui/core';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Helpicon from '@material-ui/icons/Help';
 import SettingsIcon from '@material-ui/icons/Settings';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import {withStyles} from '@material-ui/core/styles';
+import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
+
 import './App.css';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import 'typeface-roboto';
 import fb from './firebase';
 import HelpDialog from './HelpDialog';
 import UploadDialog from './UploadDialog';
 import genericUserPhoto from './generic-user.jpg';
-
-
-import Axios from 'axios';
 
 const theme = createMuiTheme({
     typography: {
@@ -28,8 +23,8 @@ const theme = createMuiTheme({
     },
     palette: {
         primary: {
-         main: '#c51162',
-         text: '#ffffff'
+            main: '#c51162',
+            text: '#ffffff'
         }
     },
 });
@@ -108,7 +103,7 @@ class Header extends Component {
             showUpload: false,
             drawerOpen: false,
         }
-      }
+    }
 
     toggleHelpDialog() {
         this.setState({
@@ -123,32 +118,34 @@ class Header extends Component {
     }
 
     toggleDrawer(event) {
-        if ( event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-          return;
+        if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return;
         }
-    
-        this.setState({drawerOpen: !this.state.drawerOpen });
+
+        this.setState({drawerOpen: !this.state.drawerOpen});
     };
 
-    handleAdminButtonClick(){
+    handleAdminButtonClick() {
         this.toggleDrawer();
         this.props.adminSwap();
     };
-    
+
 
     render() {
         const classes = this.props.classes;
 
         let loginButton = this.props.user ? (
             <ListItem button color="inherit"
-                    onClick={this.props.handleSignOut}>
-                <ExitToAppIcon />
+                      onClick={this.props.handleSignOut}>
+                <ExitToAppIcon/>
                 <ListItemText primary="Sign Out"></ListItemText>
             </ListItem>
         ) : (
             <ListItem button color="inherit"
-            onClick={() => {return fb.showAuthPopup()}} >
-                <LockOpenIcon />
+                      onClick={() => {
+                          return fb.showAuthPopup()
+                      }}>
+                <LockOpenIcon/>
                 <ListItemText primary="Sign In With Dropbox"></ListItemText>
             </ListItem>
 
@@ -156,10 +153,10 @@ class Header extends Component {
 
         let userDetail = this.props.user ? (
             <div>
-                <Avatar 
+                <Avatar
                     alt={(this.props.user && this.props.user.name) || "Unnamed Contributor"}
-                    src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto} 
-                    className={classes.bigAvatar} />
+                    src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
+                    className={classes.bigAvatar}/>
                 {/* <ListItem selected className={classes.avatarName}>
                     <ListItemText primary={this.props.user.displayName} />
                 </ListItem> */}
@@ -167,83 +164,86 @@ class Header extends Component {
             </div>
         ) : (
             <div>
-                <Avatar 
+                <Avatar
                     alt={"No User"}
-                    src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto} 
-                    className={classes.bigAvatar} />
+                    src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
+                    className={classes.bigAvatar}/>
                 {/* <ListItem selected className={classes.avatarName}> */}
-                    <ListSubheader className={classes.avatarName}>{"Not Signed In"} </ListSubheader>
+                <ListSubheader className={classes.avatarName}>{"Not Signed In"} </ListSubheader>
                 {/* </ListItem> */}
             </div>
         );
 
         let adminButton = this.props.adminButton ? (
-            <ListItem button color="primary" aria-label="Admin" onClick={() => {return this.handleAdminButtonClick.bind(this)()}}>
-                <SettingsIcon />
+            <ListItem button color="primary" aria-label="Admin" onClick={() => {
+                return this.handleAdminButtonClick.bind(this)()
+            }}>
+                <SettingsIcon/>
                 <ListItemText primary={"Admin Settings"}></ListItemText>
             </ListItem>
-        ) : (<div />);
+        ) : (<div/>);
 
         return (
             <MuiThemeProvider theme={theme}>
-            <Drawer className={classes.drawer} open={this.state.drawerOpen} onClose={this.toggleDrawer.bind(this)}>
-                {userDetail}
-                <List>
-                    <Divider />
-                    {loginButton}
-                    {adminButton}
-                    <ListItem button
-                        size="small"
-                        color='inherit'
-                        aria-label="Upload"
-                        onClick={this.toggleHelpDialog.bind(this)} >
-                        <Helpicon />
-                        <ListItemText primary={"Help"}></ListItemText>
-                    </ListItem>
-                    <ListItem button>
-                        <a href={"http://www.jazzhistorydatabase.com"}>
+                <Drawer className={classes.drawer} open={this.state.drawerOpen} onClose={this.toggleDrawer.bind(this)}>
+                    {userDetail}
+                    <List>
+                        <Divider/>
+                        {loginButton}
+                        {adminButton}
+                        <ListItem button
+                                  size="small"
+                                  color='inherit'
+                                  aria-label="Upload"
+                                  onClick={this.toggleHelpDialog.bind(this)}>
+                            <Helpicon/>
+                            <ListItemText primary={"Help"}></ListItemText>
+                        </ListItem>
+                        <ListItem button>
+                            <a href={"http://www.jazzhistorydatabase.com"}>
                                 <ListItemText primary={"Back to jazzhistorydatabase.com"}></ListItemText>
-                        </a>
-                    </ListItem>
-                </List>
-                <div style={{"width": "1vw"}}></div>
-                        <div>
-                            <br/>
-                        </div>
-            </Drawer>
-            <div className={classes.root}>
-                <AppBar position="static">
-                    <Toolbar>
-                        <IconButton className={classes.menuButton} color="inherit" aria-label="menu" onClick={this.toggleDrawer.bind(this)}>
-                            <MenuIcon className={classes.icon}/>
-                        </IconButton>
-                        <div className={classes.grow}>
-                            <Typography variant="h5" align="left" color="inherit">
-                                <b>Global Contributor Portal</b>
-                            </Typography>
-                            <Typography variant="h6" align="left" color="inherit">
-                                Jazz History Database
-                            </Typography>
-                        </div>
-                        <div>
-                            {/* <Button color="inherit" 
+                            </a>
+                        </ListItem>
+                    </List>
+                    <div style={{"width": "1vw"}}></div>
+                    <div>
+                        <br/>
+                    </div>
+                </Drawer>
+                <div className={classes.root}>
+                    <AppBar position="static">
+                        <Toolbar>
+                            <IconButton className={classes.menuButton} color="inherit" aria-label="menu"
+                                        onClick={this.toggleDrawer.bind(this)}>
+                                <MenuIcon className={classes.icon}/>
+                            </IconButton>
+                            <div className={classes.grow}>
+                                <Typography variant="h5" align="left" color="inherit">
+                                    <b>Global Contributor Portal</b>
+                                </Typography>
+                                <Typography variant="h6" align="left" color="inherit">
+                                    Jazz History Database
+                                </Typography>
+                            </div>
+                            <div>
+                                {/* <Button color="inherit"
                                     onClick={this.toggleUploadDialog.bind(this)} 
                                     className={classes.backButton}>
                                 <CloudUploadIcon />
                                 <label style={{marginLeft: 5}}>{"Upload Media"}</label>
                             </Button> */}
-                        </div>
-                        <HelpDialog 
-                            show={this.state.showHelp} 
-                            toggle={this.toggleHelpDialog.bind(this)}/>
-                        <UploadDialog 
-                            show={this.state.showUpload} 
-                            toggle={this.toggleUploadDialog.bind(this)}/>
+                            </div>
+                            <HelpDialog
+                                show={this.state.showHelp}
+                                toggle={this.toggleHelpDialog.bind(this)}/>
+                            <UploadDialog
+                                show={this.state.showUpload}
+                                toggle={this.toggleUploadDialog.bind(this)}/>
 
-                    </Toolbar>
+                        </Toolbar>
 
-                </AppBar>
-            </div>
+                    </AppBar>
+                </div>
             </MuiThemeProvider>
         );
     }

@@ -121,8 +121,7 @@ class App extends Component {
             default:
                 x = <ContributionsListView contributions={this.state.contributions}
                                    windowSwap={this.windowSwap.bind(this)}
-                                    adminSwap={this.adminSwap.bind(this)}
-                                    adminButton={this.state.users.length > 2}/>;
+                                    adminSwap={this.adminSwap.bind(this)}/>;
         }
             
 
@@ -142,7 +141,7 @@ class App extends Component {
                 <Header user={this.state.user} 
                         handleSignOut={this.handleUserSignOut.bind(this)}
                         adminSwap={this.adminSwap.bind(this)}
-                        adminButton={this.state.users.length > 2}/>
+                        adminButton={this.state.user && this.state.user.admin}/>
                 {appContent}
             </div>
         );

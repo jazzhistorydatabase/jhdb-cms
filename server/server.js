@@ -2,11 +2,11 @@ const express = require('express');
 const exphbs  = require('express-handlebars');
 const fb = require("firebase-admin");
 const fs = require("fs");
-const proxy = require("express-http-proxy");
 const path = require('path');
-const axios = require('axios');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
+
+const logger = require('./logger');
 
 const serverCredentials = require("./server-creds.json");
 const serviceAccount = serverCredentials.firebaseConfig;
@@ -58,25 +58,23 @@ let renderFromFirebase = (req, res, collectionName, collectionId="") => {
         .join(" ");
 
     if(collectionId) {
+        logger.info(`Fetching collection by id: ${collectionId}`)
         collsRef = collRoot.doc(collectionId);
     } else {
+        logger.info(`Fetching collection by name: "${collectionName}" -> "${collName}"`)
         collsRef = collRoot.where("name", "==", collName);
     }
-    console.log(collsRef);
 
     collsRef.get().then(snapshots => {
         if(!collectionId && snapshots.empty) {
             // No such collection
-            console.log("No matching collections found");
+            logger.error(`No matching collections found for name: ${collectionName} id: ${collectionId}`);
             res.send("No matching collections found");
-            console.log(snapshots.data);
             return;
         } else {
             let snap = collectionId ?  [snapshots] : snapshots;
-            console.log("Found "+snapshots.size + " matching collections");
+            logger.log(`Found ${snapshots.size} matches for name: ${collectionName} id: ${collectionId}`);
             snap.forEach(collRef => {
-                // TODO: What to do if more than one?
-
                 let collectionDoc = collRef.data();
 
 
@@ -84,7 +82,6 @@ let renderFromFirebase = (req, res, collectionName, collectionId="") => {
 
                 let images = [];
                 collRef.ref.collection("Images").get().then( imgSnapshot => {
-                    console.log(imgSnapshot);
                     imgSnapshot.forEach(doc => {
                         images.push(doc.data());
                     });
@@ -102,7 +99,7 @@ let renderFromFirebase = (req, res, collectionName, collectionId="") => {
                                 video.push(data);
                             });
 
-                            console.log("Render template with doc: " + collRef.id);
+                            logger.log(`Rendering preview template with name: ${collectionName} found doc id: ${collRef.id}`);
 
                             collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
 
@@ -110,93 +107,67 @@ let renderFromFirebase = (req, res, collectionName, collectionId="") => {
                             collectionDoc.audio = audio;
                             collectionDoc.video = video;
                             res.render("preview", collectionDoc);
-
+                            logger.success(`Successfully rendered preview template with name: ${collectionName} doc id: ${collRef.id}`);
                             return;
                         }).catch( err => {
-                            console.log("ERROR\n");
-                            console.log(err);
+                            logger.error(`Error fetching video for name: ${collectionName} id: ${collectionId}`, err);
                             res.render("preview", collectionDoc);
                         });
                     }).catch( err => {
-                        console.log("ERROR\n");
-                        console.log(err);
+                        logger.error(`Error fetching audio for name: ${collectionName} id: ${collectionId}`, err);
                         res.render("preview", collectionDoc);
                     });
                 }).catch( err => {
-                    console.log("ERROR\n");
-                    console.log(err);
+                    logger.error(`Error fetching images for name: ${collectionName} id: ${collectionId}`, err);
                     res.render("preview", collectionDoc);
                 });
 
             })
         }
-     }).catch( err => {
-        console.log("ERROR\n");
-        console.log(err);
-     });
-};
-
-
-// Set up collection routing function
-let collectionReqHandler = (req, res) => {
-    let filename = req.params.collection.toLowerCase();
-    // let subpage = req.params["subpage"] && req.params.subpage.toLowerCase();
-    // TODO: Implement subpage logic
-    // Check if static content is available
-    fs.stat("legacy/" + filename, (err, stats) => {
-        if(err){
-            switch(err.code){
-                case "ENOENT":
-                    console.log(filename + " does not exist");
-                    break;
-                default:
-                    console.log("Unexpected error code in app.get(/:collection).");
-            }
-            // If static files DNE, try to load from firebase
-            return renderFromFirebase(req, res, filename);
-        }
-        // If static files exist, check if request includes index.html
-        if (stats.isDirectory()) {
-
-            fs.stat("legacy/" + filename + "/index.html", function(err, stats) {
-                res.sendFile("legacy/" + filename + "/index.html",{ root: __dirname });
-            });
-
-        } else {
-            res.render("legacy/" + filename);
-        }
-      });
+    }).catch( err => {
+        logger.error(`Error fetching collection by name "${collectionName}" or id "${collectionId}"`, err);
+    });
 };
 
 let previewReqHandler = (req, res) => {
-    let filename = req.params.collection.toLowerCase();
-    return renderFromFirebase(req, res, filename);
+    let collName = req.params.collection.toLowerCase();
+    logger.info(`User request preview for collection: ${collName}`);
+    return renderFromFirebase(req, res, collName);
 }
 
 app.get("/preview/header-new.html", (req, res) => {
+    logger.info('User request preview/header-new.html');
     res.sendFile("./templates/header-new.html", {root: __dirname});
 });
 
 app.get("/preview/home", (req, res) => {
+    logger.info('User request preview/home');
     res.sendFile("./templates/CMS-landing-page.html", {root: __dirname});
 });
 
 app.get("/preview/branch", (req, res) => {
+    logger.info('User request preview/branch');
     res.sendFile("./templates/landing-page.html", {root: __dirname});
 });
 
 app.get("/preview/:collection", previewReqHandler);
 
 app.get("/upload", (req, res) => {
+    logger.info('User requesting upload link. Validating token...');
     let token = req.query["auth"];
     fb.auth().verifyIdToken(token).then(decodedToken => {
+        logger.success(`Successfully validated token for user account_id: ${decodedToken.account_id} name: ${decodedToken.name}`)
         let path = "/jhdb global/"+decodedToken.name.toLowerCase();
+        logger.log(`Generating upload link for account_id: ${decodedToken.account_id} path: ${path}`);
         dbx.filesGetTemporaryUploadLink({commit_info: {path: path}}).then( (dat => {
+            logger.success(`Successfully sent upload link for account_id: ${decodedToken.account_id} path: ${path}`);
             res.send(dat && dat.link);
         })).catch(err => {
+            logger.error(`Failed to generate upload link for account_id: ${decodedToken.account_id} path: ${path}`, err);
             res.send(err);
         });
     }).catch(err => {
+        logger.err('Error authenticating user token for upload request', err);
         res.sendStatus(400);
     });
 });
@@ -226,70 +197,73 @@ let createFirebaseAccount = (dropboxID, user) => {
         photoURL: user["profile_photo_url"] || undefined,
     };
 
-    console.log("USER UPDATE "+userData);
-
+    logger.log(`Fetch or create user id: ${dropboxID}`)
+    
     // Create or update the user account.
-    const userCreationTask = fb.auth().updateUser(dropboxID, userData).catch(err => {
-          fb.auth().createUser(userData);
-          console.log("NO SUCH USER - CREATING NEW FB USER FOR "+dropboxID);
-      });
-      
-  
-    // Wait for all async task to complete then generate and return a custom auth token.
-    return Promise.all([userCreationTask]).then(() => {
-      // Create a Firebase custom auth token.
-      return fb.auth().createCustomToken(dropboxID);
+    return fb.auth().updateUser(dropboxID, userData).then( () => {
+        logger.success(`Successfully updated firebase user for id: ${dropboxID}, generating firebase token`);
+        return fb.auth().createCustomToken(dropboxID);
+    }).catch(err => {
+        logger.log(`No such firebase user for id: ${dropboxID}, creating one`)
+        fb.auth().createUser(userData).then( () => {
+            logger.success(`Created new firebase user for id: ${dropboxID}, generating firebase token`)
+            return fb.auth().createCustomToken(dropboxID);
+        }).catch(err => {
+            logger.error(`Error creating new firebase user for id: ${dropboxID}, attempting to generate firebase token anyway`);
+            return fb.auth().createCustomToken(dropboxID);
+        });
     });
 };
-  
 
 app.get('/redirect', (req, res) => {
-    const redirectUri = oauth2.authorizationCode.authorizeURL({
+    const redirectUri = callbackUri(req);
+    logger.info(`Beginning OAuth Code Flow redirect, redirect_uri: ${redirectUri}`);
+    const redir = oauth2.authorizationCode.authorizeURL({
       redirect_uri: callbackUri(req),
     });
-    res.redirect(redirectUri);
-  });
+    res.redirect(redir);
+});
 
 app.get("/login", (req, res) => {
+    const redirectUri = callbackUri(req);
+    logger.info(`Fetching token from code, redirect_uri: ${redirectUri}`)
     oauth2.authorizationCode.getToken({
         code: req.query.code,
-        redirect_uri: callbackUri(req)
-      }).then(results => {
+        redirect_uri: redirectUri
+    }).then(results => {
         // We have a Dropbox access token and the user identity now.
         const dropboxUserID = results.account_id;
+        logger.success(`Got token for id: ${dropboxUserID}`)
         
+        logger.info(`Getting firebase account for user with id: ${dropboxUserID}`)
         dbx.usersGetAccount({account_id: dropboxUserID}).then( user => {
             createFirebaseAccount(dropboxUserID, user).then( token => {
+                logger.success(`Got firebase token for user with id: ${dropboxUserID}`);
                 res.redirect("/#"+token);
             }).catch( err => {
+                logger.error(`Error getting firebase token for user with id: ${dropboxUserID}`, err);
                 res.send(err);
             });
         }).catch(err => {
+            logger.error(`Error getting dropbox user info for id: ${dropboxUserID}`, err);
             res.send(err);
         });
-        // res.send( results );
-        // Create a Firebase account and get the Custom Auth Token.
-        // createFirebaseAccount(dropboxUserID, accessToken).then(firebaseToken => {
-        //   // Redirect to a frontend url that will log the user in
-        //   res.redirect(`${req.session.source}login?token=${firebaseToken}`)
-        // });
-      }, error => {
-        console.error(error);
+    }, error => {
+        logger.error(`Login error - couldn't get token from code, redirect_uri: ${callbackUri}`);
         res.send(error.context)
-      });
+    });
 });
 
 
 // Host compiled contributor portal
 app.use("/", express.static("dist"));
-// app.use("/static", express.static("build/static"));
 app.use("/images", express.static("./templates/images"));
-// }
 
 
 // Start the server
 const PORT = process.env.PORT || 8080;
+logger.info("Starting server on port "+PORT);
 app.listen(PORT, () => {
-    console.log(`App listening on port ${PORT}`);
-    console.log("Press Ctrl+C to quit.");
+    logger.success(`App listening on port ${PORT}`);
+    logger.success("Press Ctrl+C to quit.");
 });
