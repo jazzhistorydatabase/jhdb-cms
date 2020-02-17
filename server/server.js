@@ -16,18 +16,21 @@ const dropboxToken = serverCredentials.dropboxConfig.token;
 
 const credentials = {
     client: {
-      id: dropboxKey,
-      secret: dropboxSecret
+        id: dropboxKey,
+        secret: dropboxSecret
     },
     auth: {
-      tokenHost: 'https://api.dropbox.com',
-      tokenPath: '1/oauth2/token',
-      authorizeHost: 'https://www.dropbox.com',
-      authorizePath: '1/oauth2/authorize'
+        tokenHost: 'https://api.dropbox.com',
+        tokenPath: '1/oauth2/token',
+        authorizeHost: 'https://www.dropbox.com',
+        authorizePath: '1/oauth2/authorize'
     }
-  
-  };
-  const oauth2 = require('simple-oauth2').create(credentials);
+    
+};
+const oauth2 = require('simple-oauth2').create(credentials);
+
+// Fetch cli args
+const IS_DEV = process.argv.includes('--dev');
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
@@ -178,7 +181,8 @@ app.get("/upload", (req, res) => {
 // Login
 
 let apiUrl = (req, suffix) => {
-    let stem = `${req.protocol}://${req.get('host')}`;
+    // Enforce https if not running in dev mode
+    let stem = `${IS_DEV ? 'http' : 'https'}://${req.get('host')}`;
     return `${stem}${suffix}`;
 }
 
