@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-7589884-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push( arguments );
+        }
+        gtag( 'js', new Date() );
+        gtag( 'config', 'UA-7589884-1' );
+    </script>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="author" content="JazzHistoryDatabase"/>
+
+
+
+
+    <!-- Stylesheets
+    ============================================= -->
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/css/bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/style.css" type="text/css"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/css/dark.css" type="text/css"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/x-font-woff"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css"/>
+    <link rel="stylesheet" href="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/css/JHDB.css" type="text/css"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <!-- Document Title
+    ============================================= -->
+    <title>Jazz History Database</title>
+
+</head>
+
+<body>
+
+<!-- Document Wrapper
+============================================= -->
+
+<div id="wrapper" class="clearfix">
+
+
+
+    <!-- Header
+    ============================================= -->
+    <script src="https://www.w3schools.com/lib/w3.js"></script>
+    <div w3-include-html="header-new.html"></div>
+    <script>
+        w3.includeHTML();
+    </script>
+    {{header}}
+
+    <!-- Page Title
+    ============================================= -->
+    <!-- Intro -->
+    <style>
+        #page-title {
+            padding: 0 0;
+        }
+
+        img.resize {
+            width: auto;
+            /* you can use % */
+            height: 300px;
+        }
+
+        a.resize {
+            max-height: 300px;
+            height: 300px;
+        }
+
+        li>a {
+            cursor: pointer;
+        }
+    </style>
+
+
+    <!-- Content
+    ============================================= -->
+    <section id="content">
+
+        <br>
+
+        <!-- Collection nav bar start-->
+        <div id="page-menu">
+            <div style="background-color: #333333">
+                <div class="container clearfix">
+                    <div class="menu-title" style="cursor:pointer;" onclick="goToByScroll('section-bio')"> {{name}} Collection </div>
+                    <nav>
+                        <ul>
+                            <li>
+                                <a onclick="goToByScroll('bio')">
+                                    <div>Biography</div>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a onClick="goToByScroll('images')">
+                                    <div>Images</div>
+
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div id="page-submenu-trigger"><i class="icon-reorder"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Collection nav bar end -->
+        <!-- Content Wrap starts -->
+        <div class="content-wrap">
+            <!-- Bio -->
+            <div class="container clearfix">
+                <div class="fancy-title title-bottom-border" id="bio">
+                    <h2>Biography of {{ name }} </h2>
+                </div>
+                <!-- Insert bio -->
+                <div class="coll-main-bio">
+                    <div class="col_three_fifth bottommargin-sm">
+                        <p class="bio">
+                            {{ description }}
+                        </p>
+                        <!--<p>-->
+                            <!--<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#fullBio">-->
+                                <!--Read Full Biography-->
+                            <!--</button>-->
+
+                        <!--</p>-->
+                        <!--<div class="collapse" id="fullBio">-->
+                            <!--{{ description }}-->
+                        <!--</div>-->
+                    </div>
+
+                    <div class="col_two_fifth bottommargin-sm col_last">
+                        <img src="">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images Section -->
+            <div class="row common-height clearfix" style="padding-bottom:8%;">
+                <div class="col-sm-5 col-padding">
+                    <div class="fancy-title title-bottom-border" id="images">
+                        <h2> Images</h2>
+                    </div>
+                    <!--Carousel-->
+                    <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="1" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
+                        {{#each images }}
+                        <div class="oc-item">
+                            <div class="iportfolio">
+                                <div class="portfolio-image">
+                                    <a class="resize" href="#">
+                                        <img src="{{url}}" alt="{{name}}" height="200px">
+                                    </a>
+
+                                    <div class="portfolio-overlay">
+                                        <a href="{{url}}" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
+                                    </div>
+                                </div>
+                                <div class="portfolio-desc center nobottompadding">
+                                    <h3><a href="portfolio-single.html">{{caption}}</a></h3>
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+
+                <div class="col-sm-7 col-padding">
+                    <div>
+                        <div class="fancy-title title-bottom-border">
+                            <h2 id="section-interviews">Audio</h2>
+                        </div>
+                        {{#each audio}}
+                            <h5>{{name}}</h5>
+                            <audio controls>
+                                <source src={{url}} type="audio/mp3">
+                                Your browser does not support the audio element.
+                            </audio>
+                        {{/each}}
+                        {{#each video}}
+                            <h5>{{name}}</h5>
+                            <iframe frameborder="0" scrolling="no" marginheight="0" marginwidth="0"width="356" height="200" type="text/html" 
+                            src={{url}}><div><small><a href="https://youtubeembedcode.com/pl/">youtubeembedcode.com/pl/</a></small></div><div><small><a href="https://add-link-exchange.com">https://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/nl/">youtubeembedcode nl</a></small></div><div><small><a href="https://add-link-exchange.com">https://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/en">youtubeembedcode.com/en/</a></small></div><div><small><a href="https://add-link-exchange.com">add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/es/">youtubeembedcode es</a></small></div><div><small><a href="https://add-link-exchange.com">w://add-link-exchange.com</a></small></div></iframe>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+</div>
+
+<!-- Footer
+    ============================================= -->
+
+{{footer}}
+
+
+
+
+</div>
+<!-- #wrapper end -->
+
+<!-- Go To Top
+============================================= -->
+<div id="gotoTop" class="icon-angle-up"></div>
+
+<!-- External JavaScripts
+============================================= -->
+<script type="text/javascript" src="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/js/jquery.js"></script>
+<script type="text/javascript" src="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/js/plugins.js"></script>
+<script>
+    function goToByScroll( id ) {
+        $( 'html,body' ).animate( {
+            scrollTop: $( "#" + id ).offset().top - 115
+        }, 'slow' );
+    }
+</script>
+<!-- Footer Scripts
+============================================= -->
+<script type="text/javascript" src="https://legacy.jazzhistorydatabase.com/scripts/canvas/HTML/js/functions.js"></script>
+
+</body>
+</html>
