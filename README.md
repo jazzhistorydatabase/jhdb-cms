@@ -72,6 +72,8 @@ All commits to the `master` branch are auto-deployed to the [production environm
 
 Authenticated users with the Google Cloud SDK installed can run
 `gcloud builds submit --config cloudbuild.yaml .`
+Alternatively, to deploy to staging:
+`gcloud builds submit --config cloudbuild-staging.yaml .`
 This should be used in extreme circumstances only (i.e. in case of service outage)! All releases should be peer reviewed and auto-deployed via pull request.
 
 #

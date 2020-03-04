@@ -6,6 +6,8 @@ import dbx from './dropbox.js';
 import EditContributionView from "./EditContributionView";
 import fb from './firebase.js';
 import ContributionsListView from './ContributionsListView';
+import { CircularProgress } from '@material-ui/core';
+import { ArrowUpwardSharp } from '@material-ui/icons';
 
 
 class App extends Component {
@@ -20,6 +22,7 @@ class App extends Component {
             showAdminWindow: false,
             selectedContribution: undefined,
             adminPanel: undefined,
+            pageLoadDone: false,
         }
     }
 
@@ -71,6 +74,9 @@ class App extends Component {
         if (!fb.app) {
             fb.initialize(this.handleUserAuth.bind(this));
         }
+        setTimeout(() => {
+            this.setState({pageLoadDone: true});
+        }, 5000);
 
     }
 
@@ -131,9 +137,21 @@ class App extends Component {
                     {x}
                 </div>
             ) : (
-                <h3>You are not authorized - contact administrator to enable your account then refresh</h3>
+                <div>
+                    {(this.state.pageLoadDone ? 
+                        <h3>This account is not enabled. Click the help button at the top right of this page for assistance</h3>   
+                        : 
+                        <h3><CircularProgress /><br/>Attempting to fetch collections...</h3>)}
+                </div>
             ) : (
-            <h3>Sign in to continue</h3>
+                <h3 style={{textAlign: 'left', paddingLeft: 20}}>
+                    <ArrowUpwardSharp/><ArrowUpwardSharp/><ArrowUpwardSharp/>
+                    <br/>
+                    Please sign in to continue
+                    <h5 style={{display: this.state.pageLoadDone ? 'none' : 'block'}}>
+                        If you have just signed in, give it a few seconds...
+                    </h5>
+                </h3>
         );
 
         return (

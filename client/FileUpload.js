@@ -29,7 +29,8 @@ const styles = theme => ({
         width: '50px',
         height: '50px',
         borderRadius: '100px',
-    }
+    },
+
 });
 
 class FileUpload extends Component {
@@ -134,13 +135,15 @@ class FileUpload extends Component {
                             {fileUploadComponent}
                         </Grid>
                         <Grid item xs={4}>
-                            <Typography variant={"body1"}>{(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)} </Typography>
+                            <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
+                                {(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)} 
+                            </Typography>
                         </Grid>
                         <Grid item xs={5}>
                             <TextField
                                 id="standard-multiline-static"
                                 label="Caption"
-                                style={{margin: 5, width: '100%'}}
+                                style={{margin: 5, width: "100%"}}
                                 multiline
                                 value={(this.state.fileDoc && this.state.fileDoc.caption) || ""}
                                 onChange={this.handleTextChange}
