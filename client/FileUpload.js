@@ -29,7 +29,8 @@ const styles = theme => ({
         width: '50px',
         height: '50px',
         borderRadius: '100px',
-    }
+    },
+
 });
 
 class FileUpload extends Component {
@@ -84,6 +85,7 @@ class FileUpload extends Component {
         if(!doc) {
             return <div />;
         }
+        const isVideo = (this.props.fileType === 'Video');
         let fileUploadIcon = doc.url ?
                 ((doc.thumbnail || doc.icon) ?
                     (<img className={classes.fabImg} alt="Upload preview" src={(doc.thumbnail || doc.icon)} />) :
@@ -91,7 +93,7 @@ class FileUpload extends Component {
                 (<AddIcon/>);
 
         let fileUploadComponent;
-        if (this.props.fileType !== 'Video') {
+        if (!isVideo) {
             fileUploadComponent =
                 <Tooltip title={"Click to " + (doc.url ? "change" : "select") + " file"}>
                     <Fab
@@ -130,17 +132,19 @@ class FileUpload extends Component {
                     
                 <FormGroup row id={(this.state.fileDoc && this.state.fileDoc.name) || this.props.fileIndex}>
                     <Grid container spacing={3} justify="left" alignItems="center" row>
-                        <Grid item xs={1}>
+                        <Grid item xs={isVideo ? 5 : 1}>
                             {fileUploadComponent}
                         </Grid>
-                        <Grid item xs={4}>
-                            <Typography variant={"body1"}>{(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)} </Typography>
+                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={isVideo ? 0 : 4}>
+                            <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
+                                {(this.state.fileDoc && this.state.fileDoc.name) || (this.props && this.props.fileIndex)} 
+                            </Typography>
                         </Grid>
                         <Grid item xs={5}>
                             <TextField
                                 id="standard-multiline-static"
                                 label="Caption"
-                                style={{margin: 5, width: '100%'}}
+                                style={{margin: 5, width: "100%"}}
                                 multiline
                                 value={(this.state.fileDoc && this.state.fileDoc.caption) || ""}
                                 onChange={this.handleTextChange}

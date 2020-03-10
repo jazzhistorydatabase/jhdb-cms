@@ -139,14 +139,14 @@ class EditContributionView extends Component {
                 <br/>
                 <TextField
                     id="standard-name"
-                    label="Contribution Title"
+                    label="Collection Title"
                     className={classes.textField}
                     value={(contrib && contrib.name) || ""}
                     onChange={this.handleNameChange}
                     margin="normal"
                 />
                 <FormControl component={"fieldset"} className={classes.formControl}>
-                    <FormLabel component="legend"> Contribution Type</FormLabel>
+                    <FormLabel component="legend"> Collection Type</FormLabel>
                     <RadioGroup row
                                 value={(contrib && contrib.type) || ""}
                                 onChange={this.handleCheckBoxChange}>

@@ -14,7 +14,7 @@ const dropboxKey = serverCredentials.dropboxConfig.appKey;
 const dropboxSecret = serverCredentials.dropboxConfig.appSecret;
 const dropboxToken = serverCredentials.dropboxConfig.token;
 
-const credentials = {
+const credentials = { 
     client: {
         id: dropboxKey,
         secret: dropboxSecret
@@ -30,7 +30,8 @@ const credentials = {
 const oauth2 = require('simple-oauth2').create(credentials);
 
 // Fetch cli args
-const IS_DEV = process.argv.includes('--dev');
+const IS_DEV = process.env["DEV"];
+logger.info(`Starting server in ${IS_DEV ? "dev" : "prod"} mode`);
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
@@ -266,7 +267,7 @@ app.use("/images", express.static("./templates/images"));
 
 // Start the server
 const PORT = process.env.PORT || 8080;
-logger.info("Starting server on port "+PORT);
+logger.info("Binding to port "+PORT);
 app.listen(PORT, () => {
     logger.success(`App listening on port ${PORT}`);
     logger.success("Press Ctrl+C to quit.");

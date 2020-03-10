@@ -11,6 +11,8 @@
 # from your .gitignore file, remove the corresponding line
 # below:
 .git
-
+.gitignore
+.cache
+.idea
 # Node.js dependencies:
-node_modules/
+/node_modules

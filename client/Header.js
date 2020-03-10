@@ -8,6 +8,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import { CloseSharp } from '@material-ui/icons';
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 
 import './App.css';
@@ -16,6 +17,7 @@ import fb from './firebase';
 import HelpDialog from './HelpDialog';
 import UploadDialog from './UploadDialog';
 import genericUserPhoto from './generic-user.jpg';
+import { Button } from '@material-ui/core';
 
 const theme = createMuiTheme({
     typography: {
@@ -65,10 +67,11 @@ const styles = {
         width: 'auto',
     },
     menuButton: {
-        marginLeft: -12,
-        marginRight: 20,
         height: 50,
-        width: 50,
+    },
+    toolbarHelp: {
+        height: "100%",
+        backgroundColor: "#A10C32",
     },
     accountButton: {
         backgroundColor: "#A10C32",
@@ -186,6 +189,10 @@ class Header extends Component {
         return (
             <MuiThemeProvider theme={theme}>
                 <Drawer className={classes.drawer} open={this.state.drawerOpen} onClose={this.toggleDrawer.bind(this)}>
+                    <ListItem button onClick={this.toggleDrawer.bind(this)}>
+                        <CloseSharp />
+                        <ListItemText primary="Close Menu"/>
+                    </ListItem>
                     {userDetail}
                     <List>
                         <Divider/>
@@ -213,10 +220,13 @@ class Header extends Component {
                 <div className={classes.root}>
                     <AppBar position="static">
                         <Toolbar>
-                            <IconButton className={classes.menuButton} color="inherit" aria-label="menu"
-                                        onClick={this.toggleDrawer.bind(this)}>
-                                <MenuIcon className={classes.icon}/>
-                            </IconButton>
+                            <Button 
+                                size="large"
+                                color="inherit"
+                                className={classes.menuButton}
+                                startIcon={<MenuIcon style={{fontSize: 35}} />}
+                                aria-label="menu"
+                                onClick={this.toggleDrawer.bind(this)} >Menu</Button>
                             <div className={classes.grow}>
                                 <Typography variant="h5" align="left" color="inherit">
                                     <b>Global Contributor Portal</b>
@@ -233,6 +243,13 @@ class Header extends Component {
                                 <label style={{marginLeft: 5}}>{"Upload Media"}</label>
                             </Button> */}
                             </div>
+                            <Button 
+                                size="large"
+                                color="inherit"
+                                className={classes.toolbarHelp}
+                                endIcon={<Helpicon style={{fontSize: 35}} />}
+                                aria-label="menu"
+                                onClick={this.toggleHelpDialog.bind(this)} >Help</Button>
                             <HelpDialog
                                 show={this.state.showHelp}
                                 toggle={this.toggleHelpDialog.bind(this)}/>
