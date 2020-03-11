@@ -20,9 +20,10 @@ exports.success = (msg) => {
 exports.error = (msg, err) => {
     console.log(`${timestamp().bold} ${msg}`.red);
     if(err) {
-        console.log(`${err}`.grey);
+        console.log(`${JSON.stringify(err)}`.grey);
     }
 }
+exports.err = exports.error;
 
 exports.highlight = (msg) => {
     console.log(`${timestamp().bold} ${msg}`.bgMagenta);

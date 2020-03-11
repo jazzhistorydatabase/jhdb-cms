@@ -17,6 +17,7 @@ import fb from './firebase';
 import HelpDialog from './HelpDialog';
 import UploadDialog from './UploadDialog';
 import genericUserPhoto from './generic-user.jpg';
+import { CloudUpload } from '@material-ui/icons';
 import { Button } from '@material-ui/core';
 
 const theme = createMuiTheme({
@@ -25,9 +26,14 @@ const theme = createMuiTheme({
     },
     palette: {
         primary: {
-            main: '#c51162',
-            text: '#ffffff'
-        }
+            main: '#00519a',//19ABFF
+            text: '#ffffff',
+            light: '#6edcff',//00519a
+        },
+        secondary: {
+            main: '#80cbc4',
+            text: '#000000',
+        },
     },
 });
 
@@ -71,10 +77,10 @@ const styles = {
     },
     toolbarHelp: {
         height: "100%",
-        backgroundColor: "#A10C32",
+        // backgroundColor: theme.palette.primary.main,
     },
     accountButton: {
-        backgroundColor: "#A10C32",
+        backgroundColor: "#007ccb",
         display: 'inline-block',
         height: 40,
         padding: 5,
@@ -90,9 +96,6 @@ const styles = {
     accountButtonImg: {
         height: 30
     },
-    backButton: {
-        backgroundColor: "#a02c49"
-    }
 };
 
 class Header extends Component {
@@ -186,6 +189,17 @@ class Header extends Component {
             </ListItem>
         ) : (<div/>);
 
+        let uploadButton = (this.props.user && this.props.user.authorized) ? (
+            <Button variant="contained"
+                    color="secondary"
+                    onClick={this.toggleUploadDialog.bind(this)} >
+                <CloudUpload />
+                <label style={{marginLeft: 5}}>{"Upload Media"}</label>
+            </Button>
+        ) : (
+            <div></div>
+        );
+
         return (
             <MuiThemeProvider theme={theme}>
                 <Drawer className={classes.drawer} open={this.state.drawerOpen} onClose={this.toggleDrawer.bind(this)}>
@@ -236,12 +250,7 @@ class Header extends Component {
                                 </Typography>
                             </div>
                             <div>
-                                {/* <Button color="inherit"
-                                    onClick={this.toggleUploadDialog.bind(this)} 
-                                    className={classes.backButton}>
-                                <CloudUploadIcon />
-                                <label style={{marginLeft: 5}}>{"Upload Media"}</label>
-                            </Button> */}
+                            {uploadButton}
                             </div>
                             <Button 
                                 size="large"
@@ -261,6 +270,7 @@ class Header extends Component {
 
                     </AppBar>
                 </div>
+                {this.props.content}
             </MuiThemeProvider>
         );
     }

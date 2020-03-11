@@ -10,13 +10,13 @@ import {Add, Edit, Visibility } from "@material-ui/icons";
 
 import fb from './firebase';
 
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: '#c51162',
-        },
-    },
-});
+// const theme = createMuiTheme({
+//     palette: {
+//         primary: {
+//             main: '#c51162',
+//         },
+//     },
+// });
 
 const styles = theme => ({
     root: {
@@ -90,7 +90,7 @@ class MainPageTB extends Component {
         const contrib = this.props.contributions;
 
         return (
-            <MuiThemeProvider theme={theme}>
+            <div>
                 <br/>
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
@@ -120,7 +120,7 @@ class MainPageTB extends Component {
                         </List>
                     </div>
                 </Paper>
-            </MuiThemeProvider>
+            </div>
         );
     }
 }
