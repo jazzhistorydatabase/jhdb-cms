@@ -15,15 +15,6 @@ import fb from "./firebase";
 
 import genericUserPhoto from './generic-user.jpg';
 
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: '#c51162',
-        } ,
-    },
-
-});
-
 const styles = theme => ({
     root: {
         width: '100%',
@@ -129,7 +120,6 @@ class AdminView extends Component {
         }
 
         return (
-            <MuiThemeProvider theme={theme}>
             <div>
 
                 <h1> Admin Settings </h1>
@@ -202,7 +192,6 @@ class AdminView extends Component {
 
                 </Paper>
             </div>
-            </MuiThemeProvider>
 
         );
     }

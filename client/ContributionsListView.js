@@ -1,20 +1,22 @@
 import Button from '@material-ui/core/Button';
+import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import React, {Component} from 'react';
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
+import {Add, Edit, Visibility } from "@material-ui/icons";
 
 
 import fb from './firebase';
 
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: '#c51162',
-        },
-    },
-});
+// const theme = createMuiTheme({
+//     palette: {
+//         primary: {
+//             main: '#c51162',
+//         },
+//     },
+// });
 
 const styles = theme => ({
     root: {
@@ -88,33 +90,37 @@ class MainPageTB extends Component {
         const contrib = this.props.contributions;
 
         return (
-            <MuiThemeProvider theme={theme}>
+            <div>
                 <br/>
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     <div className={" MainPage-format"}>
-                        <h1>My Contributions</h1>
-                        <Button onClick={() => {return this.handleAddButtonClick.bind(this)()}} variant="outlined" color={"primary"}
-                                className={classes.button}>Add Contribution </Button>
+                        <h1>My Collections</h1>
+                        <Button onClick={() => {return this.handleAddButtonClick.bind(this)()}} variant="outlined" color={"primary"} startIcon={<Add />}
+                                className={classes.button}>Add Collection </Button>
                         <List className={classes.contributionList}>
                             {contrib.map((e) => {
                                 return (
-                                    <ListItem key={e.id || e.name} className={classes.contributionListItem}>
-                                        <h3 className={classes.contributionListName}>{e.name}</h3>
-                                        <Button variant="outlined" color={"primary"}
-                                                onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}
-                                                className={classes.button}>Edit </Button>
-                                        <Button variant="outlined" color={"primary"}
-                                                href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
-                                                className={classes.button}>Preview </Button>
-                                        <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
-                                    </ListItem>
+                                    <div>
+                                        <ListItem key={e.id || e.name} className={classes.contributionListItem}>
+                                            <h3 className={classes.contributionListName}>{e.name}</h3>
+                                            <Button variant="outlined" color={"primary"}
+                                                    onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}
+                                                    startIcon={<Edit />}
+                                                    className={classes.button}>Edit </Button>
+                                            <Button variant="outlined" color={"primary"}
+                                                    startIcon={<Visibility />}
+                                                    href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
+                                                    className={classes.button}>Preview </Button>
+                                            <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
+                                        </ListItem>
+                                    </div>
                                 );
                             })}
                         </List>
                     </div>
                 </Paper>
-            </MuiThemeProvider>
+            </div>
         );
     }
 }

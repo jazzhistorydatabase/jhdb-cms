@@ -65,7 +65,6 @@ class MediaUpload extends Component {
                 newState["audioSubpage"] = event.target.checked;
                 break;
             case "Video":
-                break;
             default:
                 newState["videoSubpage"] = event.target.checked;
                 break;

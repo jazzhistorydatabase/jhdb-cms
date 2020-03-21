@@ -10,15 +10,8 @@ import React, { Component } from 'react';
 import 'typeface-roboto';
 import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
-
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: '#c51162',
-        } ,
-    },
-
-});
+import { Visibility } from '@material-ui/icons';
+import { Fab } from '@material-ui/core';
 
 const styles = theme => ({
     container: {
@@ -60,6 +53,12 @@ const styles = theme => ({
         width: '200px',
         height: '40px',
         margin: 20,
+    },
+    previewButton: {
+        display: 'block',
+        position: 'fixed',
+        bottom: 20,
+        right: 20,
     },
     reviewOptionLeft: {
         marginLeft: '10%',
@@ -131,79 +130,85 @@ class EditContributionView extends Component {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
         return (
-            <MuiThemeProvider theme={theme}>
             <div>
-                <h1> Contribution </h1>
-                <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
-                        className={classes.button}> Back </Button>
-                <br/>
-                <TextField
-                    id="standard-name"
-                    label="Contribution Title"
-                    className={classes.textField}
-                    value={(contrib && contrib.name) || ""}
-                    onChange={this.handleNameChange}
-                    margin="normal"
-                />
-                <FormControl component={"fieldset"} className={classes.formControl}>
-                    <FormLabel component="legend"> Contribution Type</FormLabel>
-                    <RadioGroup row
-                                value={(contrib && contrib.type) || ""}
-                                onChange={this.handleCheckBoxChange}>
-                        <FormControlLabel
-                            value="artist"
-                            control={<Radio color="primary"/>}
-                            label="Artist Type"
-                            labelPlacement="start"
-                        />
-                        <FormControlLabel
-                            value="collection"
-                            control={<Radio color="primary"/>}
-                            label="Collection"
-                            labelPlacement="start"
-                        />
-                    </RadioGroup>
-                </FormControl>
-                <br/>
-                <FormControl>
+                <div>
+                    <h1> Contribution </h1>
+                    <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
+                            className={classes.button}> Back </Button>
+                    <br/>
                     <TextField
-                        id="filled-multiline-flexible, filled-full-width"
-                        label="Biography"
-                        style={{margin: 5}}
-                        multiline
-                        value={(contrib && contrib.description) || ""}
-                        onChange={this.handleBioChange}
-                        fullWidth
+                        id="standard-name"
+                        label="Collection Title"
+                        className={classes.textField}
+                        value={(contrib && contrib.name) || ""}
+                        onChange={this.handleNameChange}
                         margin="normal"
-                        variant="filled"
-                        placeholder={"Insert Biography"}
-                        className={classes.formWideControl}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
                     />
-                </FormControl>
-                <br/>
-                <FormControl className={classes.uploadWidth}>
-                    <MediaUpload uploadName="Images"
-                                 isSubpage={contrib && contrib.imagesSubpage}
-                                 collection={this.props.selectedContribution.ref.collection("Images")}
-                                 onChange={this.handleChildChange}/>
-                    <MediaUpload uploadName="Audio"
-                                 isSubpage={contrib && contrib.audioSubpage}
-                                 collection={this.props.selectedContribution.ref.collection("Audio")}
-                                 onChange={this.handleChildChange}/>
-                    <MediaUpload uploadName="Video"
-                                 isSubpage={contrib && contrib.videoSubpage}
-                                 collection={this.props.selectedContribution.ref.collection("Video")}
-                                 onChange={this.handleChildChange}/>
-                </FormControl>
-                <br/>
-                <br/>
-                <br/>
-                <a className={classes.button2} href={"/preview/"+this.props.selectedContribution.name.toLowerCase().replace(/ /g, "-")}><Button>Preview</Button></a>
+                    <FormControl component={"fieldset"} className={classes.formControl}>
+                        <FormLabel component="legend"> Collection Type</FormLabel>
+                        <RadioGroup row
+                                    value={(contrib && contrib.type) || ""}
+                                    onChange={this.handleCheckBoxChange}>
+                            <FormControlLabel
+                                value="artist"
+                                control={<Radio color="primary"/>}
+                                label="Artist Type"
+                                labelPlacement="start"
+                            />
+                            <FormControlLabel
+                                value="collection"
+                                control={<Radio color="primary"/>}
+                                label="Collection"
+                                labelPlacement="start"
+                            />
+                        </RadioGroup>
+                    </FormControl>
+                    <br/>
+                    <FormControl>
+                        <TextField
+                            id="filled-multiline-flexible, filled-full-width"
+                            label="Biography"
+                            style={{margin: 5}}
+                            multiline
+                            value={(contrib && contrib.description) || ""}
+                            onChange={this.handleBioChange}
+                            fullWidth
+                            margin="normal"
+                            variant="filled"
+                            placeholder={"Insert Biography"}
+                            className={classes.formWideControl}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </FormControl>
+                    <br/>
+                    <FormControl className={classes.uploadWidth}>
+                        <MediaUpload uploadName="Images"
+                                    isSubpage={contrib && contrib.imagesSubpage}
+                                    collection={this.props.selectedContribution.ref.collection("Images")}
+                                    onChange={this.handleChildChange}/>
+                        <MediaUpload uploadName="Audio"
+                                    isSubpage={contrib && contrib.audioSubpage}
+                                    collection={this.props.selectedContribution.ref.collection("Audio")}
+                                    onChange={this.handleChildChange}/>
+                        <MediaUpload uploadName="Video"
+                                    isSubpage={contrib && contrib.videoSubpage}
+                                    collection={this.props.selectedContribution.ref.collection("Video")}
+                                    onChange={this.handleChildChange}/>
+                    </FormControl>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <Button variant="contained"
+                            color={"primary"}
+                            className={classes.previewButton}
+                            startIcon={<Visibility />}
+                            href={"/preview/"+this.props.selectedContribution.name.toLowerCase().replace(/ /g, "-")}>
+                                Preview 
+                    </Button>
+                </div>
             </div>
-            </MuiThemeProvider>
         );
     }
 

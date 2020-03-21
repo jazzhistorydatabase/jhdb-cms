@@ -14,7 +14,7 @@ const dropboxKey = serverCredentials.dropboxConfig.appKey;
 const dropboxSecret = serverCredentials.dropboxConfig.appSecret;
 const dropboxToken = serverCredentials.dropboxConfig.token;
 
-const credentials = {
+const credentials = { 
     client: {
         id: dropboxKey,
         secret: dropboxSecret
@@ -30,7 +30,8 @@ const credentials = {
 const oauth2 = require('simple-oauth2').create(credentials);
 
 // Fetch cli args
-const IS_DEV = process.argv.includes('--dev');
+const IS_DEV = process.env["DEV"];
+logger.info(`Starting server in ${IS_DEV ? "dev" : "prod"} mode`);
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
@@ -159,14 +160,23 @@ app.get("/upload", (req, res) => {
     logger.info('User requesting upload link. Validating token...');
     let token = req.query["auth"];
     fb.auth().verifyIdToken(token).then(decodedToken => {
-        logger.success(`Successfully validated token for user account_id: ${decodedToken.account_id} name: ${decodedToken.name}`)
+        logger.success(`Successfully validated token for user account_id: ${decodedToken.uid} name: ${decodedToken.name}`)
+        
         let path = "/jhdb global/"+decodedToken.name.toLowerCase();
-        logger.log(`Generating upload link for account_id: ${decodedToken.account_id} path: ${path}`);
-        dbx.filesGetTemporaryUploadLink({commit_info: {path: path}}).then( (dat => {
-            logger.success(`Successfully sent upload link for account_id: ${decodedToken.account_id} path: ${path}`);
-            res.send(dat && dat.link);
+        let time = new Date();
+        time.setTime(time.getTime() + (1*60*60*1000)); // Add 1hr to current time
+        time.setSeconds(0, 0); // Remove seconds/millis
+        let deadline = time.toISOString().replace(".000", ""); // Remove millis from ISO string so dbx doesn't complain
+        // TODO: Find a less hacky way to do this^ (pass in format string to ISOString()?)
+        
+        logger.log(`Generating upload link for account_id: ${decodedToken.uid} path: ${path} deadline: ${deadline}`);
+
+        dbx.fileRequestsCreate({"title": `JHDB File Upload - ${decodedToken.name} [Contributor Portal]`, "destination": path, "deadline": {"deadline": deadline}}).then( (dat => {
+            logger.success(`Successfully sent upload link for account_id: ${decodedToken.uid} path: ${path}`);
+            console.log(dat);
+            res.send(dat && dat.url);
         })).catch(err => {
-            logger.error(`Failed to generate upload link for account_id: ${decodedToken.account_id} path: ${path}`, err);
+            logger.error(`Failed to generate upload link for account_id: ${decodedToken.uid} path: ${path}`, err);
             res.send(err);
         });
     }).catch(err => {
@@ -266,7 +276,7 @@ app.use("/images", express.static("./templates/images"));
 
 // Start the server
 const PORT = process.env.PORT || 8080;
-logger.info("Starting server on port "+PORT);
+logger.info("Binding to port "+PORT);
 app.listen(PORT, () => {
     logger.success(`App listening on port ${PORT}`);
     logger.success("Press Ctrl+C to quit.");

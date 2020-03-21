@@ -8,6 +8,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import { CloseSharp } from '@material-ui/icons';
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 
 import './App.css';
@@ -16,6 +17,8 @@ import fb from './firebase';
 import HelpDialog from './HelpDialog';
 import UploadDialog from './UploadDialog';
 import genericUserPhoto from './generic-user.jpg';
+import { CloudUpload } from '@material-ui/icons';
+import { Button } from '@material-ui/core';
 
 const theme = createMuiTheme({
     typography: {
@@ -23,9 +26,14 @@ const theme = createMuiTheme({
     },
     palette: {
         primary: {
-            main: '#c51162',
-            text: '#ffffff'
-        }
+            main: '#00519a',//19ABFF
+            text: '#ffffff',
+            light: '#6edcff',//00519a
+        },
+        secondary: {
+            main: '#80cbc4',
+            text: '#000000',
+        },
     },
 });
 
@@ -65,13 +73,14 @@ const styles = {
         width: 'auto',
     },
     menuButton: {
-        marginLeft: -12,
-        marginRight: 20,
         height: 50,
-        width: 50,
+    },
+    toolbarHelp: {
+        height: "100%",
+        // backgroundColor: theme.palette.primary.main,
     },
     accountButton: {
-        backgroundColor: "#A10C32",
+        backgroundColor: "#007ccb",
         display: 'inline-block',
         height: 40,
         padding: 5,
@@ -87,9 +96,6 @@ const styles = {
     accountButtonImg: {
         height: 30
     },
-    backButton: {
-        backgroundColor: "#a02c49"
-    }
 };
 
 class Header extends Component {
@@ -183,9 +189,24 @@ class Header extends Component {
             </ListItem>
         ) : (<div/>);
 
+        let uploadButton = (this.props.user && this.props.user.authorized) ? (
+            <Button variant="contained"
+                    color="secondary"
+                    onClick={this.toggleUploadDialog.bind(this)} >
+                <CloudUpload />
+                <label style={{marginLeft: 5}}>{"Upload Media"}</label>
+            </Button>
+        ) : (
+            <div></div>
+        );
+
         return (
             <MuiThemeProvider theme={theme}>
                 <Drawer className={classes.drawer} open={this.state.drawerOpen} onClose={this.toggleDrawer.bind(this)}>
+                    <ListItem button onClick={this.toggleDrawer.bind(this)}>
+                        <CloseSharp />
+                        <ListItemText primary="Close Menu"/>
+                    </ListItem>
                     {userDetail}
                     <List>
                         <Divider/>
@@ -213,10 +234,13 @@ class Header extends Component {
                 <div className={classes.root}>
                     <AppBar position="static">
                         <Toolbar>
-                            <IconButton className={classes.menuButton} color="inherit" aria-label="menu"
-                                        onClick={this.toggleDrawer.bind(this)}>
-                                <MenuIcon className={classes.icon}/>
-                            </IconButton>
+                            <Button 
+                                size="large"
+                                color="inherit"
+                                className={classes.menuButton}
+                                startIcon={<MenuIcon style={{fontSize: 35}} />}
+                                aria-label="menu"
+                                onClick={this.toggleDrawer.bind(this)} >Menu</Button>
                             <div className={classes.grow}>
                                 <Typography variant="h5" align="left" color="inherit">
                                     <b>Global Contributor Portal</b>
@@ -226,13 +250,15 @@ class Header extends Component {
                                 </Typography>
                             </div>
                             <div>
-                                {/* <Button color="inherit"
-                                    onClick={this.toggleUploadDialog.bind(this)} 
-                                    className={classes.backButton}>
-                                <CloudUploadIcon />
-                                <label style={{marginLeft: 5}}>{"Upload Media"}</label>
-                            </Button> */}
+                            {uploadButton}
                             </div>
+                            <Button 
+                                size="large"
+                                color="inherit"
+                                className={classes.toolbarHelp}
+                                endIcon={<Helpicon style={{fontSize: 35}} />}
+                                aria-label="menu"
+                                onClick={this.toggleHelpDialog.bind(this)} >Help</Button>
                             <HelpDialog
                                 show={this.state.showHelp}
                                 toggle={this.toggleHelpDialog.bind(this)}/>
@@ -244,6 +270,7 @@ class Header extends Component {
 
                     </AppBar>
                 </div>
+                {this.props.content}
             </MuiThemeProvider>
         );
     }
