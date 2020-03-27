@@ -78,7 +78,6 @@ class MainPageTB extends Component {
                 bioUrl: '',
                 bioName: '',
                 bioThumbnail: '',
-                bioIcon: '',
             });
         } else {
             window.alert("Collection name can not be blank!");

@@ -39,13 +39,12 @@ class FileUpload extends Component {
         super(props);
         this.state = {
             fileDoc: undefined,
-            isBioPhoto: (this.props.bio && this.props.bio === "true") ? true : false
         };
 
         this.handleTextChange = event => {
             let fileDoc = this.state.fileDoc;
             if (this.props.fileType === 'Video' && event.target.id.indexOf('multiline') === -1)  {
-                if (this.state.isBioPhoto) {
+                if (this.props.bio) {
                     fileDoc.bioUrl = event.target.value;
                 } else {
                     fileDoc.url = event.target.value;
@@ -60,7 +59,7 @@ class FileUpload extends Component {
 
     handleDelete() {
         if(window.confirm("Are you sure you want to remove this item? This can not be undone!\n\n(This will not remove the file from dropbox or your computer)")) {
-            if (this.state.isBioPhoto) {
+            if (this.props.bio) {
                 let fileDoc = this.state.fileDoc;
                 fileDoc.bioIcon = "";
                 fileDoc.bioName = "";
@@ -75,10 +74,9 @@ class FileUpload extends Component {
 
     onChooserSuccess(file) {
         let fileDoc = this.state.fileDoc;
-        if (this.state.isBioPhoto) {
+        if (this.props.bio) {
             fileDoc['bioName'] = file[0].name || "";
             fileDoc['bioUrl'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
-            fileDoc['bioIcon'] = file[0].icon || "";
             fileDoc['bioThumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
         } else {
             fileDoc['name'] = file[0].name || "";
@@ -103,10 +101,10 @@ class FileUpload extends Component {
         const classes = this.props.classes;
         const doc = this.state.fileDoc;
         // tags are different in an image doc vs the bio photo in the contrib doc
-        const thumbnail = (this.state.isBioPhoto) ? 'bioThumbnail' : 'thumbnail';
-        const url = (this.state.isBioPhoto) ? 'bioUrl' : 'url';
-        const icon = (this.state.isBioPhoto) ? 'bioIcon' : 'icon';
-        const name = (this.state.isBioPhoto) ? 'bioName' : 'name';
+        const thumbnail = (this.props.bio) ? 'bioThumbnail' : 'thumbnail';
+        const url = (this.props.bio) ? 'bioUrl' : 'url';
+        const icon = 'icon';
+        const name = (this.props.bio) ? 'bioName' : 'name';
         const caption = 'caption'; // bio doesnt have a caption
         if(!doc) {
             return <div />;
@@ -161,12 +159,12 @@ class FileUpload extends Component {
                         <Grid item xs={isVideo ? 5 : 1}>
                             {fileUploadComponent}
                         </Grid>
-                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={isVideo ? 0 : ((this.state.isBioPhoto) ? 9 : 4)}>
+                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={isVideo ? 0 : ((this.props.bio) ? 9 : 4)}>
                             <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
                                 {(this.state.fileDoc && this.state.fileDoc[name]) || "Choose a file..."} 
                             </Typography>
                         </Grid>
-                        {(this.state.isBioPhoto) ? <div/> : 
+                        {(this.props.bio) ? <div/> : 
                             <Grid item xs={5}>
                                 <TextField
                                     id="standard-multiline-static"
