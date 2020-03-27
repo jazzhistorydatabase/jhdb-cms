@@ -51,11 +51,7 @@ class FileUpload extends Component {
                     fileDoc.url = event.target.value;
                 }
             } else {
-                if (this.state.isBioPhoto) {
-                    fileDoc.bioCaption = event.target.value;
-                } else {
-                    fileDoc.caption = event.target.value;
-                }
+                fileDoc.caption = event.target.value;
             }
             this.setState({fileDoc: fileDoc});
         };
@@ -66,7 +62,6 @@ class FileUpload extends Component {
         if(window.confirm("Are you sure you want to remove this item? This can not be undone!\n\n(This will not remove the file from dropbox or your computer)")) {
             if (this.state.isBioPhoto) {
                 let fileDoc = this.state.fileDoc;
-                fileDoc.bioCaption = "";
                 fileDoc.bioIcon = "";
                 fileDoc.bioName = "";
                 fileDoc.bioThumbnail = "";
@@ -112,7 +107,7 @@ class FileUpload extends Component {
         const url = (this.state.isBioPhoto) ? 'bioUrl' : 'url';
         const icon = (this.state.isBioPhoto) ? 'bioIcon' : 'icon';
         const name = (this.state.isBioPhoto) ? 'bioName' : 'name';
-        const caption = (this.state.isBioPhoto) ? 'bioCaption' : 'caption';
+        const caption = 'caption'; // bio doesnt have a caption
         if(!doc) {
             return <div />;
         }
@@ -166,26 +161,28 @@ class FileUpload extends Component {
                         <Grid item xs={isVideo ? 5 : 1}>
                             {fileUploadComponent}
                         </Grid>
-                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={isVideo ? 0 : 4}>
+                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={isVideo ? 0 : ((this.state.isBioPhoto) ? 9 : 4)}>
                             <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
                                 {(this.state.fileDoc && this.state.fileDoc[name]) || "Choose a file..."} 
                             </Typography>
                         </Grid>
-                        <Grid item xs={5}>
-                            <TextField
-                                id="standard-multiline-static"
-                                label="Caption"
-                                style={{margin: 5, width: "100%"}}
-                                multiline
-                                value={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
-                                onChange={this.handleTextChange}
-                                margin="normal"
-                                variant="filled"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
+                        {(this.state.isBioPhoto) ? <div/> : 
+                            <Grid item xs={5}>
+                                <TextField
+                                    id="standard-multiline-static"
+                                    label="Caption"
+                                    style={{margin: 5, width: "100%"}}
+                                    multiline
+                                    value={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
+                                    onChange={this.handleTextChange}
+                                    margin="normal"
+                                    variant="filled"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
                                 />
-                        </Grid>
+                            </Grid>
+                        }
                         <Grid item xs={2}>
                             <Tooltip title="Unlink file from collection (will not delete original file)">
                                 <Fab size="small"
