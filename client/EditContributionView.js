@@ -10,6 +10,7 @@ import React, { Component } from 'react';
 import 'typeface-roboto';
 import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
+import FileUpload from "./FileUpload";
 import { Visibility } from '@material-ui/icons';
 import { Fab } from '@material-ui/core';
 
@@ -162,6 +163,15 @@ class EditContributionView extends Component {
                                 labelPlacement="start"
                             />
                         </RadioGroup>
+                    </FormControl>
+                    <br/>
+                    <FormControl className={classes.uploadWidth}>
+                        <FormLabel component="legend"> Bio Photo</FormLabel>
+                        <FileUpload fileType="Images"
+                            fileIndex={-1}
+                            fileDoc={this.props.selectedContribution}
+                            bio="true"
+                        />
                     </FormControl>
                     <br/>
                     <FormControl>
