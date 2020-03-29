@@ -75,6 +75,9 @@ class MainPageTB extends Component {
                 videoSubpage: false,
                 audioSubpage: false,
                 status: 'unpublished',
+                bioUrl: '',
+                bioName: '',
+                bioThumbnail: '',
             });
         } else {
             window.alert("Collection name can not be blank!");
