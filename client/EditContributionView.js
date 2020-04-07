@@ -21,8 +21,8 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     textField: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
         width: 200,
     },
     uploadWidth: {
@@ -35,14 +35,14 @@ const styles = theme => ({
         width: 200,
     },
     formControl: {
-        margin: theme.spacing.unit * 2,
+        margin: theme.spacing(2),
     },
     rightIcon: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
     },
     formWideControl: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
         width: 600,
     },
     button2: {
@@ -115,16 +115,13 @@ class EditContributionView extends Component {
         }
     }
 
-    componentWillMount() {
-        console.log(this.props && this.props.selectedContribution);
-        console.log(fb.base);
+    componentDidMount() {
         if (this.props.selectedContribution && this.props.selectedContribution.ref) {
             fb.base.syncDoc(this.props.selectedContribution.ref.path, {
                 context: this,
                 state: 'contributionData',
                 withRefs: true
             });
-            console.log(this.state.contributionData);
         }
     }
 
