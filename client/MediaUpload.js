@@ -19,18 +19,18 @@ const styles = theme => ({
     },
     paper: {
         ...theme.mixins.gutters(),
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     nameStyle: {
-        margin: theme.spacing.unit * 2,
+        margin: theme.spacing(2),
     },
     container: {
         display: 'flex',
         flexWrap: 'wrap',
     },
     fab: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
     cardColor: {
         backgroundColor: '#fce4ec',
@@ -55,7 +55,6 @@ class MediaUpload extends Component {
     }
 
     handleSubpage(event) {
-        console.log("Callback: "+event.target.checked);
         let newState =  {};
         switch(this.props && this.props.uploadName) {
             case "Images":
@@ -89,7 +88,6 @@ class MediaUpload extends Component {
     };
 
     onChooserSuccess(files) {
-        console.log(files);
         // Get highest file index
         let lst = this.state.collection;
         let maxIndex = 0;
@@ -109,7 +107,7 @@ class MediaUpload extends Component {
         });
     }
 
-    componentWillMount() {
+    componentDidMount() {
         if(this.props && this.props.collection) {
             fb.base.bindCollection(this.props.collection, {
                 context: this,
@@ -121,9 +119,7 @@ class MediaUpload extends Component {
 
     render() {
         const classes = this.props.classes;
-        // this.fileIndex = 0;
         let fileUploads = this.state.collection.map((fileDoc) => {
-            // this.fileIndex++;
             return (
                 <FileUpload key={fileDoc.index || fileDoc.name || randomBytes(2)}
                             fileType={this.props.uploadName}

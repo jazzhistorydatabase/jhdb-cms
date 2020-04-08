@@ -2,21 +2,13 @@ import Button from '@material-ui/core/Button';
 import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import React, {Component} from 'react';
-import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
+import React, { Component } from 'react';
+import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
-import {Add, Edit, Visibility } from "@material-ui/icons";
+import { Add, Edit, Visibility } from "@material-ui/icons";
 
 
 import fb from './firebase';
-
-// const theme = createMuiTheme({
-//     palette: {
-//         primary: {
-//             main: '#c51162',
-//         },
-//     },
-// });
 
 const styles = theme => ({
     root: {
@@ -28,14 +20,14 @@ const styles = theme => ({
         marginLeft: '10px'
     },
     adminFab: {
-      position: 'fixed',
+        position: 'fixed',
         right: '2vw',
         bottom: '2vw',
     },
     paper: {
         ...theme.mixins.gutters(),
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
         width: '70%',
         marginLeft: 'auto',
         marginRight: 'auto',
@@ -63,10 +55,10 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
-    
+
     handleAddButtonClick() {
         let contribName = window.prompt("Enter collection name:");
-        if(contribName) {
+        if (contribName) {
             fb.base.addToCollection(`Contributions`, {
                 name: contribName,
                 description: '',
@@ -83,7 +75,7 @@ class MainPageTB extends Component {
             window.alert("Collection name can not be blank!");
         }
     };
-  
+
     handleEditButtonClick(selectedContribution) {
         this.props.windowSwap(selectedContribution);
     };
@@ -94,27 +86,27 @@ class MainPageTB extends Component {
 
         return (
             <div>
-                <br/>
-                <br/>
-                <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
+                <br />
+                <br />
+                <Paper className={classes.paper} elevation={3} square={false} classes={{ root: classes.cardColor }}>
                     <div className={" MainPage-format"}>
                         <h1>My Collections</h1>
-                        <Button onClick={() => {return this.handleAddButtonClick.bind(this)()}} variant="outlined" color={"primary"} startIcon={<Add />}
-                                className={classes.button}>Add Collection </Button>
+                        <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} variant="outlined" color={"primary"} startIcon={<Add />}
+                            className={classes.button}>Add Collection </Button>
                         <List className={classes.contributionList}>
-                            {contrib.map((e) => {
+                            {contrib.filter(e => e.type).map((e) => {
                                 return (
-                                    <div>
-                                        <ListItem key={e.id || e.name} className={classes.contributionListItem}>
+                                    <div key={e.id || e.name} >
+                                        <ListItem className={classes.contributionListItem}>
                                             <h3 className={classes.contributionListName}>{e.name}</h3>
                                             <Button variant="outlined" color={"primary"}
-                                                    onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}
-                                                    startIcon={<Edit />}
-                                                    className={classes.button}>Edit </Button>
+                                                onClick={() => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                startIcon={<Edit />}
+                                                className={classes.button}>Edit </Button>
                                             <Button variant="outlined" color={"primary"}
-                                                    startIcon={<Visibility />}
-                                                    href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
-                                                    className={classes.button}>Preview </Button>
+                                                startIcon={<Visibility />}
+                                                href={"/preview/" + e.name.toLowerCase().replace(/ /g, "-")}
+                                                className={classes.button}>Preview </Button>
                                             <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
                                         </ListItem>
                                     </div>

@@ -46,7 +46,6 @@ class UploadDialog extends Component {
 									if(link.startsWith('http')) {
 										window.location.href = link;
 									} else {
-										console.log(link);
 										this.setState({loading: false});
 									}
 								}).catch( () => {

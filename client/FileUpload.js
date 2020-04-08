@@ -23,7 +23,7 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     fab: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
     fabImg: {
         width: '50px',
@@ -87,7 +87,7 @@ class FileUpload extends Component {
         this.setState({fileDoc: fileDoc});
     }
 
-    componentWillMount() {
+    componentDidMount() {
         if(this.props && this.props.fileDoc) {
             fb.base.syncDoc(this.props.fileDoc.ref, {
                 context: this,
@@ -122,7 +122,7 @@ class FileUpload extends Component {
                 <Tooltip title={"Click to " + (doc[url] ? "change" : "select") + " file"}>
                     <Fab
                         size="small"
-                        color={doc[url] ? 'none' : 'primary'}
+                        color="primary"
                         aria-label="Upload"
                         className={classes.fab}
                         onClick={
@@ -155,11 +155,11 @@ class FileUpload extends Component {
             <div className={classes.root}>
                     
                 <FormGroup row id={(this.state.fileDoc && this.state.fileDoc[name]) || this.props.fileIndex}>
-                    <Grid container spacing={3} justify="left" alignItems="center" row>
+                    <Grid container spacing={3} justify="flex-start" alignItems="center">
                         <Grid item xs={isVideo ? 5 : 1}>
                             {fileUploadComponent}
                         </Grid>
-                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={isVideo ? 0 : ((this.props.bio) ? 9 : 4)}>
+                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={((this.props.bio) ? 9 : 4)}>
                             <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
                                 {(this.state.fileDoc && this.state.fileDoc[name]) || "Choose a file..."} 
                             </Typography>
