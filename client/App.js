@@ -44,7 +44,6 @@ class App extends Component {
                     fb.db.collection("Users").doc("authorized").get().then((snapshot) => {
                         let u = this.state.user;
                         u["authorized"] = snapshot.exists && snapshot.data()[u.uid];
-                        console.log(snapshot.data());
                         this.setState({user: u});
                     });
                     // Get admin
@@ -70,13 +69,22 @@ class App extends Component {
         fb.signOut();
     }
 
-    componentWillMount() {
+    componentDidMount() {
         if (!fb.app) {
             fb.initialize(this.handleUserAuth.bind(this));
         }
         setTimeout(() => {
             this.setState({pageLoadDone: true});
         }, 5000);
+        if(this.state.user && this.state.user.uid) {
+            let user = {
+                uid: this.state.user.uid,
+                name: this.state.user.displayName,
+                email: this.state.user.email,
+                displayPhoto: this.state.user.photoURL,
+            };
+            fb.base.addToCollection('Users', user, this.state.user.uid);
+        }
 
     }
 
@@ -102,17 +110,6 @@ class App extends Component {
 
         let currentWindow = this.state.showAdminWindow ? 2 : this.state.showEditWindow ? 1 : 0;
         let x;
-
-        console.log("Trying to update user");
-        if(this.state.user && this.state.user.uid) {
-            let user = {
-                uid: this.state.user.uid,
-                name: this.state.user.displayName,
-                email: this.state.user.email,
-                displayPhoto: this.state.user.photoURL,
-            };
-            fb.base.addToCollection('Users', user, this.state.user.uid);
-        }
 
         switch (currentWindow) {
             case 1:
@@ -144,14 +141,16 @@ class App extends Component {
                         <h3><CircularProgress /><br/>Attempting to fetch collections...</h3>)}
                 </div>
             ) : (
-                <h3 style={{textAlign: 'left', paddingLeft: 20}}>
-                    <ArrowUpwardSharp/><ArrowUpwardSharp/><ArrowUpwardSharp/>
-                    <br/>
-                    Please sign in to continue
+                <div>    
+                    <h3 style={{textAlign: 'left', paddingLeft: 20}}>
+                        <ArrowUpwardSharp/><ArrowUpwardSharp/><ArrowUpwardSharp/>
+                        <br/>
+                        Please sign in to continue
+                    </h3>
                     <h5 style={{display: this.state.pageLoadDone ? 'none' : 'block'}}>
                         If you have just signed in, give it a few seconds...
                     </h5>
-                </h3>
+                </div>
         );
 
         return (

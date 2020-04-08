@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FormControl from "@material-ui/core/FormControl";
@@ -12,6 +13,8 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Input from "@material-ui/core/Input";
 import fb from "./firebase";
+import { randomBytes } from 'crypto';
+
 
 import genericUserPhoto from './generic-user.jpg';
 
@@ -23,8 +26,8 @@ const styles = theme => ({
     },
     paper: {
         ...theme.mixins.gutters(),
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
         width: '70%',
         marginLeft: 'auto',
         marginRight: 'auto',
@@ -41,7 +44,7 @@ const styles = theme => ({
         height: 60,
     },
     formControl: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
         minWidth: 120
     },
 });
@@ -60,7 +63,7 @@ class AdminView extends Component {
         };
     }
 
-    componentWillMount() {
+    componentDidMount() {
 
         fb.base.syncDoc(fb.db.collection("Users").doc("admin"), {
             context: this,
@@ -130,11 +133,11 @@ class AdminView extends Component {
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                     {this.props.users.map( (user) => {
                         if(!user.uid) {
-                            return (<div></div>)
+                            return (<div key={ randomBytes(2)}></div>)
                         } else if (user.uid === fb.auth.currentUser.uid) {
                             return (
                                 <div key={user.uid} >
-                                <Grid container className={classes.adminGrid} spacing={3} justify="left" alignItems="center" row>
+                                <Grid container className={classes.adminGrid} spacing={3} justify="flex-start" alignItems="center">
                                     <Grid item xs={1}>
                                     </Grid>
                                     <Grid item xs={1}>
@@ -153,10 +156,10 @@ class AdminView extends Component {
                             </div>
                             )
                         };
-                        console.log("elem for user "+user.name);
+
                         return (
                             <div key={user.uid} >
-                                <Grid container className={classes.adminGrid} spacing={3} justify="left" alignItems="center" row>
+                                <Grid container className={classes.adminGrid} spacing={3} justify="flex-start" alignItems="center" >
                                     <Grid item xs={1}>
                                     </Grid>
                                     <Grid item xs={1}>

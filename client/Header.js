@@ -46,9 +46,6 @@ const styles = {
         padding: 5,
         marginLeft: 10,
     },
-    drawer: {
-        // backgroundColor: "#FCE4EC",
-    },
     avatarName: {
         fontWeight: 'bold',
         marginLeft: 'auto',
