@@ -61,7 +61,6 @@ class FileUpload extends Component {
         if(window.confirm("Are you sure you want to remove this item? This can not be undone!\n\n(This will not remove the file from dropbox or your computer)")) {
             if (this.props.bio) {
                 let fileDoc = this.state.fileDoc;
-                fileDoc.bioIcon = "";
                 fileDoc.bioName = "";
                 fileDoc.bioThumbnail = "";
                 fileDoc.bioUrl = "";

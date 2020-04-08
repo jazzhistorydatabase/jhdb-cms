@@ -1,7 +1,9 @@
 import Button from '@material-ui/core/Button';
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormGroup from "@material-ui/core/FormGroup";
 import FormLabel from "@material-ui/core/FormLabel";
+import Paper from "@material-ui/core/Paper";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
@@ -43,7 +45,7 @@ const styles = theme => ({
     formWideControl: {
         marginLeft: theme.spacing.unit,
         marginRight: theme.spacing.unit,
-        width: 600,
+        width: 540,
     },
     button2: {
         width: '40%',
@@ -68,6 +70,18 @@ const styles = theme => ({
     reviewOptionRight: {
         marginRight: '10%',
     },
+    cardColor: {
+        backgroundColor: '#fce4ec',
+    },
+    paper: {
+        ...theme.mixins.gutters(),
+        paddingTop: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing.unit * 2,
+    },
+    mediaUploadTitle: {
+        width: '10vw',
+        textAlign: 'left',
+    }
 });
 
 class EditContributionView extends Component {
@@ -167,32 +181,33 @@ class EditContributionView extends Component {
                     </FormControl>
                     <br/>
                     <FormControl className={classes.uploadWidth}>
-                        <FormLabel component="legend"> Bio Photo</FormLabel>
-                        <FileUpload fileType="Images"
-                            fileIndex={-1}
-                            fileDoc={this.props.selectedContribution}
-                            bio="true"
-                        />
+                        <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
+                            <h2 className={classes.mediaUploadTitle}> Bio</h2>
+                            <FormLabel component="legend"> Bio Photo</FormLabel>
+                            <FileUpload fileType="Images"
+                                fileIndex={-1}
+                                fileDoc={this.props.selectedContribution}
+                                bio="true"
+                            />
+                            <TextField
+                                id="filled-multiline-flexible, filled-full-width"
+                                label="Biography"
+                                style={{margin: 5}}
+                                multiline
+                                value={(contrib && contrib.description) || ""}
+                                onChange={this.handleBioChange}
+                                fullWidth
+                                margin="normal"
+                                variant="filled"
+                                placeholder={"Insert Biography"}
+                                className={classes.formWideControl}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        </Paper>
                     </FormControl>
                     <br/>
-                    <FormControl>
-                        <TextField
-                            id="filled-multiline-flexible, filled-full-width"
-                            label="Biography"
-                            style={{margin: 5}}
-                            multiline
-                            value={(contrib && contrib.description) || ""}
-                            onChange={this.handleBioChange}
-                            fullWidth
-                            margin="normal"
-                            variant="filled"
-                            placeholder={"Insert Biography"}
-                            className={classes.formWideControl}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
-                    </FormControl>
                     <br/>
                     <FormControl className={classes.uploadWidth}>
                         <MediaUpload uploadName="Images"

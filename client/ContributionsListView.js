@@ -5,7 +5,7 @@ import ListItem from '@material-ui/core/ListItem';
 import React, {Component} from 'react';
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
-import {Add, Edit, Visibility } from "@material-ui/icons";
+import {Add, Edit, Visibility, Publish } from "@material-ui/icons";
 
 
 import fb from './firebase';
@@ -63,6 +63,24 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            publishedList: null
+        };
+    }
+
+    componentWillMount() {
+        const publishedDoc = this.props.contributions.filter(e => e.ref.id === 'published')[0];
+        console.log(publishedDoc);
+        fb.base.syncDoc(publishedDoc.ref.path, {
+            context: this,
+            state: 'publishedList',
+            withRefs: true
+        });
+        console.log(this.state.publishedList);
+    }
     
     handleAddButtonClick() {
         let contribName = window.prompt("Enter collection name:");
@@ -88,6 +106,15 @@ class MainPageTB extends Component {
         this.props.windowSwap(selectedContribution);
     };
 
+    handlePublishButtonClick(selectedContribution) {
+        console.log(this.state.publishedList);
+        console.log(selectedContribution);
+        let publishedList = this.state.publishedList;
+        publishedList[selectedContribution.ref.id] = 'true';
+        this.setState({ publishedList: publishedList });
+        window.location.href("/preview/"+selectedContribution.name.toLowerCase().replace(/ /g, "-"));
+    }
+
     render() {
         const classes = this.props.classes;
         const contrib = this.props.contributions;
@@ -103,6 +130,7 @@ class MainPageTB extends Component {
                                 className={classes.button}>Add Collection </Button>
                         <List className={classes.contributionList}>
                             {contrib.map((e) => {
+                                if (e.ref.id === 'published') return;
                                 return (
                                     <div>
                                         <ListItem key={e.id || e.name} className={classes.contributionListItem}>
@@ -115,6 +143,10 @@ class MainPageTB extends Component {
                                                     startIcon={<Visibility />}
                                                     href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
                                                     className={classes.button}>Preview </Button>
+                                            <Button variant="outlined" color={"primary"}
+                                                    startIcon={<Publish />}
+                                                    onClick={() => {return this.handlePublishButtonClick.bind(this)(e)}}
+                                                    className={classes.button}>Publish </Button>
                                             <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
                                         </ListItem>
                                     </div>
