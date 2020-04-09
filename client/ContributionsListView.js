@@ -1,11 +1,10 @@
 import Button from '@material-ui/core/Button';
-import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
-import {Add, Edit, Visibility, Publish } from "@material-ui/icons";
+import {Add, Edit, Visibility, Person, PriorityHigh, Done } from "@material-ui/icons";
 
 
 import fb from './firebase';
@@ -59,19 +58,18 @@ class MainPageTB extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            publishedList: null
+            publishedList: null,
         };
     }
 
-    componentWillMount() {
-        const publishedDoc = this.props.contributions.filter(e => e.ref.id === 'published')[0];
-        console.log(publishedDoc);
-        fb.base.syncDoc(publishedDoc.ref.path, {
-            context: this,
-            state: 'publishedList',
-            withRefs: true
-        });
-        console.log(this.state.publishedList);
+    componentDidMount() {
+        if (this.props.publishedList) {
+            fb.base.syncDoc(this.props.publishedList.ref.path, {
+                context: this,
+                state: 'publishedList',
+                withRefs: true
+            });
+        }
     }
     
     handleAddButtonClick() {
@@ -98,15 +96,6 @@ class MainPageTB extends Component {
         this.props.windowSwap(selectedContribution);
     };
 
-    handlePublishButtonClick(selectedContribution) {
-        console.log(this.state.publishedList);
-        console.log(selectedContribution);
-        let publishedList = this.state.publishedList;
-        publishedList[selectedContribution.ref.id] = 'true';
-        this.setState({ publishedList: publishedList });
-        window.location.href("/preview/"+selectedContribution.name.toLowerCase().replace(/ /g, "-"));
-    }
-
     render() {
         const classes = this.props.classes;
         const contrib = this.props.contributions;
@@ -122,9 +111,10 @@ class MainPageTB extends Component {
                             className={classes.button}>Add Collection </Button>
                         <List className={classes.contributionList}>
                             {contrib.filter(e => e.type).map((e) => {
-                                if (e.ref.id === 'published') return;
+                                let pendingApproval = e.approval === "pending";
+                                let published = this.state.publishedList && this.state.publishedList[e.ref.id] === 'true';
                                 return (
-                                    <div key={e.id || e.name} >
+                                    <div key={e.ref.id || e.name} >
                                         <ListItem className={classes.contributionListItem}>
                                             <h3 className={classes.contributionListName}>{e.name}</h3>
                                             <Button variant="outlined" color={"primary"}
@@ -136,9 +126,11 @@ class MainPageTB extends Component {
                                                     href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
                                                     className={classes.button}>Preview </Button>
                                             <Button variant="outlined" color={"primary"}
-                                                    startIcon={<Publish />}
-                                                    onClick={() => {return this.handlePublishButtonClick.bind(this)(e)}}
-                                                    className={classes.button}>Publish </Button>
+                                                    startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
+                                                    onClick={() => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                    className={classes.button}>
+                                                        {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
+                                                </Button>
                                             <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
                                         </ListItem>
                                     </div>

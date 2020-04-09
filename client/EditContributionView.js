@@ -1,12 +1,11 @@
 import Button from '@material-ui/core/Button';
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormGroup from "@material-ui/core/FormGroup";
 import FormLabel from "@material-ui/core/FormLabel";
 import Paper from "@material-ui/core/Paper";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
-import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import React, { Component } from 'react';
 import 'typeface-roboto';
@@ -15,7 +14,7 @@ import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
 
 import { Visibility } from '@material-ui/icons';
-import { Fab } from '@material-ui/core';
+import { Switch } from '@material-ui/core';
 
 const styles = theme => ({
     container: {
@@ -61,8 +60,23 @@ const styles = theme => ({
     previewButton: {
         display: 'block',
         position: 'fixed',
+        height: 60,
         bottom: 20,
-        right: 20,
+        right: 10,
+    },
+    approvalPaper: {
+        height: 95,
+        position: 'fixed',
+        width: 100,
+        bottom: 95,
+        left: 10,
+    },
+    publishPaper: {
+        height: 65,
+        position: 'fixed',
+        bottom: 20,
+        width: 100,
+        left: 10,
     },
     reviewOptionLeft: {
         marginLeft: '10%',
@@ -75,8 +89,8 @@ const styles = theme => ({
     },
     paper: {
         ...theme.mixins.gutters(),
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
     mediaUploadTitle: {
         width: '10vw',
@@ -97,7 +111,10 @@ class EditContributionView extends Component {
             contribBio: '',
             mediaProcess: '',
             contentEditing: '',
-            contributionData: null
+            contributionData: null,
+            approvalSwitch: false,
+            publishedSwitch: false,
+            publishedList: null,
         };
         
         this.handleNameChange = event => {
@@ -127,6 +144,43 @@ class EditContributionView extends Component {
             });
             this.setState({contributionData: contrib});
         }
+
+        this.handleSwitchChange = (event) => {
+            let contributionData = this.state.contributionData;
+            let publishedList = this.state.publishedList;
+            let publishedSwitch = this.state.publishedSwitch;
+            let approvalSwitch = this.state.approvalSwitch;
+            if (event.target.name === 'publishedSwitch') {
+                if (!this.props.admin) {
+                    console.log("Attempt to publish without admin credentials!");
+                    return;
+                } else if (event.target.checked) {
+                    contributionData.status = "published";
+                    contributionData.approval = "approved";
+                    approvalSwitch = false;
+                    publishedSwitch = true;
+                    publishedList[contributionData.ref.id] = 'true';
+                } else {
+                    contributionData.status = "unpublished";
+                    contributionData.approval = "not requested";
+                    approvalSwitch = false;
+                    publishedSwitch = false;
+                    publishedList[contributionData.ref.id] = 'false';
+                }
+            } else if (event.target.name === 'approvalSwitch') {
+                contributionData.approval = (event.target.checked) ? "pending" : "not requested";
+                approvalSwitch = event.target.checked;
+            } else {
+                console.log("Something called this function...but what??");
+                return;
+            }
+            this.setState({
+                contributionData: contributionData,
+                publishedSwitch: publishedSwitch,
+                approvalSwitch: approvalSwitch,
+                publishedList: publishedList,
+            });
+        };
     }
 
     componentDidMount() {
@@ -137,11 +191,28 @@ class EditContributionView extends Component {
                 withRefs: true
             });
         }
+        if (this.props.publishedList) {
+            fb.base.syncDoc(this.props.publishedList.ref.path, {
+                context: this,
+                state: 'publishedList',
+                withRefs: true
+            });
+        }
     }
 
     render() {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
+        let approvalText = "Request Approval";
+        let publishedText = "Publish";
+        if (contrib) {
+            if (contrib.approval === 'pending') {
+                approvalText = "Pending Approval";
+            }
+            if (this.state.publishedList && (this.state.publishedList[contrib.ref.id] === 'true')) {
+                publishedText = "Published";
+            }
+        }
         return (
             <div>
                 <div>
@@ -230,6 +301,42 @@ class EditContributionView extends Component {
                             href={"/preview/"+this.props.selectedContribution.name.toLowerCase().replace(/ /g, "-")}>
                                 Preview 
                     </Button>
+                    <Paper className={classes.approvalPaper} elevation={3} square={false} color={"primary"}>
+                        <FormControlLabel
+                            color={"primary"}
+                            label={approvalText}
+                            labelPlacement="bottom"
+                            control={
+                                <Switch
+                                    checked={(contrib && (contrib.approval === 'pending')) || this.state.approvalSwitch}
+                                    onChange={this.handleSwitchChange}
+                                    name="approvalSwitch"
+                                    color="secondary"
+                                /> }
+                        />
+                    </Paper>
+                    <Paper className={classes.publishPaper} elevation={3} square={false} color={"primary"}>
+                        <FormControlLabel
+                            color={"primary"}
+                            label={publishedText}
+                            labelPlacement="bottom"
+                            control={
+                                this.props.admin ? 
+                                    <Switch
+                                        name="publishedSwitch"
+                                        checked={(this.state.publishedList && (this.state.publishedList[contrib.ref.id] === 'true')) || this.state.publishedSwitch}
+                                        onChange={this.handleSwitchChange}
+                                        color="secondary"
+                                    /> :
+                                    <Switch
+                                        disabled
+                                        name="publishedSwitch"
+                                        checked={(this.state.publishedList && (this.state.publishedList[contrib.ref.id] === 'true')) || this.state.publishedSwitch}
+                                        color="secondary"
+                                    /> 
+                                }
+                        />
+                    </Paper>
                 </div>
             </div>
         );

@@ -23,6 +23,7 @@ class App extends Component {
             selectedContribution: undefined,
             adminPanel: undefined,
             pageLoadDone: false,
+            publishedList: null,
         }
     }
 
@@ -32,7 +33,15 @@ class App extends Component {
             fb.base.bindCollection(`Contributions`, {
                 context: this,
                 state: 'contributions',
-                withRefs: true
+                withRefs: true,
+                then: () => {
+                    // Get published
+                    fb.db.collection("Contributions").doc("published").get().then((snapshot) => {
+                        let publishedList = this.state.publishedList;
+                        publishedList = (snapshot.exists) ? snapshot.data() : null;
+                        this.setState({publishedList: publishedList});
+                    });
+                }
             });
 
             fb.base.bindCollection(`Users`, {
@@ -113,7 +122,13 @@ class App extends Component {
 
         switch (currentWindow) {
             case 1:
-                x = <EditContributionView selectedContribution={this.state.selectedContribution}
+                x = (this.state.user && this.state.user.admin) ?
+                        <EditContributionView selectedContribution={this.state.selectedContribution}
+                                             admin={true}
+                                             publishedList={this.state.publishedList}
+                                             windowSwap={this.windowSwap.bind(this)}/> :
+                        <EditContributionView selectedContribution={this.state.selectedContribution}
+                                             publishedList={this.state.publishedList}
                                              windowSwap={this.windowSwap.bind(this)}/>;
                                              break;
             case 2:
@@ -124,7 +139,8 @@ class App extends Component {
             default:
                 x = <ContributionsListView contributions={this.state.contributions}
                                    windowSwap={this.windowSwap.bind(this)}
-                                    adminSwap={this.adminSwap.bind(this)}/>;
+                                   publishedList={this.state.publishedList}
+                                   adminSwap={this.adminSwap.bind(this)}/>;
         }
             
 
