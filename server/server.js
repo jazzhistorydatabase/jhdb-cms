@@ -156,6 +156,14 @@ app.get("/preview/branch", (req, res) => {
 
 app.get("/preview/:collection", previewReqHandler);
 
+let publishedReqHandler = (req, res) => {
+    let collName = req.params.collection.toLowerCase();
+    logger.info(`User request view published collection: ${collName}`);
+    return renderFromFirebase(req, res, collName);
+}
+
+app.get("/published/:collection", publishedReqHandler);
+
 app.get("/upload", (req, res) => {
     logger.info('User requesting upload link. Validating token...');
     let token = req.query["auth"];

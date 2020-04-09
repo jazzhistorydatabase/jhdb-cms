@@ -110,7 +110,9 @@ class MainPageTB extends Component {
                                                     className={classes.button}>Preview </Button>
                                             <Button variant="outlined" color={"primary"}
                                                     startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
-                                                    onClick={() => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                    onClick={(published) ? 
+                                                        () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
+                                                        () => { return this.handleEditButtonClick.bind(this)(e) }}
                                                     className={classes.button}>
                                                         {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
                                                 </Button>
