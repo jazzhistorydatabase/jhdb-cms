@@ -150,16 +150,53 @@ class EditContributionView extends Component {
                     console.log("Attempt to publish without admin credentials!");
                     return;
                 } else if (event.target.checked) {
-                    contributionData.status = "published";
-                    contributionData.approval = "approved";
-                    publishedList[contributionData.ref.id] = 'true';
+                    if (window.confirm('Are you sure you want to publish "' + contributionData.name +
+                            '"?\n\nThis will make it publicly accessible via the Jazz History Database ' +
+                            'website. You may visit your published contribution by clicking the ' + 
+                            '"Published" button next to the contribution name in the "My Collections" page.')) {
+                        contributionData.status = "published";
+                        contributionData.approval = "approved";
+                        publishedList[contributionData.ref.id] = 'true';
+                    }
                 } else {
-                    contributionData.status = "unpublished";
-                    contributionData.approval = "not requested";
-                    publishedList[contributionData.ref.id] = 'false';
+                    if (window.confirm('Are you sure you want to unpublish "' + contributionData.name +
+                            '"?\n\nThis contribution will no longer be publicly accessible from the Jazz ' +
+                            'History Database website. However, all your media files will remain in ' +
+                            'Dropbox, and this contribution will remain accessible through this portal. ' +
+                            'You may make any desired changes to your contribution while it is unpublished. ' +
+                            'To publish your contribution again, you may need to request approval from ' +
+                            'the JHDB administrators again. You may preview your contribution anytime by ' +
+                            'clicking the "Preview" button on this page.')) {
+                        contributionData.status = "unpublished";
+                        contributionData.approval = "not requested";
+                        publishedList[contributionData.ref.id] = 'false';
+                    }
                 }
             } else if (event.target.name === 'approvalSwitch') {
-                contributionData.approval = (event.target.checked) ? "pending" : "not requested";
+                if (event.target.checked) {
+                    if (window.confirm('Are you sure you want to request approval to publish "' +
+                            contributionData.name + '"?\n\nThis will notify JHDB administrators that ' +
+                            'your contribution is ready to be published. It will go through a review ' +
+                            'process according to JHDB\'s standards for publishing. An administrator ' +
+                            'may approve and publish your contribution, or request changes before ' +
+                            'publishing. Make sure to check your email in case an administrator wants ' +
+                            'to get in contact with you. Please refrain from making changes to your ' +
+                            'contribution while it is pending approval, to ensure that JHDB ' +
+                            'administrators won\'t review incomplete changes. You may preview your ' +
+                            'contribution anytime using the "Preview" button on this page.')) {
+                        contributionData.approval = "pending";
+                    }
+                } else {
+                    if (window.confirm('Are you sure you want to rescind your reqeust for approval to ' +
+                            'publish "' + contributionData.name + '"?\n\nThis will notify JHDB ' +
+                            'administrators that your contribution is no longer ready to be published. ' +
+                            'You may rescind your request for approval at any time - your contribution ' +
+                            'will remain accessible through this portal. ' +
+                            'If you need to make changes to your contribution, please do this ' +
+                            'as soon as possible.')) {
+                        contributionData.approval = "not requested";
+                    }
+                }
             } else {
                 console.log("Something called this function...but what??");
                 return;
