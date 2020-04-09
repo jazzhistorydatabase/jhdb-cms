@@ -54,23 +54,6 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            publishedList: null,
-        };
-    }
-
-    componentDidMount() {
-        if (this.props.publishedList) {
-            fb.base.syncDoc(this.props.publishedList.ref.path, {
-                context: this,
-                state: 'publishedList',
-                withRefs: true
-            });
-        }
-    }
     
     handleAddButtonClick() {
         let contribName = window.prompt("Enter collection name:");
@@ -112,7 +95,7 @@ class MainPageTB extends Component {
                         <List className={classes.contributionList}>
                             {contrib.filter(e => e.type).map((e) => {
                                 let pendingApproval = e.approval === "pending";
-                                let published = this.state.publishedList && this.state.publishedList[e.ref.id] === 'true';
+                                let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
                                 return (
                                     <div key={e.ref.id || e.name} >
                                         <ListItem className={classes.contributionListItem}>

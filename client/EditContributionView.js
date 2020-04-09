@@ -112,9 +112,6 @@ class EditContributionView extends Component {
             mediaProcess: '',
             contentEditing: '',
             contributionData: null,
-            approvalSwitch: false,
-            publishedSwitch: false,
-            publishedList: null,
         };
         
         this.handleNameChange = event => {
@@ -147,9 +144,7 @@ class EditContributionView extends Component {
 
         this.handleSwitchChange = (event) => {
             let contributionData = this.state.contributionData;
-            let publishedList = this.state.publishedList;
-            let publishedSwitch = this.state.publishedSwitch;
-            let approvalSwitch = this.state.approvalSwitch;
+            let publishedList = this.props.publishedList;
             if (event.target.name === 'publishedSwitch') {
                 if (!this.props.admin) {
                     console.log("Attempt to publish without admin credentials!");
@@ -157,29 +152,19 @@ class EditContributionView extends Component {
                 } else if (event.target.checked) {
                     contributionData.status = "published";
                     contributionData.approval = "approved";
-                    approvalSwitch = false;
-                    publishedSwitch = true;
                     publishedList[contributionData.ref.id] = 'true';
                 } else {
                     contributionData.status = "unpublished";
                     contributionData.approval = "not requested";
-                    approvalSwitch = false;
-                    publishedSwitch = false;
                     publishedList[contributionData.ref.id] = 'false';
                 }
             } else if (event.target.name === 'approvalSwitch') {
                 contributionData.approval = (event.target.checked) ? "pending" : "not requested";
-                approvalSwitch = event.target.checked;
             } else {
                 console.log("Something called this function...but what??");
                 return;
             }
-            this.setState({
-                contributionData: contributionData,
-                publishedSwitch: publishedSwitch,
-                approvalSwitch: approvalSwitch,
-                publishedList: publishedList,
-            });
+            this.setState({ contributionData: contributionData });
         };
     }
 
@@ -188,13 +173,6 @@ class EditContributionView extends Component {
             fb.base.syncDoc(this.props.selectedContribution.ref.path, {
                 context: this,
                 state: 'contributionData',
-                withRefs: true
-            });
-        }
-        if (this.props.publishedList) {
-            fb.base.syncDoc(this.props.publishedList.ref.path, {
-                context: this,
-                state: 'publishedList',
                 withRefs: true
             });
         }
@@ -209,7 +187,7 @@ class EditContributionView extends Component {
             if (contrib.approval === 'pending') {
                 approvalText = "Pending Approval";
             }
-            if (this.state.publishedList && (this.state.publishedList[contrib.ref.id] === 'true')) {
+            if (this.props.publishedList && (this.props.publishedList[contrib.ref.id] === 'true')) {
                 publishedText = "Published";
             }
         }
@@ -308,7 +286,7 @@ class EditContributionView extends Component {
                             labelPlacement="bottom"
                             control={
                                 <Switch
-                                    checked={(contrib && (contrib.approval === 'pending')) || this.state.approvalSwitch}
+                                    checked={(contrib && (contrib.approval === 'pending'))}
                                     onChange={this.handleSwitchChange}
                                     name="approvalSwitch"
                                     color="secondary"
@@ -324,14 +302,14 @@ class EditContributionView extends Component {
                                 this.props.admin ? 
                                     <Switch
                                         name="publishedSwitch"
-                                        checked={(this.state.publishedList && (this.state.publishedList[contrib.ref.id] === 'true')) || this.state.publishedSwitch}
+                                        checked={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
                                         onChange={this.handleSwitchChange}
                                         color="secondary"
                                     /> :
                                     <Switch
                                         disabled
                                         name="publishedSwitch"
-                                        checked={(this.state.publishedList && (this.state.publishedList[contrib.ref.id] === 'true')) || this.state.publishedSwitch}
+                                        checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
                                         color="secondary"
                                     /> 
                                 }

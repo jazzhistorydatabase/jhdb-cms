@@ -39,7 +39,11 @@ class App extends Component {
                     fb.db.collection("Contributions").doc("published").get().then((snapshot) => {
                         let publishedList = this.state.publishedList;
                         publishedList = (snapshot.exists) ? snapshot.data() : null;
-                        this.setState({publishedList: publishedList});
+                        fb.base.syncDoc(publishedList.ref.path, {
+                            context: this,
+                            state: 'publishedList',
+                            withRefs: true
+                        });
                     });
                 }
             });
