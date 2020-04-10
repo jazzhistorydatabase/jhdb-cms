@@ -34,13 +34,12 @@ class App extends Component {
                 context: this,
                 state: 'contributions',
                 withRefs: true,
-                then: () => {
-                    fb.base.syncDoc("/Contributions/published", {
-                        context: this,
-                        state: 'publishedList',
-                        withRefs: true
-                    });
-                }
+            });
+
+            fb.base.syncDoc("/Contributions/published", {
+                context: this,
+                state: 'publishedList',
+                withRefs: true
             });
 
             fb.base.bindCollection(`Users`, {
