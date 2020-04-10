@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  nodejs:
+    build:
+      context: .
+    image: nodejs
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    working_dir: /app
+    command: npm run dev
+volumes:
+  node_modules:
