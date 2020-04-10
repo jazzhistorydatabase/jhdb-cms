@@ -187,7 +187,8 @@ class EditContributionView extends Component {
                         contributionData.approval = "pending";
                     }
                 } else {
-                    if (window.confirm('Are you sure you want to rescind your reqeust for approval to ' +
+                    if (this.props.admin || 
+                        window.confirm('Are you sure you want to rescind your request for approval to ' +
                             'publish "' + contributionData.name + '"?\n\nThis will notify JHDB ' +
                             'administrators that your contribution is no longer ready to be published. ' +
                             'You may rescind your request for approval at any time - your contribution ' +
