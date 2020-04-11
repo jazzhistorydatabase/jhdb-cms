@@ -23,6 +23,7 @@ class App extends Component {
             selectedContribution: undefined,
             adminPanel: undefined,
             pageLoadDone: false,
+            publishedList: null,
         }
     }
 
@@ -32,6 +33,12 @@ class App extends Component {
             fb.base.bindCollection(`Contributions`, {
                 context: this,
                 state: 'contributions',
+                withRefs: true,
+            });
+
+            fb.base.syncDoc("/Contributions/published", {
+                context: this,
+                state: 'publishedList',
                 withRefs: true
             });
 
@@ -113,7 +120,13 @@ class App extends Component {
 
         switch (currentWindow) {
             case 1:
-                x = <EditContributionView selectedContribution={this.state.selectedContribution}
+                x = (this.state.user && this.state.user.admin) ?
+                        <EditContributionView selectedContribution={this.state.selectedContribution}
+                                             admin={true}
+                                             publishedList={this.state.publishedList}
+                                             windowSwap={this.windowSwap.bind(this)}/> :
+                        <EditContributionView selectedContribution={this.state.selectedContribution}
+                                             publishedList={this.state.publishedList}
                                              windowSwap={this.windowSwap.bind(this)}/>;
                                              break;
             case 2:
@@ -124,7 +137,8 @@ class App extends Component {
             default:
                 x = <ContributionsListView contributions={this.state.contributions}
                                    windowSwap={this.windowSwap.bind(this)}
-                                    adminSwap={this.adminSwap.bind(this)}/>;
+                                   publishedList={this.state.publishedList}
+                                   adminSwap={this.adminSwap.bind(this)}/>;
         }
             
 

@@ -1,11 +1,10 @@
 import Button from '@material-ui/core/Button';
-import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Paper from "@material-ui/core/Paper";
-import { Add, Edit, Visibility } from "@material-ui/icons";
+import {Add, Edit, Visibility, Person, PriorityHigh, Done } from "@material-ui/icons";
 
 
 import fb from './firebase';
@@ -55,7 +54,7 @@ const styles = theme => ({
 });
 
 class MainPageTB extends Component {
-
+    
     handleAddButtonClick() {
         let contribName = window.prompt("Enter collection name:");
         if (contribName) {
@@ -95,8 +94,10 @@ class MainPageTB extends Component {
                             className={classes.button}>Add Collection </Button>
                         <List className={classes.contributionList}>
                             {contrib.filter(e => e.type).map((e) => {
+                                let pendingApproval = e.approval === "pending";
+                                let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
                                 return (
-                                    <div key={e.id || e.name} >
+                                    <div key={e.ref.id || e.name} >
                                         <ListItem className={classes.contributionListItem}>
                                             <h3 className={classes.contributionListName}>{e.name}</h3>
                                             <Button variant="outlined" color={"primary"}
@@ -104,9 +105,17 @@ class MainPageTB extends Component {
                                                 startIcon={<Edit />}
                                                 className={classes.button}>Edit </Button>
                                             <Button variant="outlined" color={"primary"}
-                                                startIcon={<Visibility />}
-                                                href={"/preview/" + e.name.toLowerCase().replace(/ /g, "-")}
-                                                className={classes.button}>Preview </Button>
+                                                    startIcon={<Visibility />}
+                                                    href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
+                                                    className={classes.button}>Preview </Button>
+                                            <Button variant="outlined" color={"primary"}
+                                                    startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
+                                                    onClick={(published) ? 
+                                                        () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
+                                                        () => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                    className={classes.button}>
+                                                        {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
+                                                </Button>
                                             <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
                                         </ListItem>
                                     </div>

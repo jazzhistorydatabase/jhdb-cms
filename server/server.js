@@ -52,91 +52,85 @@ app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 
-// Define function to pull contribution from firebase and render with handlebars
-let renderFromFirebase = (req, res, collectionName, collectionId="") => {
-    let collsRef;
+let fetchContributionByName = (req, res, contributionName, callback) => {
     const collRoot = fb.firestore().collection("Contributions");
-    let collName = collectionName.toLowerCase().replace(/-/g, " ")
+    let collsRef;
+    let collName = contributionName.toLowerCase().replace(/-/g, " ")
         .split(" ")
         .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
         .join(" ");
-
-    if(collectionId) {
-        logger.info(`Fetching collection by id: ${collectionId}`)
-        collsRef = collRoot.doc(collectionId);
-    } else {
-        logger.info(`Fetching collection by name: "${collectionName}" -> "${collName}"`)
-        collsRef = collRoot.where("name", "==", collName);
-    }
-
+    logger.info(`Fetching contribution by name: "${contributionName}" -> "${collName}"`);
+    collsRef = collRoot.where("name", "==", collName);
     collsRef.get().then(snapshots => {
-        if(!collectionId && snapshots.empty) {
-            // No such collection
-            logger.error(`No matching collections found for name: ${collectionName} id: ${collectionId}`);
-            res.send("No matching collections found");
+        if (snapshots.empty) { // No such collection
+            logger.error(`No matching contributions found for name: ${contributionName}`);
+            res.send("No matching contributions found");
+            callback(req, res, null);
             return;
         } else {
-            let snap = collectionId ?  [snapshots] : snapshots;
-            logger.log(`Found ${snapshots.size} matches for name: ${collectionName} id: ${collectionId}`);
-            snap.forEach(collRef => {
-                let collectionDoc = collRef.data();
-
-
-                console.log(collRef);
-
-                let images = [];
-                collRef.ref.collection("Images").get().then( imgSnapshot => {
-                    imgSnapshot.forEach(doc => {
-                        images.push(doc.data());
-                    });
-                    let audio = [];
-                    collRef.ref.collection("Audio").get().then( audioSnapshot => {
-                        audioSnapshot.forEach(doc => {
-                            audio.push(doc.data());
-                        });
-
-                        let video = [];
-                        collRef.ref.collection("Video").get().then( videoSnapshot => {
-                            videoSnapshot.forEach(doc => {
-                                let data = doc.data();
-                                data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
-                                video.push(data);
-                            });
-
-                            logger.log(`Rendering preview template with name: ${collectionName} found doc id: ${collRef.id}`);
-
-                            collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
-
-                            collectionDoc.images = images;
-                            collectionDoc.audio = audio;
-                            collectionDoc.video = video;
-                            res.render("preview", collectionDoc);
-                            logger.success(`Successfully rendered preview template with name: ${collectionName} doc id: ${collRef.id}`);
-                            return;
-                        }).catch( err => {
-                            logger.error(`Error fetching video for name: ${collectionName} id: ${collectionId}`, err);
-                            res.render("preview", collectionDoc);
-                        });
-                    }).catch( err => {
-                        logger.error(`Error fetching audio for name: ${collectionName} id: ${collectionId}`, err);
-                        res.render("preview", collectionDoc);
-                    });
-                }).catch( err => {
-                    logger.error(`Error fetching images for name: ${collectionName} id: ${collectionId}`, err);
-                    res.render("preview", collectionDoc);
-                });
-
-            })
+            logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
+            snapshots.forEach(snapshot => {
+                let collRef = snapshot.data();
+                callback(req, res, collRef);
+            });
         }
     }).catch( err => {
-        logger.error(`Error fetching collection by name "${collectionName}" or id "${collectionId}"`, err);
+        logger.error(`Error fetching contribution by name "${contributionName}"`, err);
+        callback(req, res, null);
+    });
+};
+
+// Define function to render with handlebars
+let renderFromFirebase = (req, res, collRef) => {
+    if (!collRef) return;
+    let images = [];
+    let collectionDoc = collRef;
+    collRef.ref.collection("Images").get().then( imgSnapshot => {
+        imgSnapshot.forEach(doc => {
+            images.push(doc.data());
+        });
+        let audio = [];
+        collRef.ref.collection("Audio").get().then( audioSnapshot => {
+            audioSnapshot.forEach(doc => {
+                audio.push(doc.data());
+            });
+
+            let video = [];
+            collRef.ref.collection("Video").get().then( videoSnapshot => {
+                videoSnapshot.forEach(doc => {
+                    let data = doc.data();
+                    data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
+                    video.push(data);
+                });
+
+                logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
+
+                collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+
+                collectionDoc.images = images;
+                collectionDoc.audio = audio;
+                collectionDoc.video = video;
+                res.render("preview", collectionDoc);
+                logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
+                return;
+            }).catch( err => {
+                logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
+                res.render("preview", collectionDoc);
+            });
+        }).catch( err => {
+            logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
+            res.render("preview", collectionDoc);
+        });
+    }).catch( err => {
+        logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
+        res.render("preview", collectionDoc);
     });
 };
 
 let previewReqHandler = (req, res) => {
     let collName = req.params.collection.toLowerCase();
     logger.info(`User request preview for collection: ${collName}`);
-    return renderFromFirebase(req, res, collName);
+    fetchContributionByName(req, res, collName, renderFromFirebase);
 }
 
 // app.get("/preview/header-new.html", (req, res) => {
@@ -156,6 +150,31 @@ let previewReqHandler = (req, res) => {
 app.use("/mockup", express.static(path.join(__dirname, './mockup')));
 
 app.get("/preview/:collection", previewReqHandler);
+
+let publishedReqHandler = (req, res) => {
+    let collName = req.params.collection.toLowerCase();
+    logger.info(`User request view published collection: ${collName}`);
+    fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
+        if (snapshot.exists) {
+            let publishedList = snapshot.data();
+            fetchContributionByName(req, res, collName, (req, res, collRef) => {
+                if (!collRef) return;
+                if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
+                    // This contribution is published - proceed
+                    renderFromFirebase(req, res, collRef);
+                } else {
+                    logger.error(`Contribution "${collName}" is not published.`);
+                    res.send("This contribution is not published!");
+                }
+            });
+        } else {
+            console.log("Unable to fetch published list from Firebase!");
+            res.sendStatus(500);
+        }
+    });
+}
+
+app.get("/published/:collection", publishedReqHandler);
 
 app.get("/upload", (req, res) => {
     logger.info('User requesting upload link. Validating token...');
