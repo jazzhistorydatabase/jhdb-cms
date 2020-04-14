@@ -151,7 +151,6 @@ class EditContributionView extends Component {
                     'deleted.')) {
                 let publishedList = this.props.publishedList;
                 publishedList[contributionData.ref.id] = 'false';
-                // this.setState({});
                 fb.base.removeDoc(this.state.contributionData.ref);
                 this.handleBeforeButtonClick();
             }
