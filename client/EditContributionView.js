@@ -140,7 +140,21 @@ class EditContributionView extends Component {
                 contrib[key] = newState[key];
             });
             this.setState({contributionData: contrib});
-        }
+        };
+
+        this.handleDeleteContribution = event => {
+            let contributionData = this.state.contributionData;
+            if (window.confirm('Are you sure you want to delete "' + contributionData.name +
+                    '"?\n\nThis will remove this collection from the contributor portal.\n\nThis ' +
+                    'cannot be undone!\n\nAll your media files (bio photo, images, audio, video) will ' +
+                    'remain in Dropbox. However, any captions, links, and bio description will be ' +
+                    'deleted.')) {
+                let publishedList = this.props.publishedList;
+                publishedList[contributionData.ref.id] = 'false';
+                fb.base.removeDoc(this.state.contributionData.ref);
+                this.handleBeforeButtonClick();
+            }
+        };
 
         this.handleSwitchChange = (event) => {
             let contributionData = this.state.contributionData;
@@ -307,6 +321,11 @@ class EditContributionView extends Component {
                                     collection={this.props.selectedContribution.ref.collection("Video")}
                                     onChange={this.handleChildChange}/>
                     </FormControl>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <Button onClick={this.handleDeleteContribution} variant="outlined" color={"primary"}
+                            className={classes.button}> Delete Contribution </Button>
                     <br/>
                     <br/>
                     <br/>
