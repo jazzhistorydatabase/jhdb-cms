@@ -32,6 +32,11 @@ service cloud.firestore {
     match /Users/{uid} {
     	allow create, read, write: if (userExists() && userIsAdmin()) || (request.auth.uid == uid);
     }
+
+    match /Contributions/published {
+      allow read;
+      allow write: if userExists() && userIsAdmin();
+    }
   }
 
 

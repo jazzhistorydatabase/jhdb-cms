@@ -175,7 +175,7 @@ fabric.properties
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+.vscode
 # Legacy credentials file
 fb-server-creds.json
 
