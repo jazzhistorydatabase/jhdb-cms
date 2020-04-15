@@ -42,6 +42,10 @@ class FileUpload extends Component {
         };
 
         this.handleTextChange = event => {
+            if (this.props.isPendingApproval) {
+                window.alert("Please rescind your request for approval before making changes.");
+                return;
+            }
             let fileDoc = this.state.fileDoc;
             if (this.props.fileType === 'Video' && event.target.id.indexOf('multiline') === -1)  {
                 if (this.props.bio) {
@@ -58,6 +62,10 @@ class FileUpload extends Component {
 
 
     handleDelete() {
+        if (this.props.isPendingApproval) {
+            window.alert("Please rescind your request for approval before making changes.");
+            return;
+        }
         if(window.confirm("Are you sure you want to remove this item? This can not be undone!\n\n(This will not remove the file from dropbox or your computer)")) {
             if (this.props.bio) {
                 let fileDoc = this.state.fileDoc;
@@ -126,7 +134,9 @@ class FileUpload extends Component {
                         className={classes.fab}
                         onClick={
                             () => {
-                                if (this.state.fileDoc) {
+                                if (this.props.isPendingApproval) {
+                                    window.alert("Please rescind your request for approval before making changes.");
+                                } else if (this.state.fileDoc) {
                                     dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
                                 }
                             }
