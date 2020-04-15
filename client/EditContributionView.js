@@ -342,14 +342,8 @@ class EditContributionView extends Component {
                             label={approvalText}
                             labelPlacement="bottom"
                             control={
-                                ((this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))) ?
                                 <Switch
-                                    disabled
-                                    checked={false}
-                                    name="approvalSwitch"
-                                    color="secondary"
-                                /> :
-                                <Switch
+                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
                                     checked={(contrib && (contrib.approval === 'pending'))}
                                     onChange={this.handleSwitchChange}
                                     name="approvalSwitch"
