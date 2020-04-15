@@ -133,7 +133,6 @@ let previewReqHandler = (req, res) => {
     fetchContributionByName(req, res, collName, renderFromFirebase);
 }
 
-// });
 app.get("/preview/header-new.html", (req, res) => {
     logger.info('User request preview/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
