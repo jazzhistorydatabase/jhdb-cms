@@ -172,7 +172,12 @@ let publishedReqHandler = (req, res) => {
             res.sendStatus(500);
         }
     });
-}
+};
+
+app.get("/published/header-new.html", (req, res) => {
+    logger.info('User request published/header-new.html');
+    res.sendFile("./mockup/header-new.html", {root: __dirname});
+});
 
 app.get("/published/:collection", publishedReqHandler);
 
