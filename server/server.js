@@ -133,20 +133,20 @@ let previewReqHandler = (req, res) => {
     fetchContributionByName(req, res, collName, renderFromFirebase);
 }
 
-// app.get("/preview/header-new.html", (req, res) => {
-//     logger.info('User request preview/header-new.html');
-//     res.sendFile("./templates/header-new.html", {root: __dirname});
-// });
+app.get("/preview/header-new.html", (req, res) => {
+    logger.info('User request preview/header-new.html');
+    res.sendFile("./mockup/header-new.html", {root: __dirname});
+});
 
-// app.get("/preview/home", (req, res) => {
-//     logger.info('User request preview/home');
-//     res.sendFile("./templates/CMS-landing-page.html", {root: __dirname});
-// });
+app.get("/preview/home", (req, res) => {
+    logger.info('User request preview/home');
+    res.sendFile("./templates/CMS-landing-page.html", {root: __dirname});
+});
 
-// app.get("/preview/branch", (req, res) => {
-//     logger.info('User request preview/branch');
-//     res.sendFile("./templates/landing-page.html", {root: __dirname});
-// });
+app.get("/preview/branch", (req, res) => {
+    logger.info('User request preview/branch');
+    res.sendFile("./templates/landing-page.html", {root: __dirname});
+});
 app.use("/mockup", express.static(path.join(__dirname, './mockup')));
 
 app.get("/preview/:collection", previewReqHandler);
@@ -172,7 +172,12 @@ let publishedReqHandler = (req, res) => {
             res.sendStatus(500);
         }
     });
-}
+};
+
+app.get("/published/header-new.html", (req, res) => {
+    logger.info('User request published/header-new.html');
+    res.sendFile("./mockup/header-new.html", {root: __dirname});
+});
 
 app.get("/published/:collection", publishedReqHandler);
 
