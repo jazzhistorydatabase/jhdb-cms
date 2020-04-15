@@ -55,18 +55,24 @@ class FileUpload extends Component {
             this.setState({fileDoc: fileDoc});
         };
 
-        this.handleLinkBLur = event => {
+        this.handleLinkBlur = event => {
             if (this.props.fileType === 'Video') {
                 let fileDoc = this.state.fileDoc;
                 let url = event.target.value;
                 if (!url.includes('youtu.be/')) { // Not a sharable link
-                    if (url.includes('youtube.com/watch?v='))  {
+                    if (url.includes('youtube.com/watch?'))  {
                         // ...but we may be able to fix it
                         let videoId;
-                        if (url.includes('&')) { // link includes extra params - remove them
-                            videoId = url.substring(url.indexOf("=") + 1, url.indexOf('&'));
-                        } else {
-                            videoId = url.substring(url.indexOf("=") + 1);
+                        let videoIdStartIndex = url.indexOf("v=") + 2;
+                        if (url.includes('&')) { // link includes multiple params
+                            let videoIdEndIndex = url.indexOf('&', videoIdStartIndex);
+                            if (videoIdEndIndex < 0) { // video ID is last param
+                                videoId = url.substring(videoIdStartIndex);
+                            } else { // video ID is somewhere in the middle
+                                videoId = url.substring(videoIdStartIndex, videoIdEndIndex);
+                            }
+                        } else { // Video ID is only param
+                            videoId = url.substring(videoIdStartIndex);
                         }
                         fileDoc.url = "https://youtu.be/" + videoId;
                         this.setState({fileDoc: fileDoc});
@@ -164,7 +170,7 @@ class FileUpload extends Component {
                     style={{margin: 5}}
                     value={(this.state.fileDoc && this.state.fileDoc[url]) || ""}
                     onChange={this.handleTextChange}
-                    onBlur={this.handleLinkBLur}
+                    onBlur={this.handleLinkBlur}
                     margin="normal"
                     variant="filled"
                     placeholder={'Click SHARE on YouTube'}
