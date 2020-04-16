@@ -58,6 +58,11 @@ class MainPageTB extends Component {
     handleAddButtonClick() {
         let contribName = window.prompt("Enter collection name:");
         if (contribName) {
+            let lst = this.props.contributions;
+            let maxIndex = 0;
+            lst.forEach( (e) => {
+                if(e.index > maxIndex) maxIndex = e.index;
+            })
             fb.base.addToCollection(`Contributions`, {
                 name: contribName,
                 description: '',
@@ -69,6 +74,7 @@ class MainPageTB extends Component {
                 bioUrl: '',
                 bioName: '',
                 bioThumbnail: '',
+                index: maxIndex + 1,
             });
         } else {
             window.alert("Collection name can not be blank!");
@@ -81,7 +87,13 @@ class MainPageTB extends Component {
 
     render() {
         const classes = this.props.classes;
-        const contrib = this.props.contributions;
+        let contrib = this.props.contributions;
+        contrib = contrib.filter(e => e.type);
+        contrib.sort((a, b) => {
+            if (!a.index) return 1;
+            if (!b.index) return -1;
+            return b.index - a.index;
+        });
 
         return (
             <div>
@@ -93,7 +105,7 @@ class MainPageTB extends Component {
                         <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} variant="outlined" color={"primary"} startIcon={<Add />}
                             className={classes.button}>Add Collection </Button>
                         <List className={classes.contributionList}>
-                            {contrib.filter(e => e.type).map((e) => {
+                            {contrib.map((e) => {
                                 let pendingApproval = e.approval === "pending";
                                 let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
                                 return (
