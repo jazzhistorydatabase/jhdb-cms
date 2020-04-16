@@ -134,7 +134,6 @@ class MediaUpload extends Component {
             return a.index - b.index;
         });
         fileUploads = fileUploads.map((fileDoc) => {
-            console.log(fileDoc.index);
             return (
                 <FileUpload key={fileDoc.index || fileDoc.name || randomBytes(2)}
                             fileType={this.props.uploadName}
