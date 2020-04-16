@@ -363,11 +363,12 @@ class EditContributionView extends Component {
                             labelPlacement="bottom"
                             control={
                                 <Switch
+                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
                                     checked={(contrib && (contrib.approval === 'pending'))}
                                     onChange={this.handleSwitchChange}
                                     name="approvalSwitch"
                                     color="secondary"
-                                /> }
+                                />}
                         />
                     </Paper>
                     <Paper className={classes.publishPaper} elevation={3} square={false} color={"primary"}>
