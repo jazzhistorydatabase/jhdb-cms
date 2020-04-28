@@ -39,7 +39,7 @@
 
 </head>
 
-<body>
+<body class="">
 
 <!-- Document Wrapper
 ============================================= -->
@@ -90,6 +90,10 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+
+        #page-menu.sticky-page-menu #page-menu-wrap {
+            top: 60px;
+        }
     </style>
 
 
@@ -98,7 +102,7 @@
     <section id="content">
         <!-- Collection nav bar start-->
         <div id="page-menu">
-            <div style="background-color: #333333">
+            <div id="page-menu-wrap">
                 <div class="container clearfix">
                     <div class="menu-title" style="cursor:pointer;" onclick="goToByScroll('section-bio')"> {{name}} Collection </div>
                     <nav>
@@ -117,8 +121,7 @@
                             </li>
                         </ul>
                     </nav>
-                    <div id="page-submenu-trigger"><i class="icon-reorder"></i>
-                    </div>
+                    <div id="page-submenu-trigger"><i class="icon-reorder"></i></div>
                 </div>
             </div>
         </div>
@@ -166,13 +169,13 @@
                             <h2> Images</h2>
                         </div>
                         <!--Carousel-->
-                        <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="5" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
+                        <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="{{dataItems}}" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
                             {{#each images }}
                                 <div class="oc-item">
                                     <div class="iportfolio">
                                         <div class="portfolio-image">
-                                            <a class="resize" href="#">
-                                                <img src="{{url}}" alt="{{name}}" height="200px">
+                                            <a href="#">
+                                                <img src="{{url}}" alt="{{name}}">
                                             </a>
 
                                             <div class="portfolio-overlay">
@@ -228,8 +231,7 @@
                 </div>
             {{/if}}
         </div>
-    </div>
-</div>
+    </section>
 </div>
 
 <!-- Footer
@@ -239,8 +241,6 @@
 
 
 
-
-</div>
 <!-- #wrapper end -->
 
 <!-- Go To Top

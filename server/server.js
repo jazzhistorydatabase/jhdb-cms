@@ -142,6 +142,8 @@ let renderFromFirebase = (req, res, collRef) => {
 
                 collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
 
+                collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
+
                 collectionDoc.images = images;
                 collectionDoc.audio = audio;
                 collectionDoc.video = video;
