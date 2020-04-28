@@ -62,18 +62,10 @@ class FileUpload extends Component {
                 if (!url.includes('youtu.be/')) { // Not a sharable link
                     if (url.includes('youtube.com/watch?'))  {
                         // ...but we may be able to fix it
-                        let videoId;
-                        let videoIdStartIndex = url.indexOf("v=") + 2;
-                        if (url.includes('&')) { // link includes multiple params
-                            let videoIdEndIndex = url.indexOf('&', videoIdStartIndex);
-                            if (videoIdEndIndex < 0) { // video ID is last param
-                                videoId = url.substring(videoIdStartIndex);
-                            } else { // video ID is somewhere in the middle
-                                videoId = url.substring(videoIdStartIndex, videoIdEndIndex);
-                            }
-                        } else { // Video ID is only param
-                            videoId = url.substring(videoIdStartIndex);
-                        }
+                        // find the video id within the url
+                        let regex = /\?v=([^&]*)([&$]*?)/gi;
+                        let match = regex.exec(url);
+                        let videoId = match[1];
                         fileDoc.url = "https://youtu.be/" + videoId;
                         this.setState({fileDoc: fileDoc});
                     }
