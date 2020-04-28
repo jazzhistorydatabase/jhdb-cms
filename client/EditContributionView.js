@@ -259,6 +259,7 @@ class EditContributionView extends Component {
                 publishedText = "Published";
             }
         }
+        
         return (
             <div>
                 <div>
@@ -377,17 +378,11 @@ class EditContributionView extends Component {
                             label={publishedText}
                             labelPlacement="bottom"
                             control={
-                                this.props.admin ? 
                                     <Switch
-                                        name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
-                                        onChange={this.handleSwitchChange}
-                                        color="secondary"
-                                    /> :
-                                    <Switch
-                                        disabled
+                                        disabled={!this.props.admin}
                                         name="publishedSwitch"
                                         checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        onChange={this.handleSwitchChange}
                                         color="secondary"
                                     /> 
                                 }
