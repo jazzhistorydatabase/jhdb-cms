@@ -12,8 +12,9 @@ import 'typeface-roboto';
 import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
+import RichTextEditor from 'react-rte';
 
-import { Visibility } from '@material-ui/icons';
+import { Visibility, Save } from '@material-ui/icons';
 import { Switch } from '@material-ui/core';
 
 const styles = theme => ({
@@ -56,6 +57,14 @@ const styles = theme => ({
         width: '200px',
         height: '40px',
         margin: 20,
+    },
+    saveButton: {
+        display: 'block',
+        position: 'fixed',
+        backgroundColor: 'green',
+        height: 60,
+        bottom: 100,
+        right: 10,
     },
     previewButton: {
         display: 'block',
@@ -100,7 +109,9 @@ const styles = theme => ({
 
 class EditContributionView extends Component {
     handleBeforeButtonClick() {
-        this.props.windowSwap();
+        if(!this.state.modified || window.confirm("Your unsaved changes will be lost, are you sure?")) {
+            this.props.windowSwap();
+        }
     }
 
     constructor(props) {
@@ -112,6 +123,7 @@ class EditContributionView extends Component {
             mediaProcess: '',
             contentEditing: '',
             contributionData: null,
+            modified: false,
         };
         
         this.handleNameChange = event => {
@@ -120,26 +132,26 @@ class EditContributionView extends Component {
                 window.alert("Please rescind your request for approval before making changes.");
             } else {
                 data.name = event.target.value;
-                this.setState({contributionData: data});
+                this.setState({contributionData: data, modified: true});
             }
         };
-    
+
         this.handleCheckBoxChange = event => {
             let data = this.state.contributionData;
             if ((data && (data.approval === 'pending'))) {
                 window.alert("Please rescind your request for approval before making changes.");
             } else {
                 data.type = event.target.value;
-                this.setState({contributionData: data});
+                this.setState({contributionData: data, modified: true});
             }
         };
-        this.handleBioChange = event => {
-            let data = this.state.contributionData;
+        this.handleBioChange = value => {
+            let data = this.state.contributionData || {};
             if ((data && (data.approval === 'pending'))) {
                 window.alert("Please rescind your request for approval before making changes.");
             } else {
-                data.description = event.target.value;
-                this.setState({contributionData: data});
+                data.description = value;
+                this.setState({contributionData: data, modified: true});
             }
         };
         this.handleEndBoxChange = name => event => {
@@ -154,7 +166,7 @@ class EditContributionView extends Component {
                 Object.keys(newState).forEach(key => {
                     contrib[key] = newState[key];
                 });
-                this.setState({contributionData: contrib});
+                this.setState({contributionData: contrib, modified: true});
             }
         };
 
@@ -175,6 +187,10 @@ class EditContributionView extends Component {
         this.handleSwitchChange = (event) => {
             let contributionData = this.state.contributionData;
             let publishedList = this.props.publishedList;
+            if(this.state.modified) {
+                window.alert("You have unsaved changes! Please save or revert before requesting review or publishing.");
+                return;
+            }
             if (event.target.name === 'publishedSwitch') {
                 if (!this.props.admin) {
                     console.log("Attempt to publish without admin credentials!");
@@ -232,23 +248,40 @@ class EditContributionView extends Component {
                 console.log("Something called this function...but what??");
                 return;
             }
-            this.setState({ contributionData: contributionData });
+            this.setState({ contributionData: contributionData, modified: true });
         };
+    }
+
+    save() {
+        let data = this.state.contributionData || {};
+        data.description = (data.description || RichTextEditor.createEmptyValue()).toString('html');
+        this.setState({contributionDataPub: data, modified: false});
+    }
+
+    reset(checkWithUser=false) {
+        if(!checkWithUser || window.confirm("Revert all unsaved changes? This can not be undone!")) {
+            let data = this.state.contributionDataPub || {};
+            data.description = RichTextEditor.createValueFromString(data.description || "");
+            this.setState({contributionData: data, modified: false});
+        }
     }
 
     componentDidMount() {
         if (this.props.selectedContribution && this.props.selectedContribution.ref) {
             fb.base.syncDoc(this.props.selectedContribution.ref.path, {
                 context: this,
-                state: 'contributionData',
-                withRefs: true
+                state: 'contributionDataPub',
+                withRefs: true,
+                then() {
+                    this.reset();
+                }
             });
         }
     }
 
     render() {
         const classes = this.props.classes;
-        const contrib = this.state.contributionData;
+        const contrib = this.state.contributionData || {};
         let approvalText = "Request Approval";
         let publishedText = "Publish";
         if (contrib) {
@@ -259,6 +292,17 @@ class EditContributionView extends Component {
                 publishedText = "Published";
             }
         }
+
+        const rteConfig = {
+            // Optionally specify the groups to display (displayed in the order listed).
+            display: [],//['INLINE_STYLE_BUTTONS', 'LINK_BUTTONS', 'HISTORY_BUTTONS'],
+            INLINE_STYLE_BUTTONS: [
+              {label: 'Bold', style: 'BOLD', className: 'custom-css-class'},
+              {label: 'Italic', style: 'ITALIC'},
+              {label: 'Underline', style: 'UNDERLINE'}
+            ]
+          };
+
         return (
             <div>
                 <div>
@@ -304,21 +348,18 @@ class EditContributionView extends Component {
                                 bio="true"
                                 isPendingApproval={contrib && (contrib.approval === 'pending')}
                             />
-                            <TextField
-                                id="filled-multiline-flexible, filled-full-width"
-                                label="Biography"
-                                style={{margin: 5}}
-                                multiline
-                                value={(contrib && contrib.description) || ""}
-                                onChange={this.handleBioChange}
-                                fullWidth
-                                margin="normal"
-                                variant="filled"
-                                placeholder={"Insert Biography"}
-                                className={classes.formWideControl}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
+                            <FormLabel>Biography</FormLabel>
+                            <RichTextEditor id="standard-name"
+                                    style={{margin: 5}}
+                                    className={classes.formWideControl}
+                                    value={((contrib && contrib.description) || RichTextEditor.createEmptyValue())}
+                                    onChange={this.handleBioChange}
+                                    margin="normal"
+                                    placeholder={"Insert Biography"}
+                                    toolbarConfig={rteConfig} 
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
                             />
                         </Paper>
                     </FormControl>
@@ -350,6 +391,14 @@ class EditContributionView extends Component {
                     <br/>
                     <br/>
                     <Button variant="contained"
+                            color="primary"
+                            disabled={!this.state.modified}
+                            className={classes.saveButton}
+                            startIcon={<Save />}
+                            onClick={this.save.bind(this)}>
+                                Save 
+                    </Button>
+                    <Button variant="contained"
                             color={"primary"}
                             className={classes.previewButton}
                             startIcon={<Visibility />}
@@ -364,7 +413,8 @@ class EditContributionView extends Component {
                             control={
                                 <Switch
                                     disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
-                                    checked={(contrib && (contrib.approval === 'pending'))}
+                                    // !! converts undefined to false so switch doesn't get switched to uncontrolled by accident
+                                    checked={!!(contrib && (contrib.approval === 'pending'))}
                                     onChange={this.handleSwitchChange}
                                     name="approvalSwitch"
                                     color="secondary"
@@ -380,14 +430,14 @@ class EditContributionView extends Component {
                                 this.props.admin ? 
                                     <Switch
                                         name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        checked={!!(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
                                         onChange={this.handleSwitchChange}
                                         color="secondary"
                                     /> :
                                     <Switch
                                         disabled
                                         name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        checked={!!(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
                                         color="secondary"
                                     /> 
                                 }

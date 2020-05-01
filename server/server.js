@@ -83,48 +83,56 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
 // Define function to render with handlebars
 let renderFromFirebase = (req, res, collRef) => {
     if (!collRef) return;
+
+    // Get images
     let images = [];
     let collectionDoc = collRef;
-    collRef.ref.collection("Images").get().then( imgSnapshot => {
-        imgSnapshot.forEach(doc => {
-            images.push(doc.data());
-        });
-        let audio = [];
-        collRef.ref.collection("Audio").get().then( audioSnapshot => {
-            audioSnapshot.forEach(doc => {
-                audio.push(doc.data());
-            });
-
-            let video = [];
-            collRef.ref.collection("Video").get().then( videoSnapshot => {
-                videoSnapshot.forEach(doc => {
-                    let data = doc.data();
-                    data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
-                    video.push(data);
-                });
-
-                logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
-
-                collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
-
-                collectionDoc.images = images;
-                collectionDoc.audio = audio;
-                collectionDoc.video = video;
-                res.render("preview", collectionDoc);
-                logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
-                return;
-            }).catch( err => {
-                logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-                res.render("preview", collectionDoc);
-            });
-        }).catch( err => {
-            logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-            res.render("preview", collectionDoc);
+    let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
+        logger.success(`Successfully fetched ${imgSnapshot.docs.count} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        images = imgSnapshot.docs.map(doc => {
+            return doc.data();
         });
     }).catch( err => {
         logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
         res.render("preview", collectionDoc);
     });
+    // Get audio
+    let audio = [];
+    let getAudio = collRef.ref.collection("Audio").get().then( audioSnapshot => {
+        logger.success(`Successfully fetched ${audioSnapshot.docs.count} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
+        audioSnapshot.map(doc => {
+            return doc.data();
+        });
+
+    }).catch( err => {
+        logger.error(`Error fetching audio for name: ${collRef.docs.count} id: ${collRef.ref.id}`, err);
+        res.render("preview", collectionDoc);
+    });
+    // Get video
+    let video = [];
+    let getVideo = collRef.ref.collection("Video").get().then( videoSnapshot => {
+        logger.success(`Successfully fetched ${videoSnapshot.docs.count} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        videoSnapshot.map(doc => {
+            let data = doc.data();
+            data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
+            return data;
+        });
+    }).catch( err => {
+        logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
+        res.render("preview", collectionDoc);
+    });
+    
+    Promise.all([getImages, getAudio, getVideo]).then(vals => {
+        logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
+        collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+        
+        collectionDoc.images = images;
+        collectionDoc.audio = audio;
+        collectionDoc.video = video;
+        res.render("preview", collectionDoc);
+        logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
+        return;
+    })
 };
 
 let previewReqHandler = (req, res) => {
