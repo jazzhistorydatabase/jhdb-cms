@@ -127,7 +127,13 @@ class MediaUpload extends Component {
 
     render() {
         const classes = this.props.classes;
-        let fileUploads = this.state.collection.map((fileDoc) => {
+        let fileUploads = this.state.collection;
+        fileUploads.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });
+        fileUploads = fileUploads.map((fileDoc) => {
             return (
                 <FileUpload key={fileDoc.index || fileDoc.name || randomBytes(2)}
                             fileType={this.props.uploadName}

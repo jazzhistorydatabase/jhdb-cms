@@ -254,14 +254,14 @@ class EditContributionView extends Component {
 
     save() {
         let data = this.state.contributionData || {};
-        data.description = (data.description || RichTextEditor.createEmptyValue()).toString('html');
+        data.description = (data.description && data.description.toString ? data.description : RichTextEditor.createEmptyValue()).toString('html');
         this.setState({contributionDataPub: data, modified: false});
     }
 
     reset(checkWithUser=false) {
         if(!checkWithUser || window.confirm("Revert all unsaved changes? This can not be undone!")) {
             let data = this.state.contributionDataPub || {};
-            data.description = RichTextEditor.createValueFromString(data.description || "");
+            data.description = RichTextEditor.createValueFromString((data && data.description) || "", 'html');
             this.setState({contributionData: data, modified: false});
         }
     }
@@ -288,7 +288,7 @@ class EditContributionView extends Component {
             if (contrib.approval === 'pending') {
                 approvalText = "Pending Approval";
             }
-            if (this.props.publishedList && (this.props.publishedList[contrib.ref.id] === 'true')) {
+            if (this.props.publishedList && (this.props.publishedList[contrib && contrib.ref && contrib.ref.id] === 'true')) {
                 publishedText = "Published";
             }
         }
@@ -352,7 +352,7 @@ class EditContributionView extends Component {
                             <RichTextEditor id="standard-name"
                                     style={{margin: 5}}
                                     className={classes.formWideControl}
-                                    value={((contrib && contrib.description) || RichTextEditor.createEmptyValue())}
+                                    value={contrib.description || RichTextEditor.createEmptyValue()}
                                     onChange={this.handleBioChange}
                                     margin="normal"
                                     placeholder={"Insert Biography"}
@@ -412,7 +412,7 @@ class EditContributionView extends Component {
                             labelPlacement="bottom"
                             control={
                                 <Switch
-                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib && contrib.ref && contrib.ref.id] === 'true'))}
                                     // !! converts undefined to false so switch doesn't get switched to uncontrolled by accident
                                     checked={!!(contrib && (contrib.approval === 'pending'))}
                                     onChange={this.handleSwitchChange}
@@ -430,14 +430,15 @@ class EditContributionView extends Component {
                                 this.props.admin ? 
                                     <Switch
                                         name="publishedSwitch"
-                                        checked={!!(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        checked={!!(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref && contrib.ref.id] === 'true'))}
                                         onChange={this.handleSwitchChange}
                                         color="secondary"
                                     /> :
                                     <Switch
-                                        disabled
+                                        disabled={!this.props.admin}
                                         name="publishedSwitch"
-                                        checked={!!(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        checked={!!(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref && contrib.ref.id] === 'true'))}
+                                        onChange={this.handleSwitchChange}
                                         color="secondary"
                                     /> 
                                 }

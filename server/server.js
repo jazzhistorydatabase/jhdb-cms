@@ -94,19 +94,21 @@ let renderFromFirebase = (req, res, collRef) => {
         });
     }).catch( err => {
         logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-        res.render("preview", collectionDoc);
     });
     // Get audio
     let audio = [];
     let getAudio = collRef.ref.collection("Audio").get().then( audioSnapshot => {
-        logger.success(`Successfully fetched ${audioSnapshot.docs.count} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
-        audioSnapshot.map(doc => {
+        logger.success(`Successfully fetched ${audioSnapshot.docs && audioSnapshot.docs.count} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
+        audio = audioSnapshot.map(doc => {
             return doc.data();
-        });
+        });/*.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });*/
 
     }).catch( err => {
-        logger.error(`Error fetching audio for name: ${collRef.docs.count} id: ${collRef.ref.id}`, err);
-        res.render("preview", collectionDoc);
+        logger.error(`Error fetching audio for name: ${collRef.docs && collRef.docs.count} id: ${collRef.ref.id}`, err);
     });
     // Get video
     let video = [];
@@ -116,10 +118,13 @@ let renderFromFirebase = (req, res, collRef) => {
             let data = doc.data();
             data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
             return data;
-        });
+        });/*.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });*/
     }).catch( err => {
         logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-        res.render("preview", collectionDoc);
     });
     
     Promise.all([getImages, getAudio, getVideo]).then(vals => {
@@ -132,6 +137,9 @@ let renderFromFirebase = (req, res, collRef) => {
         res.render("preview", collectionDoc);
         logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
         return;
+    }).catch( err => {
+        logger.error(`Render error: ${collRef.name} id: ${collRef.ref.id}`, err);
+        res.render("preview", collectionDoc);
     })
 };
 
