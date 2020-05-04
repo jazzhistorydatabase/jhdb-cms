@@ -12,7 +12,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 import fb from "./firebase";
 import dbx from './dropbox.js';
-import { Grid, InputLabel } from '@material-ui/core';
+import {Grid} from '@material-ui/core';
 
 const styles = theme => ({
     root: {
@@ -38,48 +38,82 @@ class FileUpload extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            fileDoc: undefined,
+            fileDoc: this.props.fileDoc,
         };
 
-        this.handleTextChange = event => {
+        this.handleDelete = this.handleDelete.bind(this);
+
+        this.handleTextChange = (event) => {
             if (this.props.isPendingApproval) {
                 window.alert("Please rescind your request for approval before making changes.");
                 return;
             }
             let fileDoc = this.state.fileDoc;
             if (this.props.fileType === 'Video' && event.target.id.indexOf('multiline') === -1)  {
-                if (this.props.bio) {
-                    fileDoc.bioUrl = event.target.value;
-                } else {
                     fileDoc.url = event.target.value;
-                }
             } else {
                 fileDoc.caption = event.target.value;
             }
-            this.setState({fileDoc: fileDoc});
+                // if (this.props.bio) {
+                //     fileDoc.bioUrl = event.target.value;
+                // } else {
+                // }
+            this.setState({'fileDoc': fileDoc}).then(() => {
+                console.log(this.state);
+                let update = {};
+                update[this.props.fileDoc.ref] = fileDoc;
+                this.props.onChange({}, update);
+            });
         };
 
-        this.handleLinkBlur = event => {
-            if (this.props.fileType === 'Video') {
-                let fileDoc = this.state.fileDoc;
-                let url = event.target.value;
-                if (!url.includes('youtu.be/')) { // Not a sharable link
-                    if (url.includes('youtube.com/watch?'))  {
-                        // ...but we may be able to fix it
-                        // find the video id within the url
-                        let regex = /\?v=([^&]*)([&$]*?)/gi;
-                        let match = regex.exec(url);
-                        let videoId = match[1];
-                        fileDoc.url = "https://youtu.be/" + videoId;
-                        this.setState({fileDoc: fileDoc});
-                    }
-                }
-            } else {
-                console.log("link blur handler called from non-video upload!");
-            }
+        this.getFileUpload = (caption) => {
+            return (this.props.bio) ?
+                <div/>
+                :
+                <Grid item xs={5}>
+                    <TextField
+                        id="standard-multiline-static"
+                        label="Caption"
+                        style={{margin: 5, width: "100%"}}
+                        multiline
+                        value={(this.state.fileDoc && this.state.fileDoc['caption']) || ""}
+                        onChange={this.handleTextChange}
+                        margin="normal"
+                        variant="filled"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />
+                </Grid>
         };
+
     };
 
+
+
+    handleLinkBlur(event) {
+        if (this.props.fileType === 'Video') {
+            let fileDoc = this.state.fileDoc;
+            let url = event.target.value;
+            if (!url.includes('youtu.be/')) { // Not a sharable link
+                if (url.includes('youtube.com/watch?'))  {
+                    // ...but we may be able to fix it
+                    // find the video id within the url
+                    let regex = /\?v=([^&]*)([&$]*?)/gi;
+                    let match = regex.exec(url);
+                    let videoId = match[1];
+                    fileDoc.url = "https://youtu.be/" + videoId;
+                    this.setState({fileDoc: fileDoc}).then(() => {
+                        let update = {};
+                        update[this.props.fileDoc.ref] = fileDoc;
+                        this.props.onChange({}, update);
+                    });
+                }
+            }
+        } else {
+            console.log("link blur handler called from non-video upload!");
+        }
+    };
 
     handleDelete() {
         if (this.props.isPendingApproval) {
@@ -93,8 +127,16 @@ class FileUpload extends Component {
                 fileDoc.bioThumbnail = "";
                 fileDoc.bioUrl = "";
                 this.setState({fileDoc: fileDoc});
+                this.props.onChange({
+                    bioName: "",
+                    bioThumbnail: "",
+                    bioUrl: ""
+                });
+
             } else {
-                fb.base.removeDoc(this.props.fileDoc.ref);
+                fb.db.doc(this.props.fileDoc.ref.path).delete().catch(() => {
+                    window.alert("Error deleting entry");
+                });
             }
         }
     }
@@ -105,22 +147,22 @@ class FileUpload extends Component {
             fileDoc['bioName'] = file[0].name || "";
             fileDoc['bioUrl'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
             fileDoc['bioThumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
+            this.setState({fileDoc: fileDoc});
+            this.props.onChange({
+                bioName: fileDoc.bioName,
+                bioUrl: fileDoc.bioUrl,
+                bioThumbnail: fileDoc.bioThumbnail
+            });
         } else {
             fileDoc['name'] = file[0].name || "";
             fileDoc['url'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
             fileDoc['icon'] = file[0].icon || "";
-            fileDoc['thumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";   
-        }
-        this.setState({fileDoc: fileDoc});
-    }
+            fileDoc['thumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
 
-    componentDidMount() {
-        if(this.props && this.props.fileDoc) {
-            fb.base.syncDoc(this.props.fileDoc.ref, {
-                context: this,
-                state: 'fileDoc',
-                withRefs: true
-            });
+            this.setState({fileDoc: fileDoc});
+            let update = {};
+            update[this.props.fileDoc.ref] = fileDoc;
+            this.props.onChange({}, update);
         }
     }
 
@@ -132,7 +174,7 @@ class FileUpload extends Component {
         const url = (this.props.bio) ? 'bioUrl' : 'url';
         const icon = 'icon';
         const name = (this.props.bio) ? 'bioName' : 'name';
-        const caption = 'caption'; // bio doesnt have a caption
+
         if(!doc) {
             return <div />;
         }
@@ -167,12 +209,11 @@ class FileUpload extends Component {
         } else {
             fileUploadComponent =
                 <TextField
-                    id="standard-static"
                     label="Link"
                     style={{margin: 5}}
                     value={(this.state.fileDoc && this.state.fileDoc[url]) || ""}
-                    onChange={this.handleTextChange}
-                    onBlur={this.handleLinkBlur}
+                    onChange={this.handleTextChange.bind(this)}
+                    onBlur={this.handleLinkBlur.bind(this)}
                     margin="normal"
                     variant="filled"
                     placeholder={'Click SHARE on YouTube'}
@@ -195,28 +236,12 @@ class FileUpload extends Component {
                                 {(this.state.fileDoc && this.state.fileDoc[name]) || "Choose a file..."} 
                             </Typography>
                         </Grid>
-                        {(this.props.bio) ? <div/> : 
-                            <Grid item xs={5}>
-                                <TextField
-                                    id="standard-multiline-static"
-                                    label="Caption"
-                                    style={{margin: 5, width: "100%"}}
-                                    multiline
-                                    value={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
-                                    onChange={this.handleTextChange}
-                                    margin="normal"
-                                    variant="filled"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
-                            </Grid>
-                        }
+                        {this.getFileUpload()}
                         <Grid item xs={2}>
                             <Tooltip title="Unlink file from collection (will not delete original file)">
                                 <Fab size="small"
                                     aria-label="Delete"
-                                    onClick={this.handleDelete.bind(this)}
+                                    onClick={this.handleDelete}
                                     className={classes.fab}>
                                     <LinkOffIcon />
                                 </Fab>

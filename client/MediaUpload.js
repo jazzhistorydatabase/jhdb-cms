@@ -75,6 +75,10 @@ class MediaUpload extends Component {
         this.props.onChange(newState);
     };
 
+    handleChildChange(newState={}, fileChanges={}) {
+        this.props.onChange(newState, fileChanges);
+    }
+
     addFileUpload(event) {
         if (this.props.isPendingApproval) {
             window.alert("Please rescind your request for approval before making changes.");
@@ -122,6 +126,10 @@ class MediaUpload extends Component {
                 state: 'collection',
                 withRefs: true
             });
+
+            fb.db.collection(this.props.collection.path).get().then(snapshot => {
+                this.setState({'coll': snapshot.docs});
+            });
         }
     }
 
@@ -139,6 +147,7 @@ class MediaUpload extends Component {
                             fileType={this.props.uploadName}
                             fileIndex={fileDoc.index}
                             fileDoc={fileDoc}
+                            onChange={this.handleChildChange.bind(this)}
                             isPendingApproval={this.props.isPendingApproval}
                 />);
         });
