@@ -132,6 +132,7 @@ class App extends Component {
                                   break;
             default:
                 x = <ContributionsListView contributions={this.state.contributions}
+                                   user={this.state.user}
                                    windowSwap={this.windowSwap.bind(this)}
                                    publishedList={this.state.publishedList}
                                    adminSwap={this.adminSwap.bind(this)}/>;
