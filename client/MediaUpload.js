@@ -55,6 +55,10 @@ class MediaUpload extends Component {
     }
 
     handleSubpage(event) {
+        if (this.props.isPendingApproval) {
+            window.alert("Please rescind your request for approval before making changes.");
+            return;
+        }
         let newState =  {};
         switch(this.props && this.props.uploadName) {
             case "Images":
@@ -72,6 +76,10 @@ class MediaUpload extends Component {
     };
 
     addFileUpload(event) {
+        if (this.props.isPendingApproval) {
+            window.alert("Please rescind your request for approval before making changes.");
+            return;
+        }
         let lst = this.state.collection;
         let maxIndex = 0;
         lst.forEach( (e) => {
@@ -119,12 +127,19 @@ class MediaUpload extends Component {
 
     render() {
         const classes = this.props.classes;
-        let fileUploads = this.state.collection.map((fileDoc) => {
+        let fileUploads = this.state.collection;
+        fileUploads.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });
+        fileUploads = fileUploads.map((fileDoc) => {
             return (
                 <FileUpload key={fileDoc.index || fileDoc.name || randomBytes(2)}
                             fileType={this.props.uploadName}
                             fileIndex={fileDoc.index}
                             fileDoc={fileDoc}
+                            isPendingApproval={this.props.isPendingApproval}
                 />);
         });
 
@@ -149,7 +164,11 @@ class MediaUpload extends Component {
                     <Button variant="contained" color="primary" className={classes.button}
                             onClick={
                                 () => {
-                                    dbx.onChooseMulti(this.props.uploadName, this.onChooserSuccess.bind(this));
+                                    if (this.props.isPendingApproval) {
+                                        window.alert("Please rescind your request for approval before making changes.");
+                                    } else {
+                                        dbx.onChooseMulti(this.props.uploadName, this.onChooserSuccess.bind(this));
+                                    }
                                 }
                             }>
                         ++ Bulk Add

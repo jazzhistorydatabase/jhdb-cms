@@ -89,12 +89,21 @@ let renderFromFirebase = (req, res, collRef) => {
         imgSnapshot.forEach(doc => {
             images.push(doc.data());
         });
+        images.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });
         let audio = [];
         collRef.ref.collection("Audio").get().then( audioSnapshot => {
             audioSnapshot.forEach(doc => {
                 audio.push(doc.data());
             });
-
+            audio.sort((a, b) => {
+                if (!a.index) return -1;
+                if (!b.index) return 1;
+                return a.index - b.index;
+            });
             let video = [];
             collRef.ref.collection("Video").get().then( videoSnapshot => {
                 videoSnapshot.forEach(doc => {
@@ -102,10 +111,38 @@ let renderFromFirebase = (req, res, collRef) => {
                     data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
                     video.push(data);
                 });
-
+                video.sort((a, b) => {
+                    if (!a.index) return -1;
+                    if (!b.index) return 1;
+                    return a.index - b.index;
+                });
                 logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
 
+                collectionDoc.descriptionParagraphs = [];
+                let done = false;
+                let start = 0;
+                let length;
+                let nextParagraph;
+                while (!done) {
+                    nextParagraph = collectionDoc.description.indexOf('\n', start);
+                    if (nextParagraph === -1) {
+                        length = collectionDoc.description.length;
+                        done = true;
+                    } else if (start === collectionDoc.description.length) {
+                        length = collectionDoc.description.length;
+                        done = true;
+                    } else {
+                        length = nextParagraph - start;
+                    }
+                    collectionDoc.descriptionParagraphs.push({
+                        paragraph: collectionDoc.description.substr(start, length),
+                    });
+                    start = nextParagraph + 1;
+                }
+
                 collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+
+                collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
 
                 collectionDoc.images = images;
                 collectionDoc.audio = audio;

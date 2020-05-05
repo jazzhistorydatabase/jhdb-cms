@@ -58,6 +58,11 @@ class MainPageTB extends Component {
     handleAddButtonClick() {
         let contribName = window.prompt("Enter collection name:");
         if (contribName) {
+            let lst = this.props.contributions;
+            let maxIndex = 0;
+            lst.forEach( (e) => {
+                if(e.index > maxIndex) maxIndex = e.index;
+            })
             fb.base.addToCollection(`Contributions`, {
                 name: contribName,
                 description: '',
@@ -70,6 +75,7 @@ class MainPageTB extends Component {
                 bioName: '',
                 bioThumbnail: '',
                 owner: this.props.user.uid,
+                index: maxIndex + 1,
             });
         } else {
             window.alert("Collection name can not be blank!");
@@ -82,7 +88,13 @@ class MainPageTB extends Component {
 
     render() {
         const classes = this.props.classes;
-        const contrib = this.props.contributions;
+        let contrib = this.props.contributions;
+        contrib = contrib.filter(e => e.type);
+        contrib.sort((a, b) => {
+            if (!a.index) return 1;
+            if (!b.index) return -1;
+            return b.index - a.index;
+        });
 
         let userButtons = (e, published, pendingApproval) => {
             console.log(this.props.user.uid);

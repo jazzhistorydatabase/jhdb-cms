@@ -116,19 +116,31 @@ class EditContributionView extends Component {
         
         this.handleNameChange = event => {
             let data = this.state.contributionData;
-            data.name = event.target.value;
-            this.setState({contributionData: data});
+            if ((data && (data.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+            } else {
+                data.name = event.target.value;
+                this.setState({contributionData: data});
+            }
         };
     
         this.handleCheckBoxChange = event => {
             let data = this.state.contributionData;
-            data.type = event.target.value;
-            this.setState({contributionData: data});
+            if ((data && (data.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+            } else {
+                data.type = event.target.value;
+                this.setState({contributionData: data});
+            }
         };
         this.handleBioChange = event => {
             let data = this.state.contributionData;
-            data.description = event.target.value;
-            this.setState({contributionData: data});
+            if ((data && (data.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+            } else {
+                data.description = event.target.value;
+                this.setState({contributionData: data});
+            }
         };
         this.handleEndBoxChange = name => event => {
             this.setState({[name]: event.target.checked});
@@ -136,10 +148,14 @@ class EditContributionView extends Component {
     
         this.handleChildChange = newState => {
             let contrib = this.state.contributionData;
-            Object.keys(newState).forEach(key => {
-                contrib[key] = newState[key];
-            });
-            this.setState({contributionData: contrib});
+            if ((contrib && (contrib.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+            } else {
+                Object.keys(newState).forEach(key => {
+                    contrib[key] = newState[key];
+                });
+                this.setState({contributionData: contrib});
+            }
         };
 
         this.handleDeleteContribution = event => {
@@ -243,6 +259,7 @@ class EditContributionView extends Component {
                 publishedText = "Published";
             }
         }
+        
         return (
             <div>
                 <div>
@@ -286,6 +303,7 @@ class EditContributionView extends Component {
                                 fileIndex={-1}
                                 fileDoc={this.props.selectedContribution}
                                 bio="true"
+                                isPendingApproval={contrib && (contrib.approval === 'pending')}
                             />
                             <TextField
                                 id="filled-multiline-flexible, filled-full-width"
@@ -310,14 +328,17 @@ class EditContributionView extends Component {
                     <FormControl className={classes.uploadWidth}>
                         <MediaUpload uploadName="Images"
                                     isSubpage={contrib && contrib.imagesSubpage}
+                                    isPendingApproval={contrib && (contrib.approval === 'pending')}
                                     collection={this.props.selectedContribution.ref.collection("Images")}
                                     onChange={this.handleChildChange}/>
                         <MediaUpload uploadName="Audio"
                                     isSubpage={contrib && contrib.audioSubpage}
+                                    isPendingApproval={contrib && (contrib.approval === 'pending')}
                                     collection={this.props.selectedContribution.ref.collection("Audio")}
                                     onChange={this.handleChildChange}/>
                         <MediaUpload uploadName="Video"
                                     isSubpage={contrib && contrib.videoSubpage}
+                                    isPendingApproval={contrib && (contrib.approval === 'pending')}
                                     collection={this.props.selectedContribution.ref.collection("Video")}
                                     onChange={this.handleChildChange}/>
                     </FormControl>
@@ -343,11 +364,12 @@ class EditContributionView extends Component {
                             labelPlacement="bottom"
                             control={
                                 <Switch
+                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
                                     checked={(contrib && (contrib.approval === 'pending'))}
                                     onChange={this.handleSwitchChange}
                                     name="approvalSwitch"
                                     color="secondary"
-                                /> }
+                                />}
                         />
                     </Paper>
                     <Paper className={classes.publishPaper} elevation={3} square={false} color={"primary"}>
@@ -356,17 +378,11 @@ class EditContributionView extends Component {
                             label={publishedText}
                             labelPlacement="bottom"
                             control={
-                                this.props.admin ? 
                                     <Switch
-                                        name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
-                                        onChange={this.handleSwitchChange}
-                                        color="secondary"
-                                    /> :
-                                    <Switch
-                                        disabled
+                                        disabled={!this.props.admin}
                                         name="publishedSwitch"
                                         checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        onChange={this.handleSwitchChange}
                                         color="secondary"
                                     /> 
                                 }

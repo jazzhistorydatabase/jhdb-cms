@@ -120,12 +120,8 @@ class App extends Component {
 
         switch (currentWindow) {
             case 1:
-                x = (this.state.user && this.state.user.admin) ?
-                        <EditContributionView selectedContribution={this.state.selectedContribution}
-                                             admin={true}
-                                             publishedList={this.state.publishedList}
-                                             windowSwap={this.windowSwap.bind(this)}/> :
-                        <EditContributionView selectedContribution={this.state.selectedContribution}
+                x = <EditContributionView selectedContribution={this.state.selectedContribution}
+                                             admin={this.state.user && this.state.user.admin}
                                              publishedList={this.state.publishedList}
                                              windowSwap={this.windowSwap.bind(this)}/>;
                                              break;

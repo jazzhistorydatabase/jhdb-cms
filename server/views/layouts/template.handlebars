@@ -39,7 +39,7 @@
 
 </head>
 
-<body>
+<body class="">
 
 <!-- Document Wrapper
 ============================================= -->
@@ -79,18 +79,30 @@
         li>a {
             cursor: pointer;
         }
+
+        p.caption {
+            height: 60px;
+            font-size: 18px;
+            display: table-cell;
+            vertical-align: middle;
+            white-space: -moz-pre-wrap;
+            white-space: -o-pre-wrap;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #page-menu.sticky-page-menu #page-menu-wrap {
+            top: 60px;
+        }
     </style>
 
 
     <!-- Content
     ============================================= -->
     <section id="content">
-
-        <br>
-
         <!-- Collection nav bar start-->
         <div id="page-menu">
-            <div style="background-color: #333333">
+            <div id="page-menu-wrap">
                 <div class="container clearfix">
                     <div class="menu-title" style="cursor:pointer;" onclick="goToByScroll('section-bio')"> {{name}} Collection </div>
                     <nav>
@@ -109,8 +121,7 @@
                             </li>
                         </ul>
                     </nav>
-                    <div id="page-submenu-trigger"><i class="icon-reorder"></i>
-                    </div>
+                    <div id="page-submenu-trigger"><i class="icon-reorder"></i></div>
                 </div>
             </div>
         </div>
@@ -118,16 +129,21 @@
         <!-- Content Wrap starts -->
         <div class="content-wrap">
             <!-- Bio -->
-            <div class="container clearfix">
+            <div class="container clearfix" style="padding-left: 20px; padding-right: 20px;">
                 <div class="fancy-title title-bottom-border" id="bio">
                     <h2>Biography of {{ name }} </h2>
                 </div>
                 <!-- Insert bio -->
-                <div class="coll-main-bio">
-                    <div class="col_three_fifth bottommargin-sm">
-                        <p class="bio">
-                            {{ description }}
-                        </p>
+                <div class="row clearfix" style=" padding-top: 20px;">
+                    <div class="col-sm-12">
+                        {{#if bioUrl}}
+                            <img class="biophoto" style="padding-left: 20px; padding-bottom: 20px;" width="500" align="right" src={{ bioUrl }}>
+                        {{/if}}
+                        {{#each descriptionParagraphs}}
+                            <p class="bio" style="font-size: 1.6em;">
+                                {{ paragraph }}
+                            </p>
+                        {{/each}}
                         <!--<p>-->
                             <!--<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#fullBio">-->
                                 <!--Read Full Biography-->
@@ -139,63 +155,83 @@
                         <!--</div>-->
                     </div>
 
-                    <div class="col_two_fifth bottommargin-sm col_last">
+                    {{!-- <div class="col-sm-5">
                         <img src={{ bioUrl }}>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
             <!-- Images Section -->
-            <div class="row common-height clearfix" style="padding-bottom:8%;">
-                <div class="col-sm-5 col-padding">
-                    <div class="fancy-title title-bottom-border" id="images">
-                        <h2> Images</h2>
-                    </div>
-                    <!--Carousel-->
-                    <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="1" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
-                        {{#each images }}
-                        <div class="oc-item">
-                            <div class="iportfolio">
-                                <div class="portfolio-image">
-                                    <a class="resize" href="#">
-                                        <img src="{{url}}" alt="{{name}}" height="200px">
-                                    </a>
+            <div class="row common-height clearfix">
+                {{#if images}}
+                    <div class="col-sm-12 col-padding">
+                        <div class="fancy-title title-bottom-border" id="images">
+                            <h2> Images</h2>
+                        </div>
+                        <!--Carousel-->
+                        <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="{{dataItems}}" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
+                            {{#each images }}
+                                <div class="oc-item">
+                                    <div class="iportfolio">
+                                        <div class="portfolio-image">
+                                            <a href="#">
+                                                <img src="{{url}}" alt="{{name}}">
+                                            </a>
 
-                                    <div class="portfolio-overlay">
-                                        <a href="{{url}}" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
+                                            <div class="portfolio-overlay">
+                                                <a href="{{url}}" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="portfolio-desc center nobottompadding">
+                                            <h3><a href="portfolio-single.html">{{caption}}</a></h3>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="portfolio-desc center nobottompadding">
-                                    <h3><a href="portfolio-single.html">{{caption}}</a></h3>
-                                </div>
-                            </div>
+                            {{/each}}
                         </div>
-                        {{/each}}
                     </div>
-                </div>
-
-                <div class="col-sm-7 col-padding">
-                    <div>
-                        <div class="fancy-title title-bottom-border">
-                            <h2 id="section-interviews">Audio</h2>
+                {{/if}}
+            </div>
+            <div class="row common-height clearfix">
+                {{#if audio}}
+                    <div class="col-sm-12 col-padding">
+                        <div>
+                            <div class="fancy-title title-bottom-border">
+                                <h2 id="section-interviews">Audio</h2>
+                            </div>
+                            {{#each audio}}
+                                <div class="row" style="padding-left: 20px; padding-top: 10px;">
+                                    <div class="col-sm-4" style="padding-right: 10px;">
+                                        <audio controls style="height: 60px; display: table-cell; vertical-align: middle;">
+                                            <source src={{url}} type="audio/mp3">
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    </div>
+                                    <div class="col-sm-8" style="word-wrap: break-word;">
+                                        <p class="caption">{{caption}}</p>
+                                    </div>
+                                </div>
+                            {{/each}}
                         </div>
-                        {{#each audio}}
-                            <h5>{{name}}</h5>
-                            <audio controls>
-                                <source src={{url}} type="audio/mp3">
-                                Your browser does not support the audio element.
-                            </audio>
-                        {{/each}}
+                    </div>
+                {{/if}}
+            </div>
+            {{#if video}}
+                <div class="row common-height clearfix">
+                    <div class="col-sm-12 col-padding">
+                        <div class="fancy-title title-bottom-border">
+                            <h2 id="section-interviews">Videos</h2>
+                        </div>
                         {{#each video}}
-                            <h5>{{name}}</h5>
                             <iframe frameborder="0" scrolling="no" marginheight="0" marginwidth="0"width="356" height="200" type="text/html" 
                             src={{url}}><div><small><a href="https://youtubeembedcode.com/pl/">youtubeembedcode.com/pl/</a></small></div><div><small><a href="https://add-link-exchange.com">https://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/nl/">youtubeembedcode nl</a></small></div><div><small><a href="https://add-link-exchange.com">https://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/en">youtubeembedcode.com/en/</a></small></div><div><small><a href="https://add-link-exchange.com">add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/es/">youtubeembedcode es</a></small></div><div><small><a href="https://add-link-exchange.com">w://add-link-exchange.com</a></small></div></iframe>
+                            <p class="center" style="height: 60px; font-size: 18px; padding-top: 10px;">{{caption}}</p>
                         {{/each}}
                     </div>
                 </div>
-            </div>
+            {{/if}}
         </div>
-</div>
+    </section>
 </div>
 
 <!-- Footer
@@ -205,8 +241,6 @@
 
 
 
-
-</div>
 <!-- #wrapper end -->
 
 <!-- Go To Top
