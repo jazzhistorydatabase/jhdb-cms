@@ -20,8 +20,8 @@ service cloud.firestore {
     }
 
   	match /Contributions/{document=**} {
-    	allow read: if userExists() && userIsAuthorized();
-    	allow write: if userExists() && userIsAuthorized() && (userIsAdmin() || userIsOwner(resource));
+      allow create: if userExists() && userIsAuthorized();
+    	allow read, write: if userExists() && userIsAuthorized() && (userIsAdmin() || userIsOwner(resource));
     }
 
     match /Users/admin {
@@ -36,7 +36,7 @@ service cloud.firestore {
 
     match /Users/{uid} {
       allow read;
-    	allow create, write: if (userExists() && userIsAdmin()) || (request.auth.uid == uid);
+    	allow create, write: if (userIsAdmin() || request.auth.uid == uid);
     }
 
     match /Contributions/published {
