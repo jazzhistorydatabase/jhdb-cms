@@ -52,7 +52,7 @@ app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 
-let fetchContributionByName = (req, res, contributionName, callback) => {
+let fetchContributionByName = (req, res, contributionName, template, callback) => {
     const collRoot = fb.firestore().collection("Contributions");
     let collsRef;
     let collName = contributionName.toLowerCase().replace(/-/g, " ")
@@ -71,7 +71,7 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
             logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
             snapshots.forEach(snapshot => {
                 let collRef = snapshot.data();
-                callback(req, res, collRef);
+                callback(req, res, collRef, template);
             });
         }
     }).catch( err => {
@@ -81,7 +81,7 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
 };
 
 // Define function to render with handlebars
-let renderFromFirebase = (req, res, collRef) => {
+let renderFromFirebase = (req, res, collRef, template) => {
     if (!collRef) return;
     let images = [];
     let collectionDoc = collRef;
@@ -147,27 +147,29 @@ let renderFromFirebase = (req, res, collRef) => {
                 collectionDoc.images = images;
                 collectionDoc.audio = audio;
                 collectionDoc.video = video;
-                res.render("preview", collectionDoc);
+                
+                collectionDoc.layout = template;
+                res.render(template, collectionDoc);
                 logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
                 return;
             }).catch( err => {
                 logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-                res.render("preview", collectionDoc);
+                res.render(template, collectionDoc);
             });
         }).catch( err => {
             logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-            res.render("preview", collectionDoc);
+            res.render(template, collectionDoc);
         });
     }).catch( err => {
         logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-        res.render("preview", collectionDoc);
+        res.render(template, collectionDoc);
     });
 };
 
 let previewReqHandler = (req, res) => {
     let collName = req.params.collection.toLowerCase();
     logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, renderFromFirebase);
+    fetchContributionByName(req, res, collName, "layout/template", renderFromFirebase);
 }
 
 app.get("/preview/header-new.html", (req, res) => {
@@ -194,11 +196,11 @@ let publishedReqHandler = (req, res) => {
     fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
         if (snapshot.exists) {
             let publishedList = snapshot.data();
-            fetchContributionByName(req, res, collName, (req, res, collRef) => {
+            fetchContributionByName(req, res, collName, "layout/template", (req, res, collRef, template) => {
                 if (!collRef) return;
                 if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
                     // This contribution is published - proceed
-                    renderFromFirebase(req, res, collRef);
+                    renderFromFirebase(req, res, collRef, template);
                 } else {
                     logger.error(`Contribution "${collName}" is not published.`);
                     res.send("This contribution is not published!");
@@ -217,6 +219,19 @@ app.get("/published/header-new.html", (req, res) => {
 });
 
 app.get("/published/:collection", publishedReqHandler);
+
+let contributorReqHandler = (req, res) => {
+    let collName = req.params.collection.toLowerCase();
+    logger.info(`User request contributor page for collection: ${collName}`);
+    fetchContributionByName(req, res, collName, "contributor", renderFromFirebase);
+}
+
+app.get("/contributor/header-new.html", (req, res) => {
+    logger.info('User request contributor/header-new.html');
+    res.sendFile("./mockup/header-new.html", {root: __dirname});
+});
+
+app.get("/contributor/:collection", contributorReqHandler);
 
 app.get("/upload", (req, res) => {
     logger.info('User requesting upload link. Validating token...');
@@ -246,9 +261,6 @@ app.get("/upload", (req, res) => {
         res.sendStatus(400);
     });
 });
-
-
-
 
 // Login
 
