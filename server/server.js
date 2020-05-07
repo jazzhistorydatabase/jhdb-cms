@@ -201,24 +201,31 @@ app.get("/upload", (req, res) => {
     logger.info('User requesting upload link. Validating token...');
     let token = req.query["auth"];
     fb.auth().verifyIdToken(token).then(decodedToken => {
-        logger.success(`Successfully validated token for user account_id: ${decodedToken.uid} name: ${decodedToken.name}`)
-        
-        let path = "/jhdb global/"+decodedToken.name.toLowerCase();
-        let time = new Date();
-        time.setTime(time.getTime() + (1*60*60*1000)); // Add 1hr to current time
-        time.setSeconds(0, 0); // Remove seconds/millis
-        let deadline = time.toISOString().replace(".000", ""); // Remove millis from ISO string so dbx doesn't complain
-        // TODO: Find a less hacky way to do this^ (pass in format string to ISOString()?)
-        
-        logger.log(`Generating upload link for account_id: ${decodedToken.uid} path: ${path} deadline: ${deadline}`);
-
-        dbx.fileRequestsCreate({"title": `JHDB File Upload - ${decodedToken.name} [Contributor Portal]`, "destination": path, "deadline": {"deadline": deadline}}).then( (dat => {
-            logger.success(`Successfully sent upload link for account_id: ${decodedToken.uid} path: ${path}`);
-            console.log(dat);
-            res.send(dat && dat.url);
-        })).catch(err => {
-            logger.error(`Failed to generate upload link for account_id: ${decodedToken.uid} path: ${path}`, err);
-            res.send(err);
+        const uid = decodedToken.uid;
+        logger.success(`Successfully validated token for user account_id: ${uid}`)
+        // Get user info from db
+        fb.firestore().collection('Users').doc(uid).get().then(snapshot => {
+            logger.success(`Successfully fetched user data for account_id: ${uid}`);
+            const user = snapshot.data();
+            let path = `/jhdb global/${user.name.toLowerCase()}/`;
+            let time = new Date();
+            time.setTime(time.getTime() + (1*60*60*1000)); // Add 1hr to current time
+            time.setSeconds(0, 0); // Remove seconds/millis
+            let deadline = time.toISOString().replace(".000", ""); // Remove millis from ISO string so dbx doesn't complain
+            // TODO: Find a less hacky way to do this^ (pass in format string to ISOString()?)
+            
+            logger.log(`Generating upload link for account_id: ${decodedToken.uid} path: ${path} deadline: ${deadline}`);
+    
+            dbx.fileRequestsCreate({"title": `JHDB File Upload - ${user.name} [Contributor Portal]`, "destination": path, "deadline": {"deadline": deadline}}).then( (dat => {
+                logger.success(`Successfully sent upload link for account_id: ${decodedToken.uid} path: ${path}`);
+                console.log(dat);
+                res.send(dat && dat.url);
+            })).catch(err => {
+                logger.error(`Failed to generate upload link for account_id: ${decodedToken.uid} path: ${path}`, err);
+                res.send(err);
+            });
+        }, err => {
+            logger.error(`Error fetching user info from db for id: ${uid}`);
         });
     }).catch(err => {
         logger.err('Error authenticating user token for upload request', err);
@@ -294,7 +301,12 @@ app.get("/login", (req, res) => {
         dbx.usersGetAccount({account_id: dropboxUserID}).then( user => {
             createFirebaseAccount(dropboxUserID, user).then( token => {
                 logger.success(`Got firebase token for user with id: ${dropboxUserID}, updating db`);
-                fb.firestore().collection('Users').doc(dropboxUserID).set(user).then( () => {
+                fb.firestore().collection('Users').doc(dropboxUserID).set({
+                    uid: user['account_id'],
+                    email: user['email'],
+                    name: (user['name'] ? user.name['display_name'] : false) || "Unnamed Contributor",
+                    displayPhoto: user['profile_photo_url'] || "",
+                }).then( () => {
                     logger.success(`Successfully updated database entry for user id: ${dropboxUserID}`);
                     res.redirect("/#"+token);
                 }).catch(err => {
