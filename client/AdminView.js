@@ -131,10 +131,8 @@ class AdminView extends Component {
                 <br/>
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
-                    {this.props.users.map( (user) => {
-                        if(!user.uid) {
-                            return (<div key={ randomBytes(2)}></div>)
-                        } else if (user.uid === fb.auth.currentUser.uid) {
+                    {this.props.users.filter(user => !!user.uid).map( (user) => {
+                        if (user.uid === fb.auth.currentUser.uid) {
                             return (
                                 <div key={user.uid} >
                                 <Grid container className={classes.adminGrid} spacing={3} justify="flex-start" alignItems="center">
