@@ -139,11 +139,12 @@
                         {{#if bioUrl}}
                             <img class="biophoto" style="padding-left: 20px; padding-bottom: 20px;" width="500" align="right" src={{ bioUrl }}>
                         {{/if}}
-                        {{#each descriptionParagraphs}}
+                        {{{description}}}
+                        {{!-- {{#each descriptionParagraphs}}
                             <p class="bio" style="font-size: 1.6em;">
                                 {{ paragraph }}
                             </p>
-                        {{/each}}
+                        {{/each}} --}}
                         <!--<p>-->
                             <!--<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#fullBio">-->
                                 <!--Read Full Biography-->
