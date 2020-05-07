@@ -83,85 +83,64 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
 // Define function to render with handlebars
 let renderFromFirebase = (req, res, collRef) => {
     if (!collRef) return;
+
+    // Get images
     let images = [];
     let collectionDoc = collRef;
-    collRef.ref.collection("Images").get().then( imgSnapshot => {
-        imgSnapshot.forEach(doc => {
-            images.push(doc.data());
-        });
-        images.sort((a, b) => {
-            if (!a.index) return -1;
-            if (!b.index) return 1;
-            return a.index - b.index;
-        });
-        let audio = [];
-        collRef.ref.collection("Audio").get().then( audioSnapshot => {
-            audioSnapshot.forEach(doc => {
-                audio.push(doc.data());
-            });
-            audio.sort((a, b) => {
-                if (!a.index) return -1;
-                if (!b.index) return 1;
-                return a.index - b.index;
-            });
-            let video = [];
-            collRef.ref.collection("Video").get().then( videoSnapshot => {
-                videoSnapshot.forEach(doc => {
-                    let data = doc.data();
-                    data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
-                    video.push(data);
-                });
-                video.sort((a, b) => {
-                    if (!a.index) return -1;
-                    if (!b.index) return 1;
-                    return a.index - b.index;
-                });
-                logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
-
-                collectionDoc.descriptionParagraphs = [];
-                let done = false;
-                let start = 0;
-                let length;
-                let nextParagraph;
-                while (!done) {
-                    nextParagraph = collectionDoc.description.indexOf('\n', start);
-                    if (nextParagraph === -1) {
-                        length = collectionDoc.description.length;
-                        done = true;
-                    } else if (start === collectionDoc.description.length) {
-                        length = collectionDoc.description.length;
-                        done = true;
-                    } else {
-                        length = nextParagraph - start;
-                    }
-                    collectionDoc.descriptionParagraphs.push({
-                        paragraph: collectionDoc.description.substr(start, length),
-                    });
-                    start = nextParagraph + 1;
-                }
-
-                collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
-
-                collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
-
-                collectionDoc.images = images;
-                collectionDoc.audio = audio;
-                collectionDoc.video = video;
-                res.render("preview", collectionDoc);
-                logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
-                return;
-            }).catch( err => {
-                logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-                res.render("preview", collectionDoc);
-            });
-        }).catch( err => {
-            logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-            res.render("preview", collectionDoc);
+    let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
+        logger.success(`Successfully fetched ${imgSnapshot.docs.count} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        images = imgSnapshot.docs.map(doc => {
+            return doc.data();
         });
     }).catch( err => {
         logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-        res.render("preview", collectionDoc);
     });
+    // Get audio
+    let audio = [];
+    let getAudio = collRef.ref.collection("Audio").get().then( audioSnapshot => {
+        logger.success(`Successfully fetched ${audioSnapshot.docs && audioSnapshot.docs.count} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
+        audio = audioSnapshot.map(doc => {
+            return doc.data();
+        });/*.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });*/
+
+    }).catch( err => {
+        logger.error(`Error fetching audio for name: ${collRef.docs && collRef.docs.count} id: ${collRef.ref.id}`, err);
+    });
+    // Get video
+    let video = [];
+    let getVideo = collRef.ref.collection("Video").get().then( videoSnapshot => {
+        logger.success(`Successfully fetched ${videoSnapshot.docs.count} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        videoSnapshot.map(doc => {
+            let data = doc.data();
+            data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
+            return data;
+        });/*.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });*/
+    }).catch( err => {
+        logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
+    });
+    
+    Promise.all([getImages, getAudio, getVideo]).then(vals => {
+        logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
+        collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+        
+        collectionDoc.images = images;
+        collectionDoc.audio = audio;
+        collectionDoc.video = video;
+        res.render("preview", collectionDoc);
+        logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
+        return;
+    }).catch( err => {
+        logger.error(`Render error: ${collRef.name} id: ${collRef.ref.id}`, err);
+        res.render("preview", collectionDoc);
+    })
 };
 
 let previewReqHandler = (req, res) => {
@@ -281,7 +260,7 @@ let createFirebaseAccount = (dropboxID, user) => {
         return fb.auth().createCustomToken(dropboxID);
     }).catch(err => {
         logger.log(`No such firebase user for id: ${dropboxID}, creating one`)
-        fb.auth().createUser(userData).then( () => {
+        return fb.auth().createUser(userData).then( () => {
             logger.success(`Created new firebase user for id: ${dropboxID}, generating firebase token`)
             return fb.auth().createCustomToken(dropboxID);
         }).catch(err => {
@@ -314,8 +293,14 @@ app.get("/login", (req, res) => {
         logger.info(`Getting firebase account for user with id: ${dropboxUserID}`)
         dbx.usersGetAccount({account_id: dropboxUserID}).then( user => {
             createFirebaseAccount(dropboxUserID, user).then( token => {
-                logger.success(`Got firebase token for user with id: ${dropboxUserID}`);
-                res.redirect("/#"+token);
+                logger.success(`Got firebase token for user with id: ${dropboxUserID}, updating db`);
+                fb.firestore().collection('Users').doc(dropboxUserID).set(user).then( () => {
+                    logger.success(`Successfully updated database entry for user id: ${dropboxUserID}`);
+                    res.redirect("/#"+token);
+                }).catch(err => {
+                    logger.error(`Failed to updat database entry for user id: ${dropboxUserID}`, err);
+                    res.redirect("/#"+token);
+                });
             }).catch( err => {
                 logger.error(`Error getting firebase token for user with id: ${dropboxUserID}`, err);
                 res.send(err);
@@ -326,7 +311,7 @@ app.get("/login", (req, res) => {
         });
     }, error => {
         logger.error(`Login error - couldn't get token from code, redirect_uri: ${callbackUri}`);
-        res.send(error.context)
+        res.send(error.context);
     });
 });
 
