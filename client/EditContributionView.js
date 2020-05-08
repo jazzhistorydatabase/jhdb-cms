@@ -17,45 +17,10 @@ import { Visibility } from '@material-ui/icons';
 import { Switch } from '@material-ui/core';
 
 const styles = theme => ({
-    container: {
-        display: 'flex',
-        flexWrap: 'wrap',
-    },
     textField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
         width: 200,
-    },
-    uploadWidth: {
-        width: 600,
-    },
-    dense: {
-        marginTop: 19,
-    },
-    menu: {
-        width: 200,
-    },
-    formControl: {
-        margin: theme.spacing(2),
-    },
-    rightIcon: {
-        marginLeft: theme.spacing(1),
-    },
-    formWideControl: {
-        marginLeft: theme.spacing(1),
-        marginRight: theme.spacing(1),
-        width: 540,
-    },
-    button2: {
-        width: '40%',
-        marginLeft: 'auto',
-        marginRight: 'auto'
-    },
-    button3: {
-        display: 'inline-block',
-        width: '200px',
-        height: '40px',
-        margin: 20,
     },
     previewButton: {
         display: 'block',
@@ -78,19 +43,8 @@ const styles = theme => ({
         width: 100,
         left: 10,
     },
-    reviewOptionLeft: {
-        marginLeft: '10%',
-    },
-    reviewOptionRight: {
-        marginRight: '10%',
-    },
-    cardColor: {
-        backgroundColor: '#fce4ec',
-    },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
+        padding: theme.spacing(3),
     },
     mediaUploadTitle: {
         width: '10vw',
@@ -100,7 +54,9 @@ const styles = theme => ({
 
 class EditContributionView extends Component {
     handleBeforeButtonClick() {
-        this.props.windowSwap();
+        if(window.confirm("Are you sure? Any unsaved changes will be permanently lost")) {
+            this.props.onSelectContribution();
+        }
     }
 
     constructor(props) {
@@ -266,17 +222,18 @@ class EditContributionView extends Component {
                 <div>
                     <h1> Contribution </h1>
                     <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
-                            className={classes.button}> Back </Button>
+                            className={classes.button}> Discard Changes </Button>
                     <br/>
-                    <TextField
-                        id="standard-name"
-                        label="Collection Title"
-                        className={classes.textField}
-                        value={(contrib && contrib.name) || ""}
-                        onChange={this.handleNameChange}
-                        margin="normal"
-                    />
-                    <FormControl component={"fieldset"} className={classes.formControl}>
+                    <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
+                        <h2 className={classes.mediaUploadTitle}> Bio</h2>
+                        <FormLabel component="legend"> Collection Title</FormLabel>
+                        <TextField
+                            id="standard-name"
+                            className={classes.textField}
+                            value={(contrib && contrib.name) || ""}
+                            onChange={this.handleNameChange}
+                            margin="normal"
+                        />
                         <FormLabel component="legend"> Collection Type</FormLabel>
                         <RadioGroup row
                                     value={(contrib && contrib.type) || ""}
@@ -294,56 +251,48 @@ class EditContributionView extends Component {
                                 labelPlacement="start"
                             />
                         </RadioGroup>
-                    </FormControl>
-                    <br/>
-                    <FormControl className={classes.uploadWidth}>
-                        <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
-                            <h2 className={classes.mediaUploadTitle}> Bio</h2>
-                            <FormLabel component="legend"> Bio Photo</FormLabel>
-                            <FileUpload fileType="Images"
-                                fileIndex={-1}
-                                fileDoc={this.props.selectedContribution}
-                                bio="true"
-                                isPendingApproval={contrib && (contrib.approval === 'pending')}
-                            />
-                            <TextField
-                                id="filled-multiline-flexible, filled-full-width"
-                                label="Biography"
-                                style={{margin: 5}}
-                                multiline
-                                value={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
-                                onChange={this.handleBioChange}
-                                fullWidth
-                                margin="normal"
-                                variant="filled"
-                                placeholder={"Insert Biography"}
-                                className={classes.formWideControl}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            />
+                        <FormLabel component="legend"> Bio Photo</FormLabel>
+                        <FileUpload fileType="Images"
+                            fileIndex={-1}
+                            fileDoc={this.props.selectedContribution}
+                            bio="true"
+                            isPendingApproval={contrib && (contrib.approval === 'pending')}
+                        />
+                        <TextField
+                            id="filled-multiline-flexible, filled-full-width"
+                            label="Biography"
+                            style={{margin: 5}}
+                            multiline
+                            value={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
+                            onChange={this.handleBioChange}
+                            fullWidth
+                            margin="normal"
+                            variant="filled"
+                            placeholder={"Insert Biography"}
+                            className={classes.formWideControl}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
 
-                        </Paper>
-                    </FormControl>
+                    </Paper>
                     <br/>
                     <br/>
-                    <FormControl className={classes.uploadWidth}>
-                        <MediaUpload uploadName="Images"
-                                    isSubpage={contrib && contrib.imagesSubpage}
-                                    isPendingApproval={contrib && (contrib.approval === 'pending')}
-                                    collection={this.props.selectedContribution.ref.collection("Images")}
-                                    onChange={this.handleChildChange}/>
-                        <MediaUpload uploadName="Audio"
-                                    isSubpage={contrib && contrib.audioSubpage}
-                                    isPendingApproval={contrib && (contrib.approval === 'pending')}
-                                    collection={this.props.selectedContribution.ref.collection("Audio")}
-                                    onChange={this.handleChildChange}/>
-                        <MediaUpload uploadName="Video"
-                                    isSubpage={contrib && contrib.videoSubpage}
-                                    isPendingApproval={contrib && (contrib.approval === 'pending')}
-                                    collection={this.props.selectedContribution.ref.collection("Video")}
-                                    onChange={this.handleChildChange}/>
-                    </FormControl>
+                    <MediaUpload uploadName="Images"
+                                isSubpage={contrib && contrib.imagesSubpage}
+                                isPendingApproval={contrib && (contrib.approval === 'pending')}
+                                collection={this.props.selectedContribution.ref.collection("Images")}
+                                onChange={this.handleChildChange}/>
+                    <MediaUpload uploadName="Audio"
+                                isSubpage={contrib && contrib.audioSubpage}
+                                isPendingApproval={contrib && (contrib.approval === 'pending')}
+                                collection={this.props.selectedContribution.ref.collection("Audio")}
+                                onChange={this.handleChildChange}/>
+                    <MediaUpload uploadName="Video"
+                                isSubpage={contrib && contrib.videoSubpage}
+                                isPendingApproval={contrib && (contrib.approval === 'pending')}
+                                collection={this.props.selectedContribution.ref.collection("Video")}
+                                onChange={this.handleChildChange}/>
                     <br/>
                     <br/>
                     <br/>

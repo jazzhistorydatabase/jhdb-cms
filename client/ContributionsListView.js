@@ -8,48 +8,20 @@ import {Add, Edit, Visibility, Person, PriorityHigh, Done } from "@material-ui/i
 
 
 import fb from './firebase';
+import { Typography, ListSubheader } from '@material-ui/core';
+import { ListItemText, ListItemAvatar, Avatar, ListItemSecondaryAction } from '@material-ui/core';
 
 const styles = theme => ({
-    root: {
-        width: '100%',
-        maxWidth: 360,
-        backgroundColor: theme.palette.background.paper,
-    },
     button: {
-        marginLeft: '10px'
-    },
-    adminFab: {
-        position: 'fixed',
-        right: '2vw',
-        bottom: '2vw',
+        marginTop: theme.spacing(1),
+        marginLeft: theme.spacing(1),
     },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-        width: '70%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        padding: theme.spacing(4),
+        paddingTop: theme.spacing(1),
     },
-    contributionList: {
-        display: 'block',
-        width: 'wrap',
-        align: 'center',
-    },
-    contributionListName: {
-        width: '20vw',
-        textAlign: 'right',
-        marginLeft: 'auto',
-        paddingRight: '3vw'
-    },
-    contributionListStatus: {
-        width: '7vw',
-        textAlign: 'left',
-        paddingLeft: '3vw',
-        marginRight: 'auto'
-    },
-    cardColor: {
-        backgroundColor: '#fce4ec',
+    addButton: {
+        marginLeft: theme.spacing(4),
     }
 });
 
@@ -83,7 +55,9 @@ class MainPageTB extends Component {
     };
 
     handleEditButtonClick(selectedContribution) {
-        this.props.windowSwap(selectedContribution);
+        console.log("selected ");
+        console.log(selectedContribution);
+        this.props.onSelectContribution(selectedContribution);
     };
 
     render() {
@@ -109,14 +83,7 @@ class MainPageTB extends Component {
                     startIcon={<Visibility />}
                     href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
                     className={classes.button}>Preview </Button>
-            <Button variant="outlined" color={"primary"}
-                                            startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
-                                            onClick={(published) ? 
-                                                () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
-                                                () => { return this.handleEditButtonClick.bind(this)(e) }}
-                                                className={classes.button}>
-                                                {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
-                                        </Button>
+            
             </div>)
             : (<h4><i>Access Denied</i></h4>);
         };
@@ -128,9 +95,13 @@ class MainPageTB extends Component {
                 <Paper className={classes.paper} elevation={3} square={false} classes={{ root: classes.cardColor }}>
                     <div className={" MainPage-format"}>
                         <h1>My Collections</h1>
-                        <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} variant="outlined" color={"primary"} startIcon={<Add />}
-                            className={classes.button}>Add Collection </Button>
+                        <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} 
+                                variant="contained" color={"primary"} 
+                                startIcon={<Add />}>
+                                    Create New Collection
+                        </Button>
                         <List className={classes.contributionList}>
+                            {/* <ListSubheader>My Collections</ListSubheader> */}
                             {contrib.filter(e => {
                                 return e.type && (e.owner === this.props.user.uid || this.props.user.admin);
                             }).sort((a, b) => {
@@ -141,14 +112,30 @@ class MainPageTB extends Component {
                                 let pendingApproval = e.approval === "pending";
                                 let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
                                 return (
-                                    <div key={e.ref.id || e.name} >
-                                        <ListItem className={classes.contributionListItem}>
-                                            <h3 className={classes.contributionListName}>{e.name}</h3>
-                                            {userButtons(e, published, pendingApproval)}
-                                            
-                                            <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
-                                        </ListItem>
-                                    </div>
+                                    <ListItem key={e.ref.id || e.name} button onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}>
+                                        <ListItemAvatar>
+                                            <Avatar src={e['bioPhotoUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText className={classes.contributionListName} 
+                                                      primary={e.name}
+                                                      secondary={e.description}>
+                                            <Typography>{e.name}</Typography> 
+                                            <Typography>{e.description}</Typography>
+                                        </ListItemText>
+                                        <ListItemSecondaryAction>
+                                            <Button variant="outlined" style={{color:  (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke" }}
+                                                startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
+                                                onClick={(published) ? 
+                                                    () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
+                                                    () => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                    className={classes.button}>
+                                                    {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
+                                            </Button>
+                                        </ListItemSecondaryAction>
+                                        {/* {userButtons(e, published, pendingApproval)} */}
+                                        
+                                        {/* <h3 className={classes.contributionListStatus}>e.status</h3> */}
+                                    </ListItem>
                                 );
                             })}
                         </List>

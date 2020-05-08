@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
+import {withStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FormControl from "@material-ui/core/FormControl";
 import Paper from "@material-ui/core/Paper";
@@ -25,15 +25,8 @@ const styles = theme => ({
         backgroundColor: theme.palette.background.paper,
     },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-        width: '70%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
     },
     cardColor: {
-        backgroundColor: '#fce4ec',
     },
     avatar: {
         margin: 10,
