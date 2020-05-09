@@ -14,22 +14,17 @@ import {withStyles} from '@material-ui/core/styles';
 import 'typeface-roboto';
 import fb from './firebase';
 import HelpDialog from './HelpDialog';
-// import UploadDialog from './UploadDialog';
 import genericUserPhoto from './generic-user.jpg';
 import { TouchApp } from '@material-ui/icons';
 import { BottomNavigationAction } from '@material-ui/core';
 import { BottomNavigation } from '@material-ui/core';
 import { Visibility } from '@material-ui/icons';
 import { Edit } from '@material-ui/icons';
-import { CloudUpload } from '@material-ui/icons';
+import { PeopleRounded } from '@material-ui/icons';
 import { Button } from '@material-ui/core';
 
 const styles = {
-    root: {
-        // display: 'flex',
-    },
     appBar: {
-        // display: 'grow',
         flexGrow: 1,
         textAlign: 'center',
         marginLeft: 'auto',
@@ -51,39 +46,12 @@ const styles = {
         marginLeft: 'auto',
         marginRight: 'auto',
     },
-    icon: {
-        height: 35,
-        width: 35,
-    },
-    list: {
-        width: 250,
-    },
-    fullList: {
-        width: 'auto',
-    },
     menuButton: {
         height: 50,
     },
-    toolbarHelp: {
-        height: "100%",
-        // backgroundColor: theme.palette.primary.main,
-    },
-    accountButton: {
-        // backgroundColor: "#007ccb",
-        display: 'inline-block',
-        height: 40,
-        padding: 5,
-        verticalAlign: 'middle'
-    },
-    accountButtonText: {
-        display: 'inline-block',
-        height: 40,
-        paddingLeft: 5,
-        paddingRight: 5,
-        verticalAlign: 'middle'
-    },
-    accountButtonImg: {
-        height: 30
+    sticky: {
+        position: 'sticky',
+        top: 0
     },
 };
 
@@ -163,9 +131,6 @@ class Header extends Component {
                     alt={(this.props.user && this.props.user.name) || "Unnamed Contributor"}
                     src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
                     className={classes.bigAvatar}/>
-                {/* <ListItem selected className={classes.avatarName}>
-                    <ListItemText primary={this.props.user.displayName} />
-                </ListItem> */}
                 <ListSubheader className={classes.avatarName}>{this.props.user.displayName} </ListSubheader>
             </div>
         ) : (
@@ -174,9 +139,9 @@ class Header extends Component {
                     alt={"No User"}
                     src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
                     className={classes.bigAvatar}/>
-                {/* <ListItem selected className={classes.avatarName}> */}
-                <ListSubheader className={classes.avatarName}>{"Not Signed In"} </ListSubheader>
-                {/* </ListItem> */}
+                <ListSubheader className={classes.avatarName}>
+                    {"Not Signed In"}
+                </ListSubheader>
             </div>
         );
 
@@ -188,17 +153,6 @@ class Header extends Component {
                 <ListItemText primary={"Admin Settings"}></ListItemText>
             </ListItem>
         ) : (<div/>);
-
-        let uploadButton = (this.props.user && this.props.user.authorized) ? (
-            <Button variant="contained"
-                    color="secondary"
-                    onClick={this.toggleUploadDialog.bind(this)} >
-                <CloudUpload />
-                <label style={{marginLeft: 5}}>{"Upload Media"}</label>
-            </Button>
-        ) : (
-            <div></div>
-        );
 
         return (
             <div>
@@ -247,24 +201,10 @@ class Header extends Component {
                             <Typography variant="h5" align="center" color="inherit">
                                 <b>Global Contributor Portal</b>
                             </Typography>
-                        </div>
-                        <div>
-                        {/* {uploadButton} */}
-                        </div>
-                        {/* <Button 
-                            size="large"
-                            color="inherit"
-                            className={classes.toolbarHelp}
-                            endIcon={<Helpicon style={{fontSize: 35}} />}
-                            aria-label="menu"
-                            onClick={this.toggleHelpDialog.bind(this)} >Help</Button> */}
+                        </div>                        
                         <HelpDialog
                             show={this.state.showHelp}
                             toggle={this.toggleHelpDialog.bind(this)}/>
-                        {/* <UploadDialog
-                            show={this.state.showUpload}
-                            toggle={this.toggleUploadDialog.bind(this)}/> */}
-
                     </Toolbar>
                     <Tabs disabled={!this.props.user} centered
                           style={{visibility: this.props.user ? 'visible' : 'collapse'}}
@@ -275,12 +215,13 @@ class Header extends Component {
                           textColor="secondary">
                         <Tab button label="Information" icon={<InfoRounded />} />
                         <Tab button label="Media Upload" icon={<CloudUploadRounded />} />
-                        <Tab active button label="Collections" icon={<LibraryBooks />} />
+                        <Tab button label="Collections" icon={<LibraryBooks />} />
                     </Tabs>
                 </AppBar>
                 <BottomNavigation value={this.props.collectionView}
                                   onChange={this.onCollectionViewChange}
                                   color="primary" showLabels 
+                                  className={classes.sticky}
                                   style={{display: (this.props.tabValue === 2 ? 'flex' : 'none')}}>
                         <BottomNavigationAction button label="Select" icon={<TouchApp />} />
                         <BottomNavigationAction style={{visibility: this.props.contributionSelected ? 'collapse' : 'visible'}} 

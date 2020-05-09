@@ -171,9 +171,7 @@ class App extends Component {
 
     adminSwap() {
         this.setState({
-            //adminPanel: adminPanel,
             showAdminWindow: !this.state.showAdminWindow
-            //showWindow: !this.state.showWindow
         });
     }
 
@@ -196,7 +194,7 @@ class App extends Component {
 
         } else if(!this.state.user.authorized) {
             return (<h3><br/>This account is not authorized. Make sure you have logged in with your JHDB-provided Dropbox account</h3>);
-        } else if(this.state.showAdminView) {
+        } else if(this.state.showAdminWindow) {
             return (<AdminView adminPanel={this.state.adminPanel}
                 users={this.state.users}
                    adminSwap={this.adminSwap.bind(this)}/>);
@@ -215,13 +213,11 @@ class App extends Component {
             case 3:
                 return (<div>
                             <iframe title="Preview" 
-                                    style={{
-                                        height: 800,
-                                        width: '100%',
-                                    }}
-                                    // width="100vw" 
-                                    // height="90vh"
-                                    src={"/preview/"+this.state.selectedContribution.name.toLowerCase().replace(/ /g, "-")} />
+                                style={{
+                                    height: 800,
+                                    width: '100%',
+                                }}
+                                src={"/preview/"+this.state.selectedContribution.name.toLowerCase().replace(/ /g, "-")} />
                         </div>);
             case 2:
                 return (<EditContributionView selectedContribution={this.state.selectedContribution}
@@ -231,10 +227,10 @@ class App extends Component {
             case 1:
             default:
                 return (<ContributionsListView contributions={this.state.contributions}
+                    selectedContribution={this.state.selectedContribution}
                     user={this.state.user}
                     onSelectContribution={this.selectContribution.bind(this)}
-                    publishedList={this.state.publishedList}
-                    adminSwap={this.adminSwap.bind(this)}/>);
+                    publishedList={this.state.publishedList} />);
         }
             
     }

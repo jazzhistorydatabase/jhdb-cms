@@ -62,31 +62,23 @@ class MainPageTB extends Component {
 
     render() {
         const classes = this.props.classes;
-        let contrib = this.props.contributions;
-        contrib = contrib.filter(e => e.type);
-        contrib.sort((a, b) => {
-            if (!a.index) return 1;
-            if (!b.index) return -1;
-            return b.index - a.index;
-        });
+        let contrib = this.props.contributions.filter(e => !!e.type);
 
-        let userButtons = (e, published, pendingApproval) => {
-            console.log(this.props.user.uid);
-            console.log(e.owner);
-            return (this.props.user && (this.props.user.admin || (e["owner"] && this.props.user.uid == e.owner))) ?
-            (<div>
-            <Button variant="outlined" color={"primary"}
-                onClick={() => { return this.handleEditButtonClick.bind(this)(e) }}
-                startIcon={<Edit />}
-                className={classes.button}>Edit </Button>
-            <Button variant="outlined" color={"primary"}
-                    startIcon={<Visibility />}
-                    href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
-                    className={classes.button}>Preview </Button>
-            
-            </div>)
-            : (<h4><i>Access Denied</i></h4>);
-        };
+        if(!this.props.user.admin) {
+            // If user isn't admin, only display user's contributions
+            contrib = contrib.filter(e => {
+                return e.owner === this.props.user.uid;
+            });
+        } else {
+            // If user is admin, show their contributions at the top
+            contrib = contrib.sort((a, b) => {
+                // Show user's contribs on top
+                if(a.owner === this.props.user.uid) return -1;
+                return 1;
+            });
+        }
+
+        const selectedUid = this.props.selectedContribution ? this.props.selectedContribution.ref.id : "";
 
         return (
             <div>
@@ -94,33 +86,29 @@ class MainPageTB extends Component {
                 <br />
                 <Paper className={classes.paper} elevation={3} square={false} classes={{ root: classes.cardColor }}>
                     <div className={" MainPage-format"}>
-                        <h1>My Collections</h1>
+                        <h1>My Pages</h1>
                         <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} 
                                 variant="contained" color={"primary"} 
                                 startIcon={<Add />}>
                                     Create New Collection
                         </Button>
+                        <br />
                         <List className={classes.contributionList}>
                             {/* <ListSubheader>My Collections</ListSubheader> */}
-                            {contrib.filter(e => {
-                                return e.type && (e.owner === this.props.user.uid || this.props.user.admin);
-                            }).sort((a, b) => {
-                                // Show user's contribs on top
-                                if(a.owner === this.props.user.uid) return -1;
-                                return 1;
-                            }).map((e) => {
+                            {contrib.map((e) => {
                                 let pendingApproval = e.approval === "pending";
                                 let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
+                                console.log(e.ref.uid);
                                 return (
-                                    <ListItem key={e.ref.id || e.name} button onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}>
+                                    <ListItem key={e.ref.id || e.name} button 
+                                              selected={e.ref.id === selectedUid}
+                                              onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}>
                                         <ListItemAvatar>
                                             <Avatar src={e['bioPhotoUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
                                         </ListItemAvatar>
                                         <ListItemText className={classes.contributionListName} 
                                                       primary={e.name}
-                                                      secondary={e.description}>
-                                            <Typography>{e.name}</Typography> 
-                                            <Typography>{e.description}</Typography>
+                                                      secondary={e.description.substring(0, 100)}>
                                         </ListItemText>
                                         <ListItemSecondaryAction>
                                             <Button variant="outlined" style={{color:  (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke" }}

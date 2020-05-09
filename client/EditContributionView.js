@@ -220,9 +220,10 @@ class EditContributionView extends Component {
         return (
             <div>
                 <div>
-                    <h1> Contribution </h1>
-                    <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
+                    <h1> Edit Page </h1>
+                    <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
                             className={classes.button}> Discard Changes </Button>
+                    <br/>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
                         <h2 className={classes.mediaUploadTitle}> Bio</h2>
