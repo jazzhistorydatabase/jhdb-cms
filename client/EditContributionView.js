@@ -13,7 +13,7 @@ import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
 
-import { Visibility } from '@material-ui/icons';
+import { Visibility, Save, Delete } from '@material-ui/icons';
 import { Switch } from '@material-ui/core';
 
 const styles = theme => ({
@@ -62,12 +62,7 @@ class EditContributionView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            contribName: '',
-            contribType: '',
-            contribBio: '',
-            mediaProcess: '',
-            contentEditing: '',
-            contributionData: null,
+            contributionData: this.props.selectedContribution,
         };
         
         this.handleNameChange = event => {
@@ -95,7 +90,6 @@ class EditContributionView extends Component {
                 window.alert("Please rescind your request for approval before making changes.");
             } else {
                 data.description = event.target.value.replace(/\n/g, "<br />");
-                console.log(data.description);
                 this.setState({contributionData: data});
             }
         };
@@ -222,7 +216,7 @@ class EditContributionView extends Component {
                 <div>
                     <h1> Edit Page </h1>
                     <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
-                            className={classes.button}> Discard Changes </Button>
+                            className={classes.button}> Unselect </Button>
                     <br/>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
@@ -231,22 +225,22 @@ class EditContributionView extends Component {
                         <TextField
                             id="standard-name"
                             className={classes.textField}
-                            value={(contrib && contrib.name) || ""}
+                            defaultValue={(contrib && contrib.name) || ""}
                             onChange={this.handleNameChange}
                             margin="normal"
                         />
                         <FormLabel component="legend"> Collection Type</FormLabel>
                         <RadioGroup row
-                                    value={(contrib && contrib.type) || ""}
+                                    defaultValue={(contrib && contrib.type) || ""}
                                     onChange={this.handleCheckBoxChange}>
                             <FormControlLabel
-                                value="artist"
+                                defaultValue="artist"
                                 control={<Radio color="primary"/>}
                                 label="Artist Type"
                                 labelPlacement="start"
                             />
                             <FormControlLabel
-                                value="collection"
+                                defaultValue="collection"
                                 control={<Radio color="primary"/>}
                                 label="Collection"
                                 labelPlacement="start"
@@ -264,7 +258,7 @@ class EditContributionView extends Component {
                             label="Biography"
                             style={{margin: 5}}
                             multiline
-                            value={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
+                            defaultValue={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
                             onChange={this.handleBioChange}
                             fullWidth
                             margin="normal"
@@ -297,18 +291,17 @@ class EditContributionView extends Component {
                     <br/>
                     <br/>
                     <br/>
-                    <Button onClick={this.handleDeleteContribution} variant="outlined" color={"primary"}
+                    <Button onClick={this.handleDeleteContribution} startIcon={<Delete />} variant="outlined" color={"error"}
                             className={classes.button}> Delete Contribution </Button>
                     <br/>
                     <br/>
                     <br/>
-                    <Button variant="contained"
-                            color={"primary"}
+                    {/* <Button variant="contained"
+                            style={{color: 'white', backgroundColor: 'green'}}
                             className={classes.previewButton}
-                            startIcon={<Visibility />}
-                            href={"/preview/"+this.props.selectedContribution.name.toLowerCase().replace(/ /g, "-")}>
-                                Preview 
-                    </Button>
+                            startIcon={<Save />}>
+                        Save 
+                    </Button> */}
                     <Paper className={classes.approvalPaper} elevation={3} square={false} color={"primary"}>
                         <FormControlLabel
                             color={"primary"}

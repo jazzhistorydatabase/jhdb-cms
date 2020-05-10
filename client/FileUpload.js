@@ -27,7 +27,7 @@ const styles = theme => ({
     fabImg: {
         width: '50px',
         height: '50px',
-        borderRadius: '100px',
+        borderRadius: '200px',
     },
 
 });
@@ -37,6 +37,7 @@ class FileUpload extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            anotherKey: null,
             fileDoc: undefined,
         };
 
@@ -55,7 +56,7 @@ class FileUpload extends Component {
             } else {
                 fileDoc.caption = event.target.value;
             }
-            this.setState({fileDoc: fileDoc});
+            this.setState({fileDoc: fileDoc, anotherKey: event.target.value});
         };
 
         this.handleLinkBlur = event => {
@@ -136,11 +137,14 @@ class FileUpload extends Component {
             return <div />;
         }
         const isVideo = (this.props.fileType === 'Video');
-        let fileUploadIcon = doc[url] ?
-                ((doc[thumbnail] || doc[icon]) ?
-                    (<img className={classes.fabImg} alt="Upload preview" src={(doc[thumbnail] || doc[icon])} />) :
-                    (<CheckIcon />)):
-                (<AddIcon/>);
+        let fileUploadIcon;
+        if(!doc[url]) {
+            fileUploadIcon = <AddIcon />;
+        } else if(doc[thumbnail] && doc[thumbnail].match(/.*(png|jpg|jpeg).*/gi)) {
+            fileUploadIcon = <img className={classes.fabImg} alt="Select" src={doc[thumbnail]} />;
+        } else {
+            fileUploadIcon = <CheckIcon />;
+        }
 
         let fileUploadComponent;
         if (!isVideo) {
@@ -149,6 +153,7 @@ class FileUpload extends Component {
                     <Fab
                         size="small"
                         color="primary"
+                        style={doc[url] ? {backgroundColor: 'green'} : {}}
                         aria-label="Upload"
                         className={classes.fab}
                         onClick={
@@ -169,7 +174,7 @@ class FileUpload extends Component {
                     id="standard-static"
                     label="Link"
                     style={{margin: 5}}
-                    value={(this.state.fileDoc && this.state.fileDoc[url]) || ""}
+                    defaultValue={(this.state.fileDoc && this.state.fileDoc[url]) || ""}
                     onChange={this.handleTextChange}
                     onBlur={this.handleLinkBlur}
                     margin="normal"
@@ -201,7 +206,7 @@ class FileUpload extends Component {
                                     label="Caption"
                                     style={{margin: 5, width: "100%"}}
                                     multiline
-                                    value={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
+                                    defaultValue={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
                                     onChange={this.handleTextChange}
                                     margin="normal"
                                     variant="filled"

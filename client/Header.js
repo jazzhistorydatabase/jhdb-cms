@@ -215,7 +215,7 @@ class Header extends Component {
                           textColor="secondary">
                         <Tab button label="Information" icon={<InfoRounded />} />
                         <Tab button label="Media Upload" icon={<CloudUploadRounded />} />
-                        <Tab button label="Collections" icon={<LibraryBooks />} />
+                        <Tab button label="Pages" icon={<LibraryBooks />} />
                     </Tabs>
                 </AppBar>
                 <BottomNavigation value={this.props.collectionView}
@@ -224,11 +224,11 @@ class Header extends Component {
                                   className={classes.sticky}
                                   style={{display: (this.props.tabValue === 2 ? 'flex' : 'none')}}>
                         <BottomNavigationAction button label="Select" icon={<TouchApp />} />
-                        <BottomNavigationAction style={{visibility: this.props.contributionSelected ? 'collapse' : 'visible'}} 
+                        <BottomNavigationAction style={this.props.contributionSelected ? {display: 'none'} : {}}
                                                 button label="Select collection to continue" />
-                        <BottomNavigationAction style={{visibility: this.props.contributionSelected ? 'visible' : 'collapse'}} 
+                        <BottomNavigationAction style={this.props.contributionSelected ? {} : {display: 'none'}}
                                                 button label="Edit" icon={<Edit />} />
-                        <BottomNavigationAction style={{visibility: this.props.contributionSelected ? 'visible' : 'collapse'}} 
+                        <BottomNavigationAction style={this.props.contributionSelected ? {} : {display: 'none'}}
                                                 button label="Preview" icon={<Visibility />} />
                 </BottomNavigation>
             </div>

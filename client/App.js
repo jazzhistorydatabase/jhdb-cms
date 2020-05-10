@@ -6,7 +6,8 @@ import EditContributionView from "./EditContributionView";
 import UploadView from "./UploadView";
 import fb from './firebase.js';
 import ContributionsListView from './ContributionsListView';
-import { CircularProgress, Container, CssBaseline } from '@material-ui/core';
+import { Visibility } from '@material-ui/icons';
+import { CircularProgress, Container, CssBaseline, Button } from '@material-ui/core';
 import { ArrowUpwardSharp } from '@material-ui/icons';
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import { lightBlue } from '@material-ui/core/colors';
@@ -212,6 +213,15 @@ class App extends Component {
         switch(( (!!this.state.selectedContribution) && this.state.collectionView) || 0) {
             case 3:
                 return (<div>
+                            <br />
+                            <Button variant="contained"
+                                    color={"primary"}
+                                    startIcon={<Visibility />}
+                                    target="#"
+                                    href={"/preview/"+this.state.selectedContribution.name.toLowerCase().replace(/ /g, "-")}>
+                                Fullscreen Preview
+                            </Button>
+                            <br /><br />
                             <iframe title="Preview" 
                                 style={{
                                     height: 800,
