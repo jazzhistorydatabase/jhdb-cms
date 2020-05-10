@@ -88,9 +88,14 @@ let renderFromFirebase = (req, res, collRef, template) => {
     let images = [];
     let collectionDoc = collRef;
     let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
-        logger.success(`Successfully fetched ${imgSnapshot.docs.count} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        logger.success(`Successfully fetched ${imgSnapshot.docs.length} images for ${collRef.name} doc id: ${collRef.ref.id}`);
         images = imgSnapshot.docs.map(doc => {
             return doc.data();
+        });
+        images.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
         });
     }).catch( err => {
         logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
@@ -98,28 +103,32 @@ let renderFromFirebase = (req, res, collRef, template) => {
     // Get audio
     let audio = [];
     let getAudio = collRef.ref.collection("Audio").get().then( audioSnapshot => {
-        logger.success(`Successfully fetched ${audioSnapshot.docs && audioSnapshot.docs.count} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
-        audio = audioSnapshot.map(doc => {
+        logger.success(`Successfully fetched ${audioSnapshot.docs && audioSnapshot.docs.length} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
+        audio = audioSnapshot.docs.map(doc => {
             return doc.data();
-        });/*.sort((a, b) => {
+        });
+        audio.sort((a, b) => {
             if (!a.index) return -1;
             if (!b.index) return 1;
             return a.index - b.index;
-        });*/
+        });
+    }).catch( err => {
+        logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
     });
     // Get video
     let video = [];
     let getVideo = collRef.ref.collection("Video").get().then( videoSnapshot => {
-        logger.success(`Successfully fetched ${videoSnapshot.docs.count} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
-        videoSnapshot.map(doc => {
+        logger.success(`Successfully fetched ${videoSnapshot.docs.length} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        video = videoSnapshot.docs.map(doc => {
             let data = doc.data();
             data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
             return data;
-        });/*.sort((a, b) => {
+        });
+        video.sort((a, b) => {
             if (!a.index) return -1;
             if (!b.index) return 1;
             return a.index - b.index;
-        });*/
+        });
     }).catch( err => {
         logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
     });
@@ -146,7 +155,7 @@ let renderFromFirebase = (req, res, collRef, template) => {
 let previewReqHandler = (req, res) => {
     let collName = req.params.collection.toLowerCase();
     logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, "layout/template", renderFromFirebase);
+    fetchContributionByName(req, res, collName, "template", renderFromFirebase);
 }
 
 app.get("/preview/header-new.html", (req, res) => {
@@ -173,7 +182,7 @@ let publishedReqHandler = (req, res) => {
     fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
         if (snapshot.exists) {
             let publishedList = snapshot.data();
-            fetchContributionByName(req, res, collName, "layout/template", (req, res, collRef, template) => {
+            fetchContributionByName(req, res, collName, "template", (req, res, collRef, template) => {
                 if (!collRef) return;
                 if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
                     // This contribution is published - proceed
