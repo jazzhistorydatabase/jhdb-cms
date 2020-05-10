@@ -30,36 +30,50 @@ class App extends Component {
     handleUserAuth(user) {
         this.setState({user: user});
         if (user) {
-            fb.base.bindCollection(`Contributions`, {
-                context: this,
-                state: 'contributions',
-                withRefs: true,
-            });
-
-            fb.base.syncDoc("/Contributions/published", {
-                context: this,
-                state: 'publishedList',
-                withRefs: true
-            });
+            
 
             fb.base.bindCollection(`Users`, {
                 context: this,
                 state: 'users',
                 withRefs: true,
                 then: () => {
+                    const u = this.state.user;
                     // Get authorized
-                    fb.db.collection("Users").doc("authorized").get().then((snapshot) => {
-                        let u = this.state.user;
+                    let authProm = fb.db.collection("Users").doc("authorized").get().then((snapshot) => {
                         u["authorized"] = snapshot.exists && snapshot.data()[u.uid];
                         this.setState({user: u});
                     });
                     // Get admin
-                    fb.db.collection("Users").doc("admin").get().then((snapshot) => {
-                        let u = this.state.user;
+                    let adminProm = fb.db.collection("Users").doc("admin").get().then((snapshot) => {
                         u["admin"] = snapshot.exists && snapshot.data()[u.uid];
                         this.setState({user: u});
                     });
-                    
+
+                    Promise.all([authProm, adminProm]).then( () => {
+                        let q = u.admin ? undefined : (ref) => ref.where('owner', '==', u.uid);
+                        if (!u.authorized) return;
+                        console.log(q);
+                        fb.base.bindCollection(`Contributions`, {
+                            context: this,
+                            state: 'contributions',
+                            withRefs: true,
+                            query: q,
+                            onFailure(err) {
+                                console.log(err);
+                            },
+                        });
+
+                        fb.base.syncDoc("/Contributions/published", {
+                            context: this,
+                            state: 'publishedList',
+                            withRefs: true,
+                            onFailure(err) {
+                                console.log(err);
+                            },
+                        });
+                    }).catch(err => {
+                        console.log(err);
+                    });
                 }
             });
             if (!dbx.app) {
@@ -132,6 +146,7 @@ class App extends Component {
                                   break;
             default:
                 x = <ContributionsListView contributions={this.state.contributions}
+                                   user={this.state.user}
                                    windowSwap={this.windowSwap.bind(this)}
                                    publishedList={this.state.publishedList}
                                    adminSwap={this.adminSwap.bind(this)}/>;

@@ -138,7 +138,8 @@ class EditContributionView extends Component {
             if ((data && (data.approval === 'pending'))) {
                 window.alert("Please rescind your request for approval before making changes.");
             } else {
-                data.description = event.target.value;
+                data.description = event.target.value.replace(/\n/g, "<br />");
+                console.log(data.description);
                 this.setState({contributionData: data});
             }
         };
@@ -310,7 +311,7 @@ class EditContributionView extends Component {
                                 label="Biography"
                                 style={{margin: 5}}
                                 multiline
-                                value={(contrib && contrib.description) || ""}
+                                value={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
                                 onChange={this.handleBioChange}
                                 fullWidth
                                 margin="normal"
@@ -321,6 +322,7 @@ class EditContributionView extends Component {
                                     shrink: true,
                                 }}
                             />
+
                         </Paper>
                     </FormControl>
                     <br/>

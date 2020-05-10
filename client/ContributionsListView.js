@@ -74,6 +74,7 @@ class MainPageTB extends Component {
                 bioUrl: '',
                 bioName: '',
                 bioThumbnail: '',
+                owner: this.props.user.uid,
                 index: maxIndex + 1,
             });
         } else {
@@ -95,6 +96,31 @@ class MainPageTB extends Component {
             return b.index - a.index;
         });
 
+        let userButtons = (e, published, pendingApproval) => {
+            console.log(this.props.user.uid);
+            console.log(e.owner);
+            return (this.props.user && (this.props.user.admin || (e["owner"] && this.props.user.uid == e.owner))) ?
+            (<div>
+            <Button variant="outlined" color={"primary"}
+                onClick={() => { return this.handleEditButtonClick.bind(this)(e) }}
+                startIcon={<Edit />}
+                className={classes.button}>Edit </Button>
+            <Button variant="outlined" color={"primary"}
+                    startIcon={<Visibility />}
+                    href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
+                    className={classes.button}>Preview </Button>
+            <Button variant="outlined" color={"primary"}
+                                            startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
+                                            onClick={(published) ? 
+                                                () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
+                                                () => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                className={classes.button}>
+                                                {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
+                                        </Button>
+            </div>)
+            : (<h4><i>Access Denied</i></h4>);
+        };
+
         return (
             <div>
                 <br />
@@ -105,29 +131,21 @@ class MainPageTB extends Component {
                         <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} variant="outlined" color={"primary"} startIcon={<Add />}
                             className={classes.button}>Add Collection </Button>
                         <List className={classes.contributionList}>
-                            {contrib.map((e) => {
+                            {contrib.filter(e => {
+                                return e.type && (e.owner === this.props.user.uid || this.props.user.admin);
+                            }).sort((a, b) => {
+                                // Show user's contribs on top
+                                if(a.owner === this.props.user.uid) return -1;
+                                return 1;
+                            }).map((e) => {
                                 let pendingApproval = e.approval === "pending";
                                 let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
                                 return (
                                     <div key={e.ref.id || e.name} >
                                         <ListItem className={classes.contributionListItem}>
                                             <h3 className={classes.contributionListName}>{e.name}</h3>
-                                            <Button variant="outlined" color={"primary"}
-                                                onClick={() => { return this.handleEditButtonClick.bind(this)(e) }}
-                                                startIcon={<Edit />}
-                                                className={classes.button}>Edit </Button>
-                                            <Button variant="outlined" color={"primary"}
-                                                    startIcon={<Visibility />}
-                                                    href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
-                                                    className={classes.button}>Preview </Button>
-                                            <Button variant="outlined" color={"primary"}
-                                                    startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
-                                                    onClick={(published) ? 
-                                                        () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
-                                                        () => { return this.handleEditButtonClick.bind(this)(e) }}
-                                                    className={classes.button}>
-                                                        {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
-                                                </Button>
+                                            {userButtons(e, published, pendingApproval)}
+                                            
                                             <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
                                         </ListItem>
                                     </div>
