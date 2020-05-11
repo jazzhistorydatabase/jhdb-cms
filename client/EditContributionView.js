@@ -145,7 +145,8 @@ class EditContributionView extends Component {
                                 auth: token,
                                 name: contributionData.name,
                             }).then(resp => {
-                                window.alert("Publish success!");
+                                window.alert("Publish success! You will now be redirected to the published page.");
+                                window.location.href = "https://global.jazzhistorydatabase.com/" + contributionData.name.toLowerCase().replace(/ /gi, '-');
                             }).catch( err => {
                                 window.alert("Error publishing - please contact developers for support\n\n" + err);
                                 console.log(err);

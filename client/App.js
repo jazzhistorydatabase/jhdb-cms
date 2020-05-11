@@ -6,8 +6,9 @@ import EditContributionView from "./EditContributionView";
 import UploadView from "./UploadView";
 import fb from './firebase.js';
 import ContributionsListView from './ContributionsListView';
+import { Typography } from '@material-ui/core';
 import { Visibility } from '@material-ui/icons';
-import { CircularProgress, Container, CssBaseline, Button } from '@material-ui/core';
+import { CircularProgress, Container, CssBaseline, Button, Paper } from '@material-ui/core';
 import { ArrowUpwardSharp } from '@material-ui/icons';
 import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import { lightBlue } from '@material-ui/core/colors';
@@ -45,6 +46,11 @@ const styles = {
         flexGrow: 1,
         padding: 5,
         marginLeft: 10,
+    },
+    paper: {
+        padding: theme.spacing(4),
+        paddingTop: theme.spacing(1),
+        marginTop: theme.spacing(2),
     },
 };
 
@@ -202,7 +208,23 @@ class App extends Component {
 
         switch(this.state.tabValue) {
             case 0:
-                return <div>Information time</div>
+                return <div>
+                    <Paper className={this.props.classes.paper}>
+                        <h1>Welcome to the contributor portal!</h1>
+                        <br />
+                        <Typography>
+							At some point in the near future, in this information tab you will find instructions on how to use the contirbutor portal effectively. While we wrap up the process of developing this documentation, please feel free to reach out to <a href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</a> with any questions or issues!
+						</Typography>
+                        <br />
+                        <Typography>
+							You can upload media to the secure JHDB archive through the Upload tab. Further instructions are included there. You can subsequently build pages using this media in the Pages tab. We have made an effort to make this interface as straightforward and intuitive as possible - if you find anything confusing, odds are someone else does too so please don't hesitate to send us an email and we will be happy to clarify and/or find ways to make it less confusing!
+						</Typography>
+                        <br />
+                        <Typography>
+							You can log out of the contributor portal in the MENU (just click the menu button at the top left of the screen and select "Sign Out")
+						</Typography>
+                    </Paper>
+                </div>
             case 1:
                 return <UploadView user={this.state.user}/>;
             default:
