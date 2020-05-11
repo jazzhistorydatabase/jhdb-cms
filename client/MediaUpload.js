@@ -16,13 +16,6 @@ const styles = theme => ({
     paper: {
         padding: theme.spacing(2),
     },
-    // nameStyle: {
-    //     margin: theme.spacing(2),
-    // },
-    // mediaUploadTitle: {
-    //     width: '10vw',
-    //     textAlign: 'left',
-    // }
 });
 
 class MediaUpload extends Component { 
@@ -73,8 +66,7 @@ class MediaUpload extends Component {
             fileDoc['thumbnail'] = (file.link && file.link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
             fileDoc['index'] = ++maxIndex;
             fb.base.addToCollection(this.props.collection, fileDoc);
-        });//Contributions/eYaDA72aWJ1aBc2PKe5k/Images/IJdv08HacZF6xyFPhgQp 
-        //dbid:AACQf2BmfRfeotlZLVNchXozYDDecOH_gUU
+        });
     }
 
     componentDidMount() {
