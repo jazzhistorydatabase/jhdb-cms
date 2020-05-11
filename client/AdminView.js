@@ -117,7 +117,6 @@ class AdminView extends Component {
 
         return (
             <div>
-
                 <h1> Admin Settings </h1>
                 <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
                         className={classes.button}> Back </Button>
@@ -137,7 +136,7 @@ class AdminView extends Component {
                                     <Grid item xs={3}>
                                     <   h3> {user.name} </h3>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item xs={3}>
                                         <h5> {user.email} </h5>
                                     </Grid>
                                     <Grid item xs={4}>
@@ -159,7 +158,7 @@ class AdminView extends Component {
                                     <Grid item xs={3}>
                                     <   h3> {user.name} </h3>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item xs={3}>
                                         <h5> {user.email} </h5>
                                     </Grid>
                                     <Grid item xs={4}>

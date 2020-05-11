@@ -172,6 +172,7 @@ class App extends Component {
     handleTabChange(value) {
         this.setState({
             tabValue: value,
+            showAdminWindow: false,
         });
         // Scroll to top
         document.body.scrollTop = 0; // For Safari
