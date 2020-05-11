@@ -94,7 +94,6 @@ class App extends Component {
                     Promise.all([authProm, adminProm]).then( () => {
                         let q = u.admin ? undefined : (ref) => ref.where('owner', '==', u.uid);
                         if (!u.authorized) return;
-                        console.log(q);
                         fb.base.bindCollection(`Contributions`, {
                             context: this,
                             state: 'contributions',
@@ -205,7 +204,7 @@ class App extends Component {
             case 0:
                 return <div>Information time</div>
             case 1:
-                return <UploadView />;
+                return <UploadView user={this.state.user}/>;
             default:
                 break;
         }
@@ -231,7 +230,7 @@ class App extends Component {
                         </div>);
             case 2:
                 return (<EditContributionView selectedContribution={this.state.selectedContribution}
-                    admin={this.state.user && this.state.user.admin}
+                admin={this.state.user && this.state.user.admin}
                     publishedList={this.state.publishedList}
                     onSelectContribution={this.selectContribution.bind(this)}/>);
             case 1:

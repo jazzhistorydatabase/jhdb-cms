@@ -12,6 +12,7 @@ import 'typeface-roboto';
 import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
+import axios from 'axios';
 
 import { Visibility, Save, Delete } from '@material-ui/icons';
 import { Switch } from '@material-ui/core';
@@ -69,6 +70,7 @@ class EditContributionView extends Component {
             let data = this.state.contributionData;
             if ((data && (data.approval === 'pending'))) {
                 window.alert("Please rescind your request for approval before making changes.");
+                return false;
             } else {
                 data.name = event.target.value;
                 this.setState({contributionData: data});
@@ -79,6 +81,7 @@ class EditContributionView extends Component {
             let data = this.state.contributionData;
             if ((data && (data.approval === 'pending'))) {
                 window.alert("Please rescind your request for approval before making changes.");
+                return false;
             } else {
                 data.type = event.target.value;
                 this.setState({contributionData: data});
@@ -88,6 +91,7 @@ class EditContributionView extends Component {
             let data = this.state.contributionData;
             if ((data && (data.approval === 'pending'))) {
                 window.alert("Please rescind your request for approval before making changes.");
+                return false;
             } else {
                 data.description = event.target.value.replace(/\n/g, "<br />");
                 this.setState({contributionData: data});
@@ -101,6 +105,7 @@ class EditContributionView extends Component {
             let contrib = this.state.contributionData;
             if ((contrib && (contrib.approval === 'pending'))) {
                 window.alert("Please rescind your request for approval before making changes.");
+                return false;
             } else {
                 Object.keys(newState).forEach(key => {
                     contrib[key] = newState[key];
@@ -135,6 +140,15 @@ class EditContributionView extends Component {
                             '"?\n\nThis will make it publicly accessible via the Jazz History Database ' +
                             'website. You may visit your published contribution by clicking the ' + 
                             '"Published" button next to the contribution name in the "My Collections" page.')) {
+                        fb.getToken( token => {
+                            axios.post(`/publish`, {
+                                auth: token,
+                                name: contributionData.name,
+                            }).then(resp => {
+                                console.log(resp);
+                            }).catch( () => {
+                            });
+                        });
                         contributionData.status = "published";
                         contributionData.approval = "approved";
                         publishedList[contributionData.ref.id] = 'true';
@@ -236,13 +250,14 @@ class EditContributionView extends Component {
                             <FormControlLabel
                                 defaultValue="artist"
                                 control={<Radio color="primary"/>}
-                                label="Artist Type"
+                                label="Artist Page (Showcase Media)"
                                 labelPlacement="start"
                             />
                             <FormControlLabel
+                                disabled
                                 defaultValue="collection"
                                 control={<Radio color="primary"/>}
-                                label="Collection"
+                                label="Collection (Showcase other pages)"
                                 labelPlacement="start"
                             />
                         </RadioGroup>

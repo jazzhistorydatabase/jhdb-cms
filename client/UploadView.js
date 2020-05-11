@@ -9,7 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import Axios from 'axios';
 import fb from './firebase';
-import { Typography } from '@material-ui/core';
+import { Typography, TextField } from '@material-ui/core';
 import { CircularProgress, Card } from '@material-ui/core';
 
 
@@ -19,7 +19,14 @@ class UploadView extends Component {
 		super(props);
 		this.state = {
 			loading: false,
+			folder: "",
 		}
+
+		this.handleFolderChange = this.handleFolderChange.bind(this);
+	}
+
+	handleFolderChange(event) {
+		this.setState({folder: event.target.value});
 	}
   
 
@@ -36,10 +43,29 @@ class UploadView extends Component {
 							You will be redirected to a page where you can select files from your computer to be uploaded to your secure JHDB Dropbox folder. Please make sure to follow appropriate naming conventions on all files prior to uploading, as you will be unable to rename them once they have been uploaded to the archive.
 						</Typography>
 						<br />
+						<Typography>
+							If you would like your media to be uploaded to a subfolder, please enter the name here (e.g. entering "<code>John Doe</code>" will upload to "<code>{this.props.user.displayName}/John Doe</code>")
+						</Typography>
+						<br />
+						<Typography>
+							You can add additional subfolders with "<code>/</code>" - e.g. if you would like an Images folder under the John Doe folder, you could enter "<code>John Doe/Images</code>"
+						</Typography>
+						<TextField
+							onChange={this.handleFolderChange}
+							label="Subfolder Name"
+							margin="normal"
+							InputLabelProps={{
+								shrink: true,
+							}}
+                        />
+						<br />
 						<Button disabled={this.state.loading} variant="outlined" color="primary" onClick={() => {
 							fb.getToken( token => {
 								this.setState({loading: true});
-								Axios.get("/upload?auth="+token).then(resp => {
+								Axios.post(`/upload`, {
+									auth: token,
+									folder: this.state.folder,
+								}).then(resp => {
 									let link = resp.data;
 									if(link.startsWith('http')) {
 										window.location.href = link;

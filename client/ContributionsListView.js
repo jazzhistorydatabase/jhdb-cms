@@ -55,8 +55,6 @@ class MainPageTB extends Component {
     };
 
     handleEditButtonClick(selectedContribution) {
-        console.log("selected ");
-        console.log(selectedContribution);
         this.props.onSelectContribution(selectedContribution);
     };
 
@@ -98,7 +96,6 @@ class MainPageTB extends Component {
                             {contrib.map((e) => {
                                 let pendingApproval = e.approval === "pending";
                                 let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
-                                console.log(e.ref.uid);
                                 return (
                                     <ListItem key={e.ref.id || e.name} button 
                                               selected={e.ref.id === selectedUid}
