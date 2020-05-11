@@ -153,7 +153,7 @@ let previewReqHandler = (req, res) => {
     fetchContributionByName(req, res, collName, renderFromFirebase);
 }
 
-app.get("/preview/header-new.html", (req, res) => {
+app.get("/header-new.php", (req, res) => {
     logger.info('User request preview/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
@@ -253,7 +253,7 @@ app.post("/publish", (req, res) => {
     const force = req.body.force;
     fb.auth().verifyIdToken(token).then(decodedToken => {
         const uid = decodedToken.uid;
-        logger.success(`Successfully validated token for user account_id: ${uid}`)
+        logger.success(`Successfully validated token for user account_id: ${uid} requesting to publish ${slug}`)
         // Get user info from db
         fb.firestore().collection('Users').doc('admin').get().then(snapshot => {
             logger.success(`Successfully get admin users, checking account_id: ${uid}`)
@@ -263,24 +263,31 @@ app.post("/publish", (req, res) => {
                     logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
                     dbx.filesUpload({
                         "path": `/jhdb global/Published/${slug}/index.php`,
-                        // "mode": "add",
-                        // "autorename": false,// If it exists, don't make a new thing, just fail
-                        // "mute": false,// Notify dbx user of upload
-                        // "strict_conflict": false,
+                        "mode": "overwrite",
                         "contents": resp.data
                     }).then(() => {
                         logger.success(`Successfully uploaded html file to dropbox for ${slug}`);
+                        res.status(200).send("Upload success!");
                     }, (err) => {
                         logger.error(`Error uploading html file to dropbox for ${slug}`, err);
+                        res.status(500).send("Error uploading to Dropbox");
                     });
                 }).catch(err => {
                     logger.error(`Error fetching preview for ${name}`, err);
+                    res.status(500).send("Error downloading preview page");
                 });
             } else {
                 logger.error(`User with account_id: ${uid} is not authorized to publish`)
-                res.status(403).send(false);
+                res.status(403).send("Not authorized");
             }
+        }, err => {
+            logger.error(`Error fetching user admin doc to check account id: ${uid}`, err);
+            res.status(500).send("Error fetching admin doc");
         });
+    }, err => {
+        logger.error(`Error validating token, can not publish ${slug}`)
+        res.status(403).send("Failed to validate token");
+
     });
 });
 

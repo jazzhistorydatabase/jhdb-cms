@@ -145,8 +145,11 @@ class EditContributionView extends Component {
                                 auth: token,
                                 name: contributionData.name,
                             }).then(resp => {
-                                console.log(resp);
-                            }).catch( () => {
+                                window.alert("Publish success!");
+                            }).catch( err => {
+                                window.alert("Error publishing - please contact developers for support\n\n" + err);
+                                console.log(err);
+                                return;
                             });
                         });
                         contributionData.status = "published";
@@ -245,17 +248,17 @@ class EditContributionView extends Component {
                         />
                         <FormLabel component="legend"> Collection Type</FormLabel>
                         <RadioGroup row
-                                    defaultValue={(contrib && contrib.type) || ""}
+                                    value={(contrib && contrib.type) || ""}
                                     onChange={this.handleCheckBoxChange}>
                             <FormControlLabel
-                                defaultValue="artist"
+                                value="artist"
                                 control={<Radio color="primary"/>}
                                 label="Artist Page (Showcase Media)"
                                 labelPlacement="start"
                             />
                             <FormControlLabel
                                 disabled
-                                defaultValue="collection"
+                                value="collection"
                                 control={<Radio color="primary"/>}
                                 label="Collection (Showcase other pages)"
                                 labelPlacement="start"
