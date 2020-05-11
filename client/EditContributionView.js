@@ -13,6 +13,7 @@ import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
 import axios from 'axios';
+import { AssignmentTurnedIn } from '@material-ui/icons';
 import { Publish } from '@material-ui/icons';
 import { AssignmentLate } from '@material-ui/icons';
 import { Delete } from '@material-ui/icons';
@@ -34,6 +35,7 @@ const styles = theme => ({
     switchPaper: {
         display: 'inline-block',
         marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2),
         paddingLeft: theme.spacing(1),
         paddingRight: theme.spacing(1),
     },
@@ -48,9 +50,7 @@ const styles = theme => ({
 
 class EditContributionView extends Component {
     handleBeforeButtonClick() {
-        if(window.confirm("Are you sure? Any unsaved changes will be permanently lost")) {
-            this.props.onSelectContribution();
-        }
+        this.props.onSelectContribution();
     }
 
     constructor(props) {
@@ -211,6 +211,7 @@ class EditContributionView extends Component {
     render() {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
+        const isPublished = (this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'));
         let approvalText = "Request Approval";
         let publishedText = "Publish";
         if (contrib) {
@@ -228,10 +229,10 @@ class EditContributionView extends Component {
                     <h1> Edit Page </h1>
                     <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
                             className={classes.button}> Unselect </Button>
-                            <Paper className={classes.switchPaper} elevation={3} square={false} color={"primary"}>
+                    <Paper className={classes.switchPaper} elevation={3} square={false} color={"primary"}>
                         <FormControlLabel
                             color={"primary"}
-                            label={<div><AssignmentLate /> {approvalText}</div>}
+                            label={<div style={{display: 'flex', alignItems: 'center'}}><AssignmentLate /> {approvalText}</div>}
                             labelPlacement="start"
                             control={
                                 <Switch
@@ -246,19 +247,26 @@ class EditContributionView extends Component {
                     <Paper className={classes.switchPaper} elevation={3} square={false} color={"primary"}>
                         <FormControlLabel
                             color={"primary"}
-                            label=<div><Publish /> {publishedText}</div>
+                            label={<div style={{display: 'flex', alignItems: 'center' }}>
+                                        <Publish /> {publishedText}
+                                    </div>}
                             labelPlacement="start"
                             control={
                                     <Switch
                                         disabled={!this.props.admin}
                                         name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        checked={isPublished}
                                         onChange={this.handleSwitchChange}
                                         color="secondary"
                                     /> 
                                 }
                         />
                     </Paper>
+                    <Button style={isPublished ? {} : {display: 'none'}}
+                            href ={"https://global.jazzhistorydatabase.com/" + contrib.name.toLowerCase().replace(/ /gi, '-')}
+                            variant="contained" color={"primary"}
+                            startIcon={<AssignmentTurnedIn />}
+                            className={classes.button}> View Published </Button>
                     <br/>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>

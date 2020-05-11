@@ -119,7 +119,7 @@ class AdminView extends Component {
             <div>
 
                 <h1> Admin Settings </h1>
-                <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
+                <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
                         className={classes.button}> Back </Button>
                 <br/>
                 <br/>

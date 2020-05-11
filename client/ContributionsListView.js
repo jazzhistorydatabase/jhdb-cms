@@ -8,6 +8,9 @@ import {Add, Edit, Visibility, Person, PriorityHigh, Done } from "@material-ui/i
 
 
 import fb from './firebase';
+import { Group } from '@material-ui/icons';
+import { IconButton, Divider } from '@material-ui/core';
+import { Cached } from '@material-ui/icons';
 import { Typography, ListSubheader } from '@material-ui/core';
 import { ListItemText, ListItemAvatar, Avatar, ListItemSecondaryAction } from '@material-ui/core';
 
@@ -92,35 +95,40 @@ class MainPageTB extends Component {
                         </Button>
                         <br />
                         <List className={classes.contributionList}>
-                            {/* <ListSubheader>My Collections</ListSubheader> */}
                             {contrib.map((e) => {
                                 let pendingApproval = e.approval === "pending";
                                 let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
                                 return (
-                                    <ListItem key={e.ref.id || e.name} button 
-                                              selected={e.ref.id === selectedUid}
-                                              onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}>
-                                        <ListItemAvatar>
-                                            <Avatar src={e['bioUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
-                                        </ListItemAvatar>
-                                        <ListItemText className={classes.contributionListName} 
-                                                      primary={e.name}
-                                                      secondary={e.description.substring(0, 100)}>
-                                        </ListItemText>
-                                        <ListItemSecondaryAction>
-                                            <Button variant="outlined" style={{color:  (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke" }}
-                                                startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
-                                                onClick={(published) ? 
-                                                    () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
-                                                    () => { return this.handleEditButtonClick.bind(this)(e) }}
-                                                    className={classes.button}>
-                                                    {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
-                                            </Button>
-                                        </ListItemSecondaryAction>
-                                        {/* {userButtons(e, published, pendingApproval)} */}
-                                        
-                                        {/* <h3 className={classes.contributionListStatus}>e.status</h3> */}
-                                    </ListItem>
+                                    <div>
+                                        <Divider />
+                                        <ListItem key={e.ref.id || e.name} button 
+                                                selected={e.ref.id === selectedUid}
+                                                onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}>
+                                            <ListItemAvatar>
+                                                <Avatar src={e['bioUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText primary={<b>{e.name}</b>}
+                                                        secondary={<div>
+                                                                        {/* Status */}
+                                                                        <span style={{display: 'flex', alignItems: 'center', color:  (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke" }}>
+                                                                                    {(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Cached />}
+                                                                                    {(published) ? "  Published" : (pendingApproval) ? "  Pending Approval" : "  Work in Progress"}
+                                                                            <br />
+                                                                        </span>
+                                                                        {/* Description */}
+                                                                        {e.description.substring(0, 100)}{e.description.length > 99 ? '...' : ''}
+                                                                    </div>}>
+                                            </ListItemText>
+                                            <ListItemSecondaryAction>
+                                                <IconButton variant="outlined" style={{color:  (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke" }}
+                                                    icon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
+                                                    onClick={(published) ? 
+                                                        () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
+                                                        () => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                        className={classes.button} />
+                                            </ListItemSecondaryAction>
+                                        </ListItem>
+                                    </div>
                                 );
                             })}
                         </List>

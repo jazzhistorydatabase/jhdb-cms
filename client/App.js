@@ -272,6 +272,7 @@ class App extends Component {
                 return (<ContributionsListView contributions={this.state.contributions}
                     selectedContribution={this.state.selectedContribution}
                     user={this.state.user}
+                    users={this.state.users}
                     onSelectContribution={this.selectContribution.bind(this)}
                     publishedList={this.state.publishedList} />);
         }
