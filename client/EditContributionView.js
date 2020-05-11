@@ -249,6 +249,9 @@ class EditContributionView extends Component {
                             defaultValue={(contrib && contrib.name) || ""}
                             onChange={this.handleNameChange}
                             margin="normal"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
                         <br />
                         <br />
@@ -279,9 +282,9 @@ class EditContributionView extends Component {
                             isPendingApproval={contrib && (contrib.approval === 'pending')}
                         />
                             <br />
+                        <FormLabel component="legend">Biography Text</FormLabel>
                         <TextField
                             id="filled-multiline-flexible, filled-full-width"
-                            label="Biography Text"
                             style={{margin: 5}}
                             multiline
                             defaultValue={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
