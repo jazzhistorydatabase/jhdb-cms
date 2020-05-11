@@ -6,7 +6,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Switch from "@material-ui/core/Switch";
 import { randomBytes } from 'crypto';
 import React, { Component } from 'react';
-import './App.css';
 import FileUpload from "./FileUpload";
 import fb from "./firebase";
 import dbx from './dropbox.js';
@@ -14,66 +13,21 @@ import dbx from './dropbox.js';
 
 
 const styles = theme => ({
-    root: {
-        flexGrow: 1,
-    },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
+        padding: theme.spacing(2),
     },
-    nameStyle: {
-        margin: theme.spacing(2),
-    },
-    container: {
-        display: 'flex',
-        flexWrap: 'wrap',
-    },
-    fab: {
-        margin: theme.spacing(1),
-    },
-    cardColor: {
-        backgroundColor: '#fce4ec',
-    },
-    mediaUploadTitle: {
-        width: '10vw',
-        textAlign: 'left',
-    }
-
-
 });
 
 class MediaUpload extends Component { 
     constructor(props) {
         super(props);
         this.state = {
-            makeSubpage: '',
             contribText: '',
             collection: [],
             add: '',
         };
     }
 
-    handleSubpage(event) {
-        if (this.props.isPendingApproval) {
-            window.alert("Please rescind your request for approval before making changes.");
-            return;
-        }
-        let newState =  {};
-        switch(this.props && this.props.uploadName) {
-            case "Images":
-                newState["imagesSubpage"] = event.target.checked;
-                break;
-            case "Audio":
-                newState["audioSubpage"] = event.target.checked;
-                break;
-            case "Video":
-            default:
-                newState["videoSubpage"] = event.target.checked;
-                break;
-        }
-        this.props.onChange(newState);
-    };
 
     addFileUpload(event) {
         if (this.props.isPendingApproval) {
@@ -146,20 +100,11 @@ class MediaUpload extends Component {
         return (
             <div className={classes.root}>
                 <br/>
-                <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
+                <Paper className={classes.paper} elevation={3} square={false}>
                     <FormGroup row>
                         <h2 className={classes.mediaUploadTitle}>
                             {this.props.uploadName || ""}
                         </h2>
-                        <FormControlLabel
-                            control={
-                                <Switch disabled
-                                    checked={(this.props && this.props.isSubpage) || false}
-                                    onChange={this.handleSubpage.bind(this)}
-                                />
-                            }
-                            label="Make Subpage (Coming Soon)"
-                        />
                     </FormGroup>
                     <Button variant="contained" color="primary" className={classes.button}
                             onClick={

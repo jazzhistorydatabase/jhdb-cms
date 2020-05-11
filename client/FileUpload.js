@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {withStyles} from '@material-ui/core/styles';
-import './App.css';
 import FormGroup from "@material-ui/core/FormGroup";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
@@ -28,7 +27,7 @@ const styles = theme => ({
     fabImg: {
         width: '50px',
         height: '50px',
-        borderRadius: '100px',
+        borderRadius: '200px',
     },
 
 });
@@ -38,13 +37,14 @@ class FileUpload extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            anotherKey: null,
             fileDoc: undefined,
         };
 
         this.handleTextChange = event => {
             if (this.props.isPendingApproval) {
                 window.alert("Please rescind your request for approval before making changes.");
-                return;
+                return false;
             }
             let fileDoc = this.state.fileDoc;
             if (this.props.fileType === 'Video' && event.target.id.indexOf('multiline') === -1)  {
@@ -56,7 +56,7 @@ class FileUpload extends Component {
             } else {
                 fileDoc.caption = event.target.value;
             }
-            this.setState({fileDoc: fileDoc});
+            this.setState({fileDoc: fileDoc, anotherKey: event.target.value});
         };
 
         this.handleLinkBlur = event => {
@@ -84,7 +84,7 @@ class FileUpload extends Component {
     handleDelete() {
         if (this.props.isPendingApproval) {
             window.alert("Please rescind your request for approval before making changes.");
-            return;
+            return false;
         }
         if(window.confirm("Are you sure you want to remove this item? This can not be undone!\n\n(This will not remove the file from dropbox or your computer)")) {
             if (this.props.bio) {
@@ -137,49 +137,13 @@ class FileUpload extends Component {
             return <div />;
         }
         const isVideo = (this.props.fileType === 'Video');
-        let fileUploadIcon = doc[url] ?
-                ((doc[thumbnail] || doc[icon]) ?
-                    (<img className={classes.fabImg} alt="Upload preview" src={(doc[thumbnail] || doc[icon])} />) :
-                    (<CheckIcon />)):
-                (<AddIcon/>);
-
-        let fileUploadComponent;
-        if (!isVideo) {
-            fileUploadComponent =
-                <Tooltip title={"Click to " + (doc[url] ? "change" : "select") + " file"}>
-                    <Fab
-                        size="small"
-                        color="primary"
-                        aria-label="Upload"
-                        className={classes.fab}
-                        onClick={
-                            () => {
-                                if (this.props.isPendingApproval) {
-                                    window.alert("Please rescind your request for approval before making changes.");
-                                } else if (this.state.fileDoc) {
-                                    dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
-                                }
-                            }
-                        }>
-                        {fileUploadIcon}
-                    </Fab>
-                </Tooltip>
+        let fileUploadIcon;
+        if(!doc[url]) {
+            fileUploadIcon = <AddIcon />;
+        } else if(doc[thumbnail] && doc[thumbnail].match(/.*(png|jpg|jpeg).*/gi)) {
+            fileUploadIcon = <img className={classes.fabImg} alt="Select" src={doc[thumbnail]} />;
         } else {
-            fileUploadComponent =
-                <TextField
-                    id="standard-static"
-                    label="Link"
-                    style={{margin: 5}}
-                    value={(this.state.fileDoc && this.state.fileDoc[url]) || ""}
-                    onChange={this.handleTextChange}
-                    onBlur={this.handleLinkBlur}
-                    margin="normal"
-                    variant="filled"
-                    placeholder={'Click SHARE on YouTube'}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                />
+            fileUploadIcon = <CheckIcon />;
         }
 
         return (
@@ -187,14 +151,53 @@ class FileUpload extends Component {
                     
                 <FormGroup row id={(this.state.fileDoc && this.state.fileDoc[name]) || this.props.fileIndex}>
                     <Grid container spacing={3} justify="flex-start" alignItems="center">
-                        <Grid item xs={isVideo ? 5 : 1}>
-                            {fileUploadComponent}
+                        {/* Video Link box (only for video) */}
+                        <Grid item xs={5} style={{display: isVideo ? 'inline-block' : 'none'}}>
+                            <TextField
+                                id="standard-static"
+                                label="Link"
+                                style={{margin: 5, width: '100%'}}
+                                defaultValue={(this.state.fileDoc && this.state.fileDoc[url]) || ""}
+                                onChange={this.handleTextChange}
+                                onBlur={this.handleLinkBlur}
+                                margin="normal"
+                                variant="filled"
+                                placeholder={'Click SHARE on YouTube'}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
                         </Grid>
-                        <Grid item style={{display: isVideo ? 'none' : 'block'}} xs={((this.props.bio) ? 9 : 4)}>
+                        {/* File select FAB and filename text (only if not video) */}
+                        <Grid item xs={1}  style={{display: !isVideo ? 'inline-block' : 'none'}}>
+                            <Tooltip title={"Click to " + (doc[url] ? "change" : "select") + " file"}>
+                                <Fab
+                                    size="small"
+                                    color="primary"
+                                    style={doc[url] ? {backgroundColor: 'green'} : {}}
+                                    aria-label="Upload"
+                                    className={classes.fab}
+                                    onClick={
+                                        () => {
+                                            if (this.props.isPendingApproval) {
+                                                window.alert("Please rescind your request for approval before making changes.");
+                                                return false;
+                                            } else if (this.state.fileDoc) {
+                                                dbx.onChoose(this.props.fileType, this.onChooserSuccess.bind(this));
+                                            }
+                                        }
+                                    }>
+                                    {fileUploadIcon}
+                                </Fab>
+                            </Tooltip>
+                        </Grid>
+                        {/* Filename text replace caption if bio */}
+                        <Grid item xs={this.props.bio ? 9 : 4}  style={{display: !isVideo ? 'inline-block' : 'none'}}>
                             <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
                                 {(this.state.fileDoc && this.state.fileDoc[name]) || "Choose a file..."} 
                             </Typography>
                         </Grid>
+                        {/* Caption for all except bio */}
                         {(this.props.bio) ? <div/> : 
                             <Grid item xs={5}>
                                 <TextField
@@ -202,7 +205,7 @@ class FileUpload extends Component {
                                     label="Caption"
                                     style={{margin: 5, width: "100%"}}
                                     multiline
-                                    value={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
+                                    defaultValue={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
                                     onChange={this.handleTextChange}
                                     margin="normal"
                                     variant="filled"

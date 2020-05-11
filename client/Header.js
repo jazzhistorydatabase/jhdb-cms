@@ -1,6 +1,6 @@
 import AppBar from '@material-ui/core/AppBar';
 import React, {Component} from 'react';
-import {Avatar, Divider, Drawer, IconButton, List, ListItem, ListItemText, ListSubheader} from '@material-ui/core';
+import {Avatar, Divider, Drawer, List, ListItem, ListItemText, ListSubheader, Tabs, Tab} from '@material-ui/core';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Helpicon from '@material-ui/icons/Help';
@@ -8,43 +8,29 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import { CloseSharp } from '@material-ui/icons';
-import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
+import { CloseSharp, InfoRounded, CloudUploadRounded, LibraryBooks } from '@material-ui/icons';
+import {withStyles} from '@material-ui/core/styles';
 
-import './App.css';
 import 'typeface-roboto';
 import fb from './firebase';
 import HelpDialog from './HelpDialog';
-import UploadDialog from './UploadDialog';
 import genericUserPhoto from './generic-user.jpg';
-import { CloudUpload } from '@material-ui/icons';
+import { TouchApp } from '@material-ui/icons';
+import { BottomNavigationAction } from '@material-ui/core';
+import { BottomNavigation } from '@material-ui/core';
+import { Visibility } from '@material-ui/icons';
+import { Edit } from '@material-ui/icons';
 import { Button } from '@material-ui/core';
 
-const theme = createMuiTheme({
-    typography: {
-        useNextVariants: true,
-    },
-    palette: {
-        primary: {
-            main: '#00519a',//19ABFF
-            text: '#ffffff',
-            light: '#6edcff',//00519a
-        },
-        secondary: {
-            main: '#80cbc4',
-            text: '#000000',
-        },
-    },
-});
-
 const styles = {
-    root: {
+    appBar: {
         flexGrow: 1,
+        textAlign: 'center',
+        marginLeft: 'auto',
+        marginRight: 'auto',
     },
-    grow: {
-        flexGrow: 1,
-        padding: 5,
-        marginLeft: 10,
+    indicator: {
+        backgroundColor: 'white',
     },
     avatarName: {
         fontWeight: 'bold',
@@ -59,39 +45,12 @@ const styles = {
         marginLeft: 'auto',
         marginRight: 'auto',
     },
-    icon: {
-        height: 35,
-        width: 35,
-    },
-    list: {
-        width: 250,
-    },
-    fullList: {
-        width: 'auto',
-    },
     menuButton: {
         height: 50,
     },
-    toolbarHelp: {
-        height: "100%",
-        // backgroundColor: theme.palette.primary.main,
-    },
-    accountButton: {
-        backgroundColor: "#007ccb",
-        display: 'inline-block',
-        height: 40,
-        padding: 5,
-        verticalAlign: 'middle'
-    },
-    accountButtonText: {
-        display: 'inline-block',
-        height: 40,
-        paddingLeft: 5,
-        paddingRight: 5,
-        verticalAlign: 'middle'
-    },
-    accountButtonImg: {
-        height: 30
+    sticky: {
+        position: 'sticky',
+        top: 0
     },
 };
 
@@ -106,6 +65,9 @@ class Header extends Component {
             showUpload: false,
             drawerOpen: false,
         }
+
+        this.onTabChange = this.onTabChange.bind(this);
+        this.onCollectionViewChange = this.onCollectionViewChange.bind(this);
     }
 
     toggleHelpDialog() {
@@ -132,6 +94,14 @@ class Header extends Component {
         this.toggleDrawer();
         this.props.adminSwap();
     };
+
+    onTabChange(event, value) {
+        this.props.handleTabChange(value);
+    }
+
+    onCollectionViewChange(event, value) {
+        this.props.handleCollectionViewChange(value);
+    }
 
 
     render() {
@@ -160,9 +130,6 @@ class Header extends Component {
                     alt={(this.props.user && this.props.user.name) || "Unnamed Contributor"}
                     src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
                     className={classes.bigAvatar}/>
-                {/* <ListItem selected className={classes.avatarName}>
-                    <ListItemText primary={this.props.user.displayName} />
-                </ListItem> */}
                 <ListSubheader className={classes.avatarName}>{this.props.user.displayName} </ListSubheader>
             </div>
         ) : (
@@ -171,9 +138,9 @@ class Header extends Component {
                     alt={"No User"}
                     src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
                     className={classes.bigAvatar}/>
-                {/* <ListItem selected className={classes.avatarName}> */}
-                <ListSubheader className={classes.avatarName}>{"Not Signed In"} </ListSubheader>
-                {/* </ListItem> */}
+                <ListSubheader className={classes.avatarName}>
+                    {"Not Signed In"}
+                </ListSubheader>
             </div>
         );
 
@@ -186,19 +153,8 @@ class Header extends Component {
             </ListItem>
         ) : (<div/>);
 
-        let uploadButton = (this.props.user && this.props.user.authorized) ? (
-            <Button variant="contained"
-                    color="secondary"
-                    onClick={this.toggleUploadDialog.bind(this)} >
-                <CloudUpload />
-                <label style={{marginLeft: 5}}>{"Upload Media"}</label>
-            </Button>
-        ) : (
-            <div></div>
-        );
-
         return (
-            <MuiThemeProvider theme={theme}>
+            <div>
                 <Drawer className={classes.drawer} open={this.state.drawerOpen} onClose={this.toggleDrawer.bind(this)}>
                     <ListItem button onClick={this.toggleDrawer.bind(this)}>
                         <CloseSharp />
@@ -217,58 +173,59 @@ class Header extends Component {
                             <Helpicon/>
                             <ListItemText primary={"Help"}></ListItemText>
                         </ListItem>
-                        <ListItem button>
-                            <a href={"http://www.jazzhistorydatabase.com"}>
-                                <ListItemText primary={"Back to jazzhistorydatabase.com"}></ListItemText>
-                            </a>
-                        </ListItem>
                     </List>
                     <div style={{"width": "1vw"}}></div>
                     <div>
                         <br/>
                     </div>
                 </Drawer>
-                <div className={classes.root}>
-                    <AppBar position="static">
-                        <Toolbar>
-                            <Button 
-                                size="large"
-                                color="inherit"
-                                className={classes.menuButton}
-                                startIcon={<MenuIcon style={{fontSize: 35}} />}
-                                aria-label="menu"
-                                onClick={this.toggleDrawer.bind(this)} >Menu</Button>
-                            <div className={classes.grow}>
-                                <Typography variant="h5" align="left" color="inherit">
-                                    <b>Global Contributor Portal</b>
-                                </Typography>
-                                <Typography variant="h6" align="left" color="inherit">
-                                    Jazz History Database
-                                </Typography>
-                            </div>
-                            <div>
-                            {uploadButton}
-                            </div>
-                            <Button 
-                                size="large"
-                                color="inherit"
-                                className={classes.toolbarHelp}
-                                endIcon={<Helpicon style={{fontSize: 35}} />}
-                                aria-label="menu"
-                                onClick={this.toggleHelpDialog.bind(this)} >Help</Button>
-                            <HelpDialog
-                                show={this.state.showHelp}
-                                toggle={this.toggleHelpDialog.bind(this)}/>
-                            <UploadDialog
-                                show={this.state.showUpload}
-                                toggle={this.toggleUploadDialog.bind(this)}/>
-
-                        </Toolbar>
-
-                    </AppBar>
-                </div>
-                {this.props.content}
-            </MuiThemeProvider>
+                <AppBar position="static">
+                    <Toolbar>
+                        <Button
+                            size="large"
+                            color="inherit"
+                            className={classes.menuButton}
+                            startIcon={<MenuIcon style={{fontSize: 35}} />}
+                            aria-label="menu"
+                            onClick={this.toggleDrawer.bind(this)} >Menu</Button>
+                        <div className={classes.appBar}>
+                            <Typography variant="h6" align="center" color="inherit">
+                                Jazz History Database
+                            </Typography>
+                            <Typography variant="h5" align="center" color="inherit">
+                                <b>Global Contributor Portal</b>
+                            </Typography>
+                        </div>                        
+                        <HelpDialog
+                            show={this.state.showHelp}
+                            toggle={this.toggleHelpDialog.bind(this)}/>
+                    </Toolbar>
+                    <Tabs disabled={!this.props.user} centered
+                          style={{visibility: this.props.user ? 'visible' : 'collapse'}}
+                          value={this.props.tabValue} 
+                          onChange={this.onTabChange} 
+                        //   variant="fullWidth" 
+                          indicatorColor="secondary" 
+                          textColor="secondary">
+                        <Tab label="Information" icon={<InfoRounded />} />
+                        <Tab label="Media Upload" icon={<CloudUploadRounded />} />
+                        <Tab label="Pages" icon={<LibraryBooks />} />
+                    </Tabs>
+                </AppBar>
+                <BottomNavigation value={this.props.collectionView}
+                                  onChange={this.onCollectionViewChange}
+                                  color="primary" showLabels 
+                                  className={classes.sticky}
+                                  style={{display: (this.props.tabValue === 2 ? 'flex' : 'none')}}>
+                        <BottomNavigationAction label="Select" icon={<TouchApp />} />
+                        <BottomNavigationAction style={this.props.contributionSelected ? {display: 'none'} : {}}
+                                                label="Select collection to continue" />
+                        <BottomNavigationAction style={this.props.contributionSelected ? {} : {display: 'none'}}
+                                                label="Edit" icon={<Edit />} />
+                        <BottomNavigationAction style={this.props.contributionSelected ? {} : {display: 'none'}}
+                                                label="Preview" icon={<Visibility />} />
+                </BottomNavigation>
+            </div>
         );
     }
 

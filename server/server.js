@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require('path');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
+const axios = require('axios');
 
 const logger = require('./logger');
 
@@ -31,6 +32,8 @@ const oauth2 = require('simple-oauth2').create(credentials);
 
 // Fetch cli args
 const IS_DEV = process.env["DEV"];
+const PORT = process.env.PORT || 8080;
+
 logger.info(`Starting server in ${IS_DEV ? "dev" : "prod"} mode`);
 
 fb.initializeApp({
@@ -88,7 +91,7 @@ let renderFromFirebase = (req, res, collRef, template) => {
     let images = [];
     let collectionDoc = collRef;
     let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
-        logger.success(`Successfully fetched ${imgSnapshot.docs.length} images for ${collRef.name} doc id: ${collRef.ref.id}`);
+        logger.success(`Successfully fetched ${imgSnapshot.size} images for ${collRef.name} doc id: ${collRef.ref.id}`);
         images = imgSnapshot.docs.map(doc => {
             return doc.data();
         });
@@ -103,14 +106,9 @@ let renderFromFirebase = (req, res, collRef, template) => {
     // Get audio
     let audio = [];
     let getAudio = collRef.ref.collection("Audio").get().then( audioSnapshot => {
-        logger.success(`Successfully fetched ${audioSnapshot.docs && audioSnapshot.docs.length} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
+        logger.success(`Successfully fetched ${audioSnapshot.size} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
         audio = audioSnapshot.docs.map(doc => {
             return doc.data();
-        });
-        audio.sort((a, b) => {
-            if (!a.index) return -1;
-            if (!b.index) return 1;
-            return a.index - b.index;
         });
     }).catch( err => {
         logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
@@ -118,7 +116,7 @@ let renderFromFirebase = (req, res, collRef, template) => {
     // Get video
     let video = [];
     let getVideo = collRef.ref.collection("Video").get().then( videoSnapshot => {
-        logger.success(`Successfully fetched ${videoSnapshot.docs.length} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        logger.success(`Successfully fetched ${videoSnapshot.size} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
         video = videoSnapshot.docs.map(doc => {
             let data = doc.data();
             data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
@@ -158,7 +156,7 @@ let previewReqHandler = (req, res) => {
     fetchContributionByName(req, res, collName, "template", renderFromFirebase);
 }
 
-app.get("/preview/header-new.html", (req, res) => {
+app.get("/header-new.php", (req, res) => {
     logger.info('User request preview/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
@@ -206,22 +204,13 @@ app.get("/published/header-new.html", (req, res) => {
 
 app.get("/published/:collection", publishedReqHandler);
 
-let contributorReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request contributor page for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, "contributor", renderFromFirebase);
-}
+// Enable json
+app.use(express.json());
 
-app.get("/contributor/header-new.html", (req, res) => {
-    logger.info('User request contributor/header-new.html');
-    res.sendFile("./mockup/header-new.html", {root: __dirname});
-});
-
-app.get("/contributor/:collection", contributorReqHandler);
-
-app.get("/upload", (req, res) => {
+app.post("/upload", (req, res) => {
     logger.info('User requesting upload link. Validating token...');
-    let token = req.query["auth"];
+    const token = req.body.auth;
+    const folder = req.body.folder;
     fb.auth().verifyIdToken(token).then(decodedToken => {
         const uid = decodedToken.uid;
         logger.success(`Successfully validated token for user account_id: ${uid}`)
@@ -229,7 +218,7 @@ app.get("/upload", (req, res) => {
         fb.firestore().collection('Users').doc(uid).get().then(snapshot => {
             logger.success(`Successfully fetched user data for account_id: ${uid}`);
             const user = snapshot.data();
-            let path = `/jhdb global/${user.name.toLowerCase()}/`;
+            let path = `/jhdb global/${user.name.toLowerCase()}/${folder ? folder+'/' : ''}`;
             let time = new Date();
             time.setTime(time.getTime() + (1*60*60*1000)); // Add 1hr to current time
             time.setSeconds(0, 0); // Remove seconds/millis
@@ -238,7 +227,7 @@ app.get("/upload", (req, res) => {
             
             logger.log(`Generating upload link for account_id: ${decodedToken.uid} path: ${path} deadline: ${deadline}`);
     
-            dbx.fileRequestsCreate({"title": `JHDB File Upload - ${user.name} [Contributor Portal]`, "destination": path, "deadline": {"deadline": deadline}}).then( (dat => {
+            dbx.fileRequestsCreate({"title": `File Upload - ${user.name}/${folder ? folder : ""} [Contributor Portal]`, "destination": path, "deadline": {"deadline": deadline}}).then( (dat => {
                 logger.success(`Successfully sent upload link for account_id: ${decodedToken.uid} path: ${path}`);
                 console.log(dat);
                 res.send(dat && dat.url);
@@ -254,6 +243,57 @@ app.get("/upload", (req, res) => {
         res.sendStatus(400);
     });
 });
+
+// 
+app.post("/publish", (req, res) => {
+    const token = req.body.auth;
+    const name = req.body.name;
+    const slug = name.toLowerCase().replace(/ /gi, '-');
+    logger.info(`User request publish for page ${slug}`)
+    if(!slug) {
+        res.status(404).send("No such page found");
+    }
+    const force = req.body.force;
+    fb.auth().verifyIdToken(token).then(decodedToken => {
+        const uid = decodedToken.uid;
+        logger.success(`Successfully validated token for user account_id: ${uid} requesting to publish ${slug}`)
+        // Get user info from db
+        fb.firestore().collection('Users').doc('admin').get().then(snapshot => {
+            logger.success(`Successfully get admin users, checking account_id: ${uid}`)
+            if(snapshot.data()[uid]) {
+                logger.success(`User ${uid} is admin, beginning publish`);
+                axios.get(`http://0.0.0.0:${PORT}/preview/${slug}`).then( resp => {
+                    logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
+                    dbx.filesUpload({
+                        "path": `/jhdb global/Published/${slug}/index.php`,
+                        "mode": "overwrite",
+                        "contents": resp.data
+                    }).then(() => {
+                        logger.success(`Successfully uploaded html file to dropbox for ${slug}`);
+                        res.status(200).send("Upload success!");
+                    }, (err) => {
+                        logger.error(`Error uploading html file to dropbox for ${slug}`, err);
+                        res.status(500).send("Error uploading to Dropbox");
+                    });
+                }).catch(err => {
+                    logger.error(`Error fetching preview for ${name}`, err);
+                    res.status(500).send("Error downloading preview page");
+                });
+            } else {
+                logger.error(`User with account_id: ${uid} is not authorized to publish`)
+                res.status(403).send("Not authorized");
+            }
+        }, err => {
+            logger.error(`Error fetching user admin doc to check account id: ${uid}`, err);
+            res.status(500).send("Error fetching admin doc");
+        });
+    }, err => {
+        logger.error(`Error validating token, can not publish ${slug}`)
+        res.status(403).send("Failed to validate token");
+
+    });
+});
+
 
 // Login
 
@@ -353,7 +393,6 @@ app.use("/images", express.static("./templates/images"));
 
 
 // Start the server
-const PORT = process.env.PORT || 8080;
 logger.info("Binding to port "+PORT);
 app.listen(PORT, () => {
     logger.success(`App listening on port ${PORT}`);
