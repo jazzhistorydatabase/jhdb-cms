@@ -8,48 +8,23 @@ import {Add, Edit, Visibility, Person, PriorityHigh, Done } from "@material-ui/i
 
 
 import fb from './firebase';
+import { Group } from '@material-ui/icons';
+import { IconButton, Divider } from '@material-ui/core';
+import { Cached } from '@material-ui/icons';
+import { Typography, ListSubheader } from '@material-ui/core';
+import { ListItemText, ListItemAvatar, Avatar, ListItemSecondaryAction } from '@material-ui/core';
 
 const styles = theme => ({
-    root: {
-        width: '100%',
-        maxWidth: 360,
-        backgroundColor: theme.palette.background.paper,
-    },
     button: {
-        marginLeft: '10px'
-    },
-    adminFab: {
-        position: 'fixed',
-        right: '2vw',
-        bottom: '2vw',
+        marginTop: theme.spacing(1),
+        marginLeft: theme.spacing(1),
     },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-        width: '70%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        padding: theme.spacing(4),
+        paddingTop: theme.spacing(1),
     },
-    contributionList: {
-        display: 'block',
-        width: 'wrap',
-        align: 'center',
-    },
-    contributionListName: {
-        width: '20vw',
-        textAlign: 'right',
-        marginLeft: 'auto',
-        paddingRight: '3vw'
-    },
-    contributionListStatus: {
-        width: '7vw',
-        textAlign: 'left',
-        paddingLeft: '3vw',
-        marginRight: 'auto'
-    },
-    cardColor: {
-        backgroundColor: '#fce4ec',
+    addButton: {
+        marginLeft: theme.spacing(4),
     }
 });
 
@@ -83,43 +58,28 @@ class MainPageTB extends Component {
     };
 
     handleEditButtonClick(selectedContribution) {
-        this.props.windowSwap(selectedContribution);
+        this.props.onSelectContribution(selectedContribution);
     };
 
     render() {
         const classes = this.props.classes;
-        let contrib = this.props.contributions;
-        contrib = contrib.filter(e => e.type);
-        contrib.sort((a, b) => {
-            if (!a.index) return 1;
-            if (!b.index) return -1;
-            return b.index - a.index;
-        });
+        let contrib = this.props.contributions.filter(e => !!e.type);
 
-        let userButtons = (e, published, pendingApproval) => {
-            console.log(this.props.user.uid);
-            console.log(e.owner);
-            return (this.props.user && (this.props.user.admin || (e["owner"] && this.props.user.uid == e.owner))) ?
-            (<div>
-            <Button variant="outlined" color={"primary"}
-                onClick={() => { return this.handleEditButtonClick.bind(this)(e) }}
-                startIcon={<Edit />}
-                className={classes.button}>Edit </Button>
-            <Button variant="outlined" color={"primary"}
-                    startIcon={<Visibility />}
-                    href={"/preview/"+e.name.toLowerCase().replace(/ /g, "-")}
-                    className={classes.button}>Preview </Button>
-            <Button variant="outlined" color={"primary"}
-                                            startIcon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
-                                            onClick={(published) ? 
-                                                () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
-                                                () => { return this.handleEditButtonClick.bind(this)(e) }}
-                                                className={classes.button}>
-                                                {(published) ? "Published" : (pendingApproval) ? "Pending Approval" : "Work in Progress"}    
-                                        </Button>
-            </div>)
-            : (<h4><i>Access Denied</i></h4>);
-        };
+        if(!this.props.user.admin) {
+            // If user isn't admin, only display user's contributions
+            contrib = contrib.filter(e => {
+                return e.owner === this.props.user.uid;
+            });
+        } else {
+            // If user is admin, show their contributions at the top
+            contrib = contrib.sort((a, b) => {
+                // Show user's contribs on top
+                if(a.owner === this.props.user.uid) return -1;
+                return 1;
+            });
+        }
+
+        const selectedUid = this.props.selectedContribution ? this.props.selectedContribution.ref.id : "";
 
         return (
             <div>
@@ -127,26 +87,46 @@ class MainPageTB extends Component {
                 <br />
                 <Paper className={classes.paper} elevation={3} square={false} classes={{ root: classes.cardColor }}>
                     <div className={" MainPage-format"}>
-                        <h1>My Collections</h1>
-                        <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} variant="outlined" color={"primary"} startIcon={<Add />}
-                            className={classes.button}>Add Collection </Button>
+                        <h1>My Pages</h1>
+                        <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} 
+                                variant="contained" color={"primary"} 
+                                startIcon={<Add />}>
+                                    Create New Page
+                        </Button>
+                        <br />
                         <List className={classes.contributionList}>
-                            {contrib.filter(e => {
-                                return e.type && (e.owner === this.props.user.uid || this.props.user.admin);
-                            }).sort((a, b) => {
-                                // Show user's contribs on top
-                                if(a.owner === this.props.user.uid) return -1;
-                                return 1;
-                            }).map((e) => {
+                            {contrib.map((e) => {
                                 let pendingApproval = e.approval === "pending";
                                 let published = this.props.publishedList && this.props.publishedList[e.ref.id] === 'true';
                                 return (
-                                    <div key={e.ref.id || e.name} >
-                                        <ListItem className={classes.contributionListItem}>
-                                            <h3 className={classes.contributionListName}>{e.name}</h3>
-                                            {userButtons(e, published, pendingApproval)}
-                                            
-                                            <h3 className={classes.contributionListStatus}>{/*e.status*/}</h3>
+                                    <div>
+                                        <Divider />
+                                        <ListItem key={e.ref.id || e.name} button 
+                                                selected={e.ref.id === selectedUid}
+                                                onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}>
+                                            <ListItemAvatar>
+                                                <Avatar src={e['bioUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText primary={<b>{e.name}</b>}
+                                                        secondary={<div>
+                                                                        {/* Status */}
+                                                                        <span style={{display: 'flex', alignItems: 'center', color:  (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke" }}>
+                                                                                    {(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Cached />}
+                                                                                    {(published) ? "  Published" : (pendingApproval) ? "  Pending Approval" : "  Work in Progress"}
+                                                                            <br />
+                                                                        </span>
+                                                                        {/* Description */}
+                                                                        {e.description.substring(0, 100)}{e.description.length > 99 ? '...' : ''}
+                                                                    </div>}>
+                                            </ListItemText>
+                                            <ListItemSecondaryAction>
+                                                <IconButton variant="outlined" style={{color:  (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke" }}
+                                                    icon={(published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Person />}
+                                                    onClick={(published) ? 
+                                                        () => { window.location.href = "/published/"+e.name.toLowerCase().replace(/ /g, "-") } :
+                                                        () => { return this.handleEditButtonClick.bind(this)(e) }}
+                                                        className={classes.button} />
+                                            </ListItemSecondaryAction>
                                         </ListItem>
                                     </div>
                                 );

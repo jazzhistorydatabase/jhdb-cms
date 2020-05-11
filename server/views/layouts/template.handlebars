@@ -51,9 +51,15 @@
     <!-- Header
     ============================================= -->
     <script src="https://www.w3schools.com/lib/w3.js"></script>
-    <div w3-include-html="header-new.html"></div>
+    <div id="include" w3-include-html="https://global.jazzhistorydatabase.com/header-new.php">
+            <?php
+            include '../header-new.php';
+            ?>
+    </div>
     <script>
-        w3.includeHTML();
+        if(window.location.href.match(/.*preview.*/gi)) {
+            w3.includeHTML();
+        }
     </script>
     {{header}}
 
@@ -237,7 +243,9 @@
 
 <!-- Footer
     ============================================= -->
-
+<?php
+include '../footer-new.php';
+?>
 {{footer}}
 
 
