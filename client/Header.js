@@ -1,6 +1,6 @@
 import AppBar from '@material-ui/core/AppBar';
 import React, {Component} from 'react';
-import {Avatar, Divider, Drawer, IconButton, List, ListItem, ListItemText, ListSubheader, Tabs, Tab, Tooltip} from '@material-ui/core';
+import {Avatar, Divider, Drawer, List, ListItem, ListItemText, ListSubheader, Tabs, Tab} from '@material-ui/core';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Helpicon from '@material-ui/icons/Help';
@@ -20,7 +20,6 @@ import { BottomNavigationAction } from '@material-ui/core';
 import { BottomNavigation } from '@material-ui/core';
 import { Visibility } from '@material-ui/icons';
 import { Edit } from '@material-ui/icons';
-import { PeopleRounded } from '@material-ui/icons';
 import { Button } from '@material-ui/core';
 
 const styles = {
@@ -173,11 +172,6 @@ class Header extends Component {
                                   onClick={this.toggleHelpDialog.bind(this)}>
                             <Helpicon/>
                             <ListItemText primary={"Help"}></ListItemText>
-                        </ListItem>
-                        <ListItem button>
-                            <a href={"http://www.jazzhistorydatabase.com"}>
-                                <ListItemText primary={"Back to jazzhistorydatabase.com"}></ListItemText>
-                            </a>
                         </ListItem>
                     </List>
                     <div style={{"width": "1vw"}}></div>

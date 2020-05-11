@@ -88,7 +88,7 @@ class MainPageTB extends Component {
                         <Button onClick={() => { return this.handleAddButtonClick.bind(this)() }} 
                                 variant="contained" color={"primary"} 
                                 startIcon={<Add />}>
-                                    Create New Collection
+                                    Create New Page
                         </Button>
                         <br />
                         <List className={classes.contributionList}>
@@ -101,7 +101,7 @@ class MainPageTB extends Component {
                                               selected={e.ref.id === selectedUid}
                                               onClick={() => {return this.handleEditButtonClick.bind(this)(e)}}>
                                         <ListItemAvatar>
-                                            <Avatar src={e['bioPhotoUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
+                                            <Avatar src={e['bioUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
                                         </ListItemAvatar>
                                         <ListItemText className={classes.contributionListName} 
                                                       primary={e.name}

@@ -11,6 +11,7 @@ import Axios from 'axios';
 import fb from './firebase';
 import { Typography, TextField } from '@material-ui/core';
 import { CircularProgress, Card } from '@material-ui/core';
+import { Publish } from '@material-ui/icons';
 
 
 class UploadView extends Component {
@@ -37,7 +38,7 @@ class UploadView extends Component {
 		return (
 			<div>
 				<Card style={{marginTop: 50, marginBotton: 50, padding: 20}}>
-					<DialogTitle id="alert-dialog-title">{"Upload Media to JazzHistoryDatabase Contributor System"}</DialogTitle>
+					<DialogTitle id="alert-dialog-title">{"Upload Media to Jazz History Database Contributor System"}</DialogTitle>
 					<DialogContent>
 						<Typography id="alert-dialog-description">
 							You will be redirected to a page where you can select files from your computer to be uploaded to your secure JHDB Dropbox folder. Please make sure to follow appropriate naming conventions on all files prior to uploading, as you will be unable to rename them once they have been uploaded to the archive.
@@ -51,6 +52,7 @@ class UploadView extends Component {
 							You can add additional subfolders with "<code>/</code>" - e.g. if you would like an Images folder under the John Doe folder, you could enter "<code>John Doe/Images</code>"
 						</Typography>
 						<TextField
+							variant="filled"
 							onChange={this.handleFolderChange}
 							label="Subfolder Name"
 							margin="normal"
@@ -59,7 +61,7 @@ class UploadView extends Component {
 							}}
                         />
 						<br />
-						<Button disabled={this.state.loading} variant="outlined" color="primary" onClick={() => {
+						<Button disabled={this.state.loading} startIcon={<Publish />} variant="contained" color="primary" onClick={() => {
 							fb.getToken( token => {
 								this.setState({loading: true});
 								Axios.post(`/upload`, {

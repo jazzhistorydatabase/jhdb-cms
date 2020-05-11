@@ -6,6 +6,7 @@ import EditContributionView from "./EditContributionView";
 import UploadView from "./UploadView";
 import fb from './firebase.js';
 import ContributionsListView from './ContributionsListView';
+import { Link } from '@material-ui/core';
 import { Typography } from '@material-ui/core';
 import { Visibility } from '@material-ui/icons';
 import { CircularProgress, Container, CssBaseline, Button, Paper } from '@material-ui/core';
@@ -40,12 +41,15 @@ const styles = {
         height: '100vh',
         backgroundColor: '#000000',
         width: '100%',
-
     },
     grow: {
         flexGrow: 1,
         padding: 5,
         marginLeft: 10,
+    },
+    loading: {
+        width: '100%',
+        textAlign: 'center',
     },
     paper: {
         padding: theme.spacing(4),
@@ -153,26 +157,34 @@ class App extends Component {
             };
             fb.base.addToCollection('Users', user, this.state.user.uid);
         }
-
     }
 
     selectContribution(selectedContribution) {
         this.setState({
             selectedContribution: selectedContribution,
-            collectionView: 0,
+            collectionView: selectedContribution ? 2 : 1,
         });
+        // Scroll to top
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     }
 
     handleTabChange(value) {
         this.setState({
             tabValue: value,
-        })
+        });
+        // Scroll to top
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     }
 
     handleCollectionViewChange(value) {
         this.setState({
             collectionView: value,
-        })
+        });
+        // Scroll to top
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     }
 
     adminSwap() {
@@ -194,7 +206,7 @@ class App extends Component {
                 </h5>
             </div>);
         } else if(!this.state.pageLoadDone) {
-            return (<div>
+            return (<div className={this.props.classes.loading}>
                         <h3><CircularProgress /><br/>Fetching data...</h3>
                     </div>);
 
@@ -213,7 +225,7 @@ class App extends Component {
                         <h1>Welcome to the contributor portal!</h1>
                         <br />
                         <Typography>
-							At some point in the near future, in this information tab you will find instructions on how to use the contirbutor portal effectively. While we wrap up the process of developing this documentation, please feel free to reach out to <a href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</a> with any questions or issues!
+							At some point in the near future, in this information tab you will find instructions on how to use the contirbutor portal effectively. While we wrap up the process of developing this documentation, please feel free to reach out to <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link> with any questions or issues!
 						</Typography>
                         <br />
                         <Typography>
@@ -265,7 +277,6 @@ class App extends Component {
         }
             
     }
-
 
 
     render() {

@@ -14,7 +14,7 @@ import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
 import axios from 'axios';
 
-import { Visibility, Save, Delete } from '@material-ui/icons';
+import { Delete } from '@material-ui/icons';
 import { Switch } from '@material-ui/core';
 
 const styles = theme => ({
@@ -36,6 +36,7 @@ const styles = theme => ({
         width: 100,
         bottom: 95,
         left: 10,
+        zIndex: 10,
     },
     publishPaper: {
         height: 65,
@@ -43,6 +44,7 @@ const styles = theme => ({
         bottom: 20,
         width: 100,
         left: 10,
+        zIndex: 10,
     },
     paper: {
         padding: theme.spacing(3),
@@ -143,7 +145,7 @@ class EditContributionView extends Component {
                         fb.getToken( token => {
                             axios.post(`/publish`, {
                                 auth: token,
-                                name: contributionData.name,
+                                name: contributionData.name
                             }).then(resp => {
                                 window.alert("Publish success! You will now be redirected to the published page.");
                                 window.location.href = "https://global.jazzhistorydatabase.com/" + contributionData.name.toLowerCase().replace(/ /gi, '-');
@@ -238,16 +240,19 @@ class EditContributionView extends Component {
                     <br/>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
-                        <h2 className={classes.mediaUploadTitle}> Bio</h2>
-                        <FormLabel component="legend"> Collection Title</FormLabel>
+                        <h2 className={classes.mediaUploadTitle}> Biography</h2>
+                        <FormLabel component="legend">Page Name/Title</FormLabel>
                         <TextField
                             id="standard-name"
+                            variant="filled"
                             className={classes.textField}
                             defaultValue={(contrib && contrib.name) || ""}
                             onChange={this.handleNameChange}
                             margin="normal"
                         />
-                        <FormLabel component="legend"> Collection Type</FormLabel>
+                        <br />
+                        <br />
+                        <FormLabel component="legend">Page Type</FormLabel>
                         <RadioGroup row
                                     value={(contrib && contrib.type) || ""}
                                     onChange={this.handleCheckBoxChange}>
@@ -265,16 +270,18 @@ class EditContributionView extends Component {
                                 labelPlacement="start"
                             />
                         </RadioGroup>
-                        <FormLabel component="legend"> Bio Photo</FormLabel>
+                        <br />
+                        <FormLabel component="legend">Bio Photo</FormLabel>
                         <FileUpload fileType="Images"
                             fileIndex={-1}
                             fileDoc={this.props.selectedContribution}
                             bio="true"
                             isPendingApproval={contrib && (contrib.approval === 'pending')}
                         />
+                            <br />
                         <TextField
                             id="filled-multiline-flexible, filled-full-width"
-                            label="Biography"
+                            label="Biography Text"
                             style={{margin: 5}}
                             multiline
                             defaultValue={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
@@ -310,7 +317,7 @@ class EditContributionView extends Component {
                     <br/>
                     <br/>
                     <br/>
-                    <Button onClick={this.handleDeleteContribution} startIcon={<Delete />} variant="outlined" color={"error"}
+                    <Button onClick={this.handleDeleteContribution} startIcon={<Delete />} variant="outlined"
                             className={classes.button}> Delete Contribution </Button>
                     <br/>
                     <br/>
