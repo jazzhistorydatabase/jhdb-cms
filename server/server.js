@@ -122,7 +122,7 @@ let renderFromFirebase = (req, res, collRef, template) => {
             data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
             return data;
         });
-        video.sort((a, b) => {
+        video = video.sort((a, b) => {
             if (!a.index) return -1;
             if (!b.index) return 1;
             return a.index - b.index;
