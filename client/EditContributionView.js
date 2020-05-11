@@ -13,7 +13,8 @@ import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
 import axios from 'axios';
-
+import { Publish } from '@material-ui/icons';
+import { AssignmentLate } from '@material-ui/icons';
 import { Delete } from '@material-ui/icons';
 import { Switch } from '@material-ui/core';
 
@@ -30,21 +31,11 @@ const styles = theme => ({
         bottom: 20,
         right: 10,
     },
-    approvalPaper: {
-        height: 95,
-        position: 'fixed',
-        width: 100,
-        bottom: 95,
-        left: 10,
-        zIndex: 10,
-    },
-    publishPaper: {
-        height: 65,
-        position: 'fixed',
-        bottom: 20,
-        width: 100,
-        left: 10,
-        zIndex: 10,
+    switchPaper: {
+        display: 'inline-block',
+        marginLeft: theme.spacing(2),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
     },
     paper: {
         padding: theme.spacing(3),
@@ -237,6 +228,37 @@ class EditContributionView extends Component {
                     <h1> Edit Page </h1>
                     <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
                             className={classes.button}> Unselect </Button>
+                            <Paper className={classes.switchPaper} elevation={3} square={false} color={"primary"}>
+                        <FormControlLabel
+                            color={"primary"}
+                            label={<div><AssignmentLate /> {approvalText}</div>}
+                            labelPlacement="start"
+                            control={
+                                <Switch
+                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                    checked={(contrib && (contrib.approval === 'pending'))}
+                                    onChange={this.handleSwitchChange}
+                                    name="approvalSwitch"
+                                    color="secondary"
+                                />}
+                        />
+                    </Paper>
+                    <Paper className={classes.switchPaper} elevation={3} square={false} color={"primary"}>
+                        <FormControlLabel
+                            color={"primary"}
+                            label=<div><Publish /> {publishedText}</div>
+                            labelPlacement="start"
+                            control={
+                                    <Switch
+                                        disabled={!this.props.admin}
+                                        name="publishedSwitch"
+                                        checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                        onChange={this.handleSwitchChange}
+                                        color="secondary"
+                                    /> 
+                                }
+                        />
+                    </Paper>
                     <br/>
                     <br/>
                     <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
@@ -319,49 +341,11 @@ class EditContributionView extends Component {
                                 onChange={this.handleChildChange}/>
                     <br/>
                     <br/>
-                    <br/>
                     <Button onClick={this.handleDeleteContribution} startIcon={<Delete />} variant="outlined"
                             className={classes.button}> Delete Contribution </Button>
                     <br/>
                     <br/>
-                    <br/>
-                    {/* <Button variant="contained"
-                            style={{color: 'white', backgroundColor: 'green'}}
-                            className={classes.previewButton}
-                            startIcon={<Save />}>
-                        Save 
-                    </Button> */}
-                    <Paper className={classes.approvalPaper} elevation={3} square={false} color={"primary"}>
-                        <FormControlLabel
-                            color={"primary"}
-                            label={approvalText}
-                            labelPlacement="bottom"
-                            control={
-                                <Switch
-                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
-                                    checked={(contrib && (contrib.approval === 'pending'))}
-                                    onChange={this.handleSwitchChange}
-                                    name="approvalSwitch"
-                                    color="secondary"
-                                />}
-                        />
-                    </Paper>
-                    <Paper className={classes.publishPaper} elevation={3} square={false} color={"primary"}>
-                        <FormControlLabel
-                            color={"primary"}
-                            label={publishedText}
-                            labelPlacement="bottom"
-                            control={
-                                    <Switch
-                                        disabled={!this.props.admin}
-                                        name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
-                                        onChange={this.handleSwitchChange}
-                                        color="secondary"
-                                    /> 
-                                }
-                        />
-                    </Paper>
+                    <br/>                    
                 </div>
             </div>
         );

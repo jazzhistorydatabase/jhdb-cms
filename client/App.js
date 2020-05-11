@@ -54,7 +54,7 @@ const styles = {
     paper: {
         padding: theme.spacing(4),
         paddingTop: theme.spacing(1),
-        marginTop: theme.spacing(2),
+        marginTop: theme.spacing(4),
     },
 };
 
