@@ -55,7 +55,7 @@ app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 
-let fetchContributionByName = (req, res, contributionName, callback) => {
+let fetchContributionByName = (req, res, contributionName, template, callback) => {
     const collRoot = fb.firestore().collection("Contributions");
     let collsRef;
     let collName = contributionName.toLowerCase().replace(/-/g, " ")
@@ -74,7 +74,7 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
             logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
             snapshots.forEach(snapshot => {
                 let collRef = snapshot.data();
-                callback(req, res, collRef);
+                callback(req, res, collRef, template);
             });
         }
     }).catch( err => {
@@ -84,7 +84,7 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
 };
 
 // Define function to render with handlebars
-let renderFromFirebase = (req, res, collRef) => {
+let renderFromFirebase = (req, res, collRef, template) => {
     if (!collRef) return;
 
     // Get images
@@ -94,6 +94,11 @@ let renderFromFirebase = (req, res, collRef) => {
         logger.success(`Successfully fetched ${imgSnapshot.size} images for ${collRef.name} doc id: ${collRef.ref.id}`);
         images = imgSnapshot.docs.map(doc => {
             return doc.data();
+        });
+        images.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
         });
     }).catch( err => {
         logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
@@ -105,12 +110,6 @@ let renderFromFirebase = (req, res, collRef) => {
         audio = audioSnapshot.docs.map(doc => {
             return doc.data();
         });
-        /*.sort((a, b) => {
-            if (!a.index) return -1;
-            if (!b.index) return 1;
-            return a.index - b.index;
-        });*/
-
     }).catch( err => {
         logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
     });
@@ -122,11 +121,12 @@ let renderFromFirebase = (req, res, collRef) => {
             let data = doc.data();
             data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
             return data;
-        });/*.sort((a, b) => {
+        });
+        video = video.sort((a, b) => {
             if (!a.index) return -1;
             if (!b.index) return 1;
             return a.index - b.index;
-        });*/
+        });
     }).catch( err => {
         logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
     });
@@ -135,22 +135,25 @@ let renderFromFirebase = (req, res, collRef) => {
         logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
         collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
         
+        collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
+
         collectionDoc.images = images;
         collectionDoc.audio = audio;
         collectionDoc.video = video;
-        res.render("preview", collectionDoc);
+        collectionDoc.layout = template;
+        res.render(template, collectionDoc);
         logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
         return;
     }).catch( err => {
         logger.error(`Render error: ${collRef.name} id: ${collRef.ref.id}`, err);
-        res.render("preview", collectionDoc);
+        res.render(template, collectionDoc);
     })
 };
 
 let previewReqHandler = (req, res) => {
     let collName = req.params.collection.toLowerCase();
     logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, renderFromFirebase);
+    fetchContributionByName(req, res, collName, "template", renderFromFirebase);
 }
 
 app.get("/header-new.php", (req, res) => {
@@ -177,11 +180,11 @@ let publishedReqHandler = (req, res) => {
     fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
         if (snapshot.exists) {
             let publishedList = snapshot.data();
-            fetchContributionByName(req, res, collName, (req, res, collRef) => {
+            fetchContributionByName(req, res, collName, "template", (req, res, collRef, template) => {
                 if (!collRef) return;
                 if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
                     // This contribution is published - proceed
-                    renderFromFirebase(req, res, collRef);
+                    renderFromFirebase(req, res, collRef, template);
                 } else {
                     logger.error(`Contribution "${collName}" is not published.`);
                     res.send("This contribution is not published!");
