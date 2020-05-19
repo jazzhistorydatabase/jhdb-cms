@@ -196,15 +196,18 @@ class App extends Component {
 
     getAppContent() {
         if(!this.state.user) {
-            return ( <div>    
-                <h3 style={{textAlign: 'left', paddingLeft: 20}}>
+            return ( <div style={{paddingLeft: 20}}>    
+                <h3 style={{textAlign: 'left'}}>
                     <ArrowUpwardSharp/><ArrowUpwardSharp/><ArrowUpwardSharp/>
                     <br/>
                     Please sign in to continue (See MENU)
                 </h3>
-                <h5 style={{paddingLeft: 20, display: this.state.pageLoadDone ? 'none' : 'block'}}>
+                <h5 style={{visibility: this.state.pageLoadDone ? 'hidden' : ''}}>
                     If you have just signed in, give it a few seconds...
                 </h5>
+                <br />
+                <h3>Getting Started Walk-Through</h3>
+                <iframe title="info-loggedout" width="560" height="315" style={{marginLeft: 'auto', marginRight: 'auto'}} src="https://www.youtube.com/embed/GirVi49SW_g" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>);
         } else if(!this.state.pageLoadDone) {
             return (<div className={this.props.classes.loading}>
@@ -212,7 +215,11 @@ class App extends Component {
                     </div>);
 
         } else if(!this.state.user.authorized) {
-            return (<h3><br/>This account is not authorized. Make sure you have logged in with your JHDB-provided Dropbox account</h3>);
+            return (<h3>
+                        <br/>This account is not authorized. Make sure you have logged in with your JHDB-provided Dropbox account
+                        <br/>If you are still unsure of how to proceed, send us an email at <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link>
+            
+                    </h3>);
         } else if(this.state.showAdminWindow) {
             return (<AdminView adminPanel={this.state.adminPanel}
                 users={this.state.users}
@@ -226,16 +233,15 @@ class App extends Component {
                         <h1>Welcome to the contributor portal!</h1>
                         <br />
                         <Typography>
-							At some point in the near future, in this information tab you will find instructions on how to use the contirbutor portal effectively. While we wrap up the process of developing this documentation, please feel free to reach out to <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link> with any questions or issues!
+							Take a look at the video below for a tour! Please feel free to reach out to <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link> if you have any questions or issues.
 						</Typography>
                         <br />
                         <Typography>
-							You can upload media to the secure JHDB archive through the Upload tab. Further instructions are included there. You can subsequently build pages using this media in the Pages tab. We have made an effort to make this interface as straightforward and intuitive as possible - if you find anything confusing, odds are someone else does too so please don't hesitate to send us an email and we will be happy to clarify and/or find ways to make it less confusing!
+							You can upload files to the JHDB archive by selecting the Upload tab above. If you have already sent us files, they should have been uploaded for you already and you can skip this step. You can then build pages in the Pages tab. If you have any questions or run into difficulties, please don't hesitate to send us an email and our team will be happy to help you out!
 						</Typography>
                         <br />
-                        <Typography>
-							You can log out of the contributor portal in the MENU (just click the menu button at the top left of the screen and select "Sign Out")
-						</Typography>
+                        <h3>Getting Started Walk-Through</h3>
+                        <iframe title="info-loggedin" width="560" height="315" src="https://www.youtube.com/embed/GirVi49SW_g?start=195" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </Paper>
                 </div>
             case 1:

@@ -40,21 +40,17 @@ class UploadView extends Component {
 				<Card style={{marginTop: 50, marginBotton: 50, padding: 20}}>
 					<DialogTitle id="alert-dialog-title">{"Upload Media to Jazz History Database Contributor System"}</DialogTitle>
 					<DialogContent>
+						<Typography>
+							If you would like your files to be uploaded to a folder, please enter the folder name below (e.g. entering "<code>John Doe</code>" (without the quotes) will upload to "<code>{this.props.user.displayName}/John Doe</code>"). We recommend organizing your files into folders by artist or page.
+						</Typography>
+						<br />
 						<Typography id="alert-dialog-description">
-							You will be redirected to a page where you can select files from your computer to be uploaded to your secure JHDB Dropbox folder. Please make sure to follow appropriate naming conventions on all files prior to uploading, as you will be unable to rename them once they have been uploaded to the archive.
-						</Typography>
-						<br />
-						<Typography>
-							If you would like your media to be uploaded to a subfolder, please enter the name here (e.g. entering "<code>John Doe</code>" will upload to "<code>{this.props.user.displayName}/John Doe</code>")
-						</Typography>
-						<br />
-						<Typography>
-							You can add additional subfolders with "<code>/</code>" - e.g. if you would like an Images folder under the John Doe folder, you could enter "<code>John Doe/Images</code>"
+							Once you click "Begin Upload", you will be redirected to Dropbox to upload your files. Please be sure to select the "Browse from Computer" button — the "Select from Dropbox" option is for internal use only. Once your files have finished uploading, you can click the back button in your browser to return to the contributor portal and upload files to a different folder, or start building pages!
 						</Typography>
 						<TextField
 							variant="filled"
 							onChange={this.handleFolderChange}
-							label="Subfolder Name"
+							label="Folder Name"
 							margin="normal"
 							InputLabelProps={{
 								shrink: true,
