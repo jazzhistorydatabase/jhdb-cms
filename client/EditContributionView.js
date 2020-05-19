@@ -110,7 +110,7 @@ class EditContributionView extends Component {
         this.handleDeleteContribution = event => {
             let contributionData = this.state.contributionData;
             if (window.confirm('Are you sure you want to delete "' + contributionData.name +
-                    '"?\n\nThis will remove this collection from the contributor portal.\n\nThis ' +
+                    '"?\n\nThis will remove this page from the contributor portal.\n\nThis ' +
                     'cannot be undone!\n\nAll your media files (bio photo, images, audio, video) will ' +
                     'remain in Dropbox. However, any captions, links, and bio description will be ' +
                     'deleted.')) {
@@ -131,8 +131,8 @@ class EditContributionView extends Component {
                 } else if (event.target.checked) {
                     if (window.confirm('Are you sure you want to publish "' + contributionData.name +
                             '"?\n\nThis will make it publicly accessible via the Jazz History Database ' +
-                            'website. You may visit your published contribution by clicking the ' + 
-                            '"Published" button next to the contribution name in the "My Collections" page.')) {
+                            'website. You may visit your published page by clicking the ' + 
+                            '"Published" button next to the page name on the "Select" screen.')) {
                         fb.getToken( token => {
                             axios.post(`/publish`, {
                                 auth: token,
@@ -350,7 +350,7 @@ class EditContributionView extends Component {
                     <br/>
                     <br/>
                     <Button onClick={this.handleDeleteContribution} startIcon={<Delete />} variant="outlined"
-                            className={classes.button}> Delete Contribution </Button>
+                            className={classes.button}> Delete Page </Button>
                     <br/>
                     <br/>
                     <br/>                    
