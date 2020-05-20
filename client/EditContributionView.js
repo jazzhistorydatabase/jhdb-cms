@@ -12,50 +12,18 @@ import 'typeface-roboto';
 import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
-
-import { Visibility } from '@material-ui/icons';
+import axios from 'axios';
+import { AssignmentTurnedIn } from '@material-ui/icons';
+import { Publish } from '@material-ui/icons';
+import { AssignmentLate } from '@material-ui/icons';
+import { Delete } from '@material-ui/icons';
 import { Switch } from '@material-ui/core';
 
 const styles = theme => ({
-    container: {
-        display: 'flex',
-        flexWrap: 'wrap',
-    },
     textField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
         width: 200,
-    },
-    uploadWidth: {
-        width: 600,
-    },
-    dense: {
-        marginTop: 19,
-    },
-    menu: {
-        width: 200,
-    },
-    formControl: {
-        margin: theme.spacing(2),
-    },
-    rightIcon: {
-        marginLeft: theme.spacing(1),
-    },
-    formWideControl: {
-        marginLeft: theme.spacing(1),
-        marginRight: theme.spacing(1),
-        width: 540,
-    },
-    button2: {
-        width: '40%',
-        marginLeft: 'auto',
-        marginRight: 'auto'
-    },
-    button3: {
-        display: 'inline-block',
-        width: '200px',
-        height: '40px',
-        margin: 20,
     },
     previewButton: {
         display: 'block',
@@ -64,33 +32,15 @@ const styles = theme => ({
         bottom: 20,
         right: 10,
     },
-    approvalPaper: {
-        height: 95,
-        position: 'fixed',
-        width: 100,
-        bottom: 95,
-        left: 10,
-    },
-    publishPaper: {
-        height: 65,
-        position: 'fixed',
-        bottom: 20,
-        width: 100,
-        left: 10,
-    },
-    reviewOptionLeft: {
-        marginLeft: '10%',
-    },
-    reviewOptionRight: {
-        marginRight: '10%',
-    },
-    cardColor: {
-        backgroundColor: '#fce4ec',
+    switchPaper: {
+        display: 'inline-block',
+        marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
     },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
+        padding: theme.spacing(3),
     },
     mediaUploadTitle: {
         width: '10vw',
@@ -100,35 +50,45 @@ const styles = theme => ({
 
 class EditContributionView extends Component {
     handleBeforeButtonClick() {
-        this.props.windowSwap();
+        this.props.onSelectContribution();
     }
 
     constructor(props) {
         super(props);
         this.state = {
-            contribName: '',
-            contribType: '',
-            contribBio: '',
-            mediaProcess: '',
-            contentEditing: '',
-            contributionData: null,
+            contributionData: this.props.selectedContribution,
         };
         
         this.handleNameChange = event => {
             let data = this.state.contributionData;
-            data.name = event.target.value;
-            this.setState({contributionData: data});
+            if ((data && (data.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+                return false;
+            } else {
+                data.name = event.target.value;
+                this.setState({contributionData: data});
+            }
         };
     
         this.handleCheckBoxChange = event => {
             let data = this.state.contributionData;
-            data.type = event.target.value;
-            this.setState({contributionData: data});
+            if ((data && (data.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+                return false;
+            } else {
+                data.type = event.target.value;
+                this.setState({contributionData: data});
+            }
         };
         this.handleBioChange = event => {
             let data = this.state.contributionData;
-            data.description = event.target.value;
-            this.setState({contributionData: data});
+            if ((data && (data.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+                return false;
+            } else {
+                data.description = event.target.value.replace(/\n/g, "<br />");
+                this.setState({contributionData: data});
+            }
         };
         this.handleEndBoxChange = name => event => {
             this.setState({[name]: event.target.checked});
@@ -136,16 +96,21 @@ class EditContributionView extends Component {
     
         this.handleChildChange = newState => {
             let contrib = this.state.contributionData;
-            Object.keys(newState).forEach(key => {
-                contrib[key] = newState[key];
-            });
-            this.setState({contributionData: contrib});
+            if ((contrib && (contrib.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+                return false;
+            } else {
+                Object.keys(newState).forEach(key => {
+                    contrib[key] = newState[key];
+                });
+                this.setState({contributionData: contrib});
+            }
         };
 
         this.handleDeleteContribution = event => {
             let contributionData = this.state.contributionData;
             if (window.confirm('Are you sure you want to delete "' + contributionData.name +
-                    '"?\n\nThis will remove this collection from the contributor portal.\n\nThis ' +
+                    '"?\n\nThis will remove this page from the contributor portal.\n\nThis ' +
                     'cannot be undone!\n\nAll your media files (bio photo, images, audio, video) will ' +
                     'remain in Dropbox. However, any captions, links, and bio description will be ' +
                     'deleted.')) {
@@ -166,8 +131,21 @@ class EditContributionView extends Component {
                 } else if (event.target.checked) {
                     if (window.confirm('Are you sure you want to publish "' + contributionData.name +
                             '"?\n\nThis will make it publicly accessible via the Jazz History Database ' +
-                            'website. You may visit your published contribution by clicking the ' + 
-                            '"Published" button next to the contribution name in the "My Collections" page.')) {
+                            'website. You may visit your published page by clicking the ' + 
+                            '"Published" button next to the page name on the "Select" screen.')) {
+                        fb.getToken( token => {
+                            axios.post(`/publish`, {
+                                auth: token,
+                                name: contributionData.name
+                            }).then(resp => {
+                                window.alert("Publish success! You will now be redirected to the published page.");
+                                window.location.href = "https://global.jazzhistorydatabase.com/" + contributionData.name.toLowerCase().replace(/ /gi, '-');
+                            }).catch( err => {
+                                window.alert("Error publishing - please contact developers for support\n\n" + err);
+                                console.log(err);
+                                return;
+                            });
+                        });
                         contributionData.status = "published";
                         contributionData.approval = "approved";
                         publishedList[contributionData.ref.id] = 'true';
@@ -233,6 +211,7 @@ class EditContributionView extends Component {
     render() {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
+        const isPublished = (this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'));
         let approvalText = "Request Approval";
         let publishedText = "Publish";
         if (contrib) {
@@ -243,135 +222,138 @@ class EditContributionView extends Component {
                 publishedText = "Published";
             }
         }
+        
         return (
             <div>
                 <div>
-                    <h1> Contribution </h1>
-                    <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
-                            className={classes.button}> Back </Button>
+                    <h1> Edit Page </h1>
+                    <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
+                            className={classes.button}> Unselect </Button>
+                    <Paper className={classes.switchPaper} elevation={3} square={false} color={"primary"}>
+                        <FormControlLabel
+                            color={"primary"}
+                            label={<div style={{display: 'flex', alignItems: 'center'}}><AssignmentLate /> {approvalText}</div>}
+                            labelPlacement="start"
+                            control={
+                                <Switch
+                                    disabled={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
+                                    checked={(contrib && (contrib.approval === 'pending'))}
+                                    onChange={this.handleSwitchChange}
+                                    name="approvalSwitch"
+                                    color="secondary"
+                                />}
+                        />
+                    </Paper>
+                    <Paper className={classes.switchPaper} elevation={3} square={false} color={"primary"}>
+                        <FormControlLabel
+                            color={"primary"}
+                            label={<div style={{display: 'flex', alignItems: 'center' }}>
+                                        <Publish /> {publishedText}
+                                    </div>}
+                            labelPlacement="start"
+                            control={
+                                    <Switch
+                                        disabled={!this.props.admin}
+                                        name="publishedSwitch"
+                                        checked={isPublished}
+                                        onChange={this.handleSwitchChange}
+                                        color="secondary"
+                                    /> 
+                                }
+                        />
+                    </Paper>
+                    <Button style={isPublished ? {} : {display: 'none'}}
+                            href ={"https://global.jazzhistorydatabase.com/" + contrib.name.toLowerCase().replace(/ /gi, '-')}
+                            variant="contained" color={"primary"}
+                            startIcon={<AssignmentTurnedIn />}
+                            className={classes.button}> View Published </Button>
                     <br/>
-                    <TextField
-                        id="standard-name"
-                        label="Collection Title"
-                        className={classes.textField}
-                        value={(contrib && contrib.name) || ""}
-                        onChange={this.handleNameChange}
-                        margin="normal"
-                    />
-                    <FormControl component={"fieldset"} className={classes.formControl}>
-                        <FormLabel component="legend"> Collection Type</FormLabel>
+                    <br/>
+                    <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
+                        <h2 className={classes.mediaUploadTitle}> Biography</h2>
+                        <FormLabel component="legend">Page Name/Title</FormLabel>
+                        <TextField
+                            id="standard-name"
+                            variant="filled"
+                            className={classes.textField}
+                            defaultValue={(contrib && contrib.name) || ""}
+                            onChange={this.handleNameChange}
+                            margin="normal"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                        <br />
+                        <br />
+                        <FormLabel component="legend">Page Type</FormLabel>
                         <RadioGroup row
                                     value={(contrib && contrib.type) || ""}
                                     onChange={this.handleCheckBoxChange}>
                             <FormControlLabel
                                 value="artist"
                                 control={<Radio color="primary"/>}
-                                label="Artist Type"
+                                label="Artist Page (Showcase Media)"
                                 labelPlacement="start"
                             />
                             <FormControlLabel
+                                disabled
                                 value="collection"
                                 control={<Radio color="primary"/>}
-                                label="Collection"
+                                label="Collection (Showcase other pages)"
                                 labelPlacement="start"
                             />
                         </RadioGroup>
-                    </FormControl>
-                    <br/>
-                    <FormControl className={classes.uploadWidth}>
-                        <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
-                            <h2 className={classes.mediaUploadTitle}> Bio</h2>
-                            <FormLabel component="legend"> Bio Photo</FormLabel>
-                            <FileUpload fileType="Images"
-                                fileIndex={-1}
-                                fileDoc={this.props.selectedContribution}
-                                bio="true"
-                            />
-                            <TextField
-                                id="filled-multiline-flexible, filled-full-width"
-                                label="Biography"
-                                style={{margin: 5}}
-                                multiline
-                                value={(contrib && contrib.description) || ""}
-                                onChange={this.handleBioChange}
-                                fullWidth
-                                margin="normal"
-                                variant="filled"
-                                placeholder={"Insert Biography"}
-                                className={classes.formWideControl}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            />
-                        </Paper>
-                    </FormControl>
-                    <br/>
-                    <br/>
-                    <FormControl className={classes.uploadWidth}>
-                        <MediaUpload uploadName="Images"
-                                    isSubpage={contrib && contrib.imagesSubpage}
-                                    collection={this.props.selectedContribution.ref.collection("Images")}
-                                    onChange={this.handleChildChange}/>
-                        <MediaUpload uploadName="Audio"
-                                    isSubpage={contrib && contrib.audioSubpage}
-                                    collection={this.props.selectedContribution.ref.collection("Audio")}
-                                    onChange={this.handleChildChange}/>
-                        <MediaUpload uploadName="Video"
-                                    isSubpage={contrib && contrib.videoSubpage}
-                                    collection={this.props.selectedContribution.ref.collection("Video")}
-                                    onChange={this.handleChildChange}/>
-                    </FormControl>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <Button onClick={this.handleDeleteContribution} variant="outlined" color={"primary"}
-                            className={classes.button}> Delete Contribution </Button>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <Button variant="contained"
-                            color={"primary"}
-                            className={classes.previewButton}
-                            startIcon={<Visibility />}
-                            href={"/preview/"+this.props.selectedContribution.name.toLowerCase().replace(/ /g, "-")}>
-                                Preview 
-                    </Button>
-                    <Paper className={classes.approvalPaper} elevation={3} square={false} color={"primary"}>
-                        <FormControlLabel
-                            color={"primary"}
-                            label={approvalText}
-                            labelPlacement="bottom"
-                            control={
-                                <Switch
-                                    checked={(contrib && (contrib.approval === 'pending'))}
-                                    onChange={this.handleSwitchChange}
-                                    name="approvalSwitch"
-                                    color="secondary"
-                                /> }
+                        <br />
+                        <FormLabel component="legend">Bio Photo</FormLabel>
+                        <FileUpload fileType="Images"
+                            fileIndex={-1}
+                            fileDoc={this.props.selectedContribution}
+                            bio="true"
+                            isPendingApproval={contrib && (contrib.approval === 'pending')}
                         />
-                    </Paper>
-                    <Paper className={classes.publishPaper} elevation={3} square={false} color={"primary"}>
-                        <FormControlLabel
-                            color={"primary"}
-                            label={publishedText}
-                            labelPlacement="bottom"
-                            control={
-                                this.props.admin ? 
-                                    <Switch
-                                        name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib && (this.props.publishedList[contrib.ref.id] === 'true'))}
-                                        onChange={this.handleSwitchChange}
-                                        color="secondary"
-                                    /> :
-                                    <Switch
-                                        disabled
-                                        name="publishedSwitch"
-                                        checked={(this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'))}
-                                        color="secondary"
-                                    /> 
-                                }
+                            <br />
+                        <FormLabel component="legend">Biography Text</FormLabel>
+                        <TextField
+                            id="filled-multiline-flexible, filled-full-width"
+                            style={{margin: 5}}
+                            multiline
+                            defaultValue={(contrib && contrib.description && contrib.description.replace(/<br \/>/g, "\n")) || ""}
+                            onChange={this.handleBioChange}
+                            fullWidth
+                            margin="normal"
+                            variant="filled"
+                            placeholder={"Insert Biography"}
+                            className={classes.formWideControl}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
+
                     </Paper>
+                    <br/>
+                    <br/>
+                    <MediaUpload uploadName="Images"
+                                isSubpage={contrib && contrib.imagesSubpage}
+                                isPendingApproval={contrib && (contrib.approval === 'pending')}
+                                collection={this.props.selectedContribution.ref.collection("Images")}
+                                onChange={this.handleChildChange}/>
+                    <MediaUpload uploadName="Audio"
+                                isSubpage={contrib && contrib.audioSubpage}
+                                isPendingApproval={contrib && (contrib.approval === 'pending')}
+                                collection={this.props.selectedContribution.ref.collection("Audio")}
+                                onChange={this.handleChildChange}/>
+                    <MediaUpload uploadName="Video"
+                                isSubpage={contrib && contrib.videoSubpage}
+                                isPendingApproval={contrib && (contrib.approval === 'pending')}
+                                collection={this.props.selectedContribution.ref.collection("Video")}
+                                onChange={this.handleChildChange}/>
+                    <br/>
+                    <br/>
+                    <Button onClick={this.handleDeleteContribution} startIcon={<Delete />} variant="outlined"
+                            className={classes.button}> Delete Page </Button>
+                    <br/>
+                    <br/>
+                    <br/>                    
                 </div>
             </div>
         );

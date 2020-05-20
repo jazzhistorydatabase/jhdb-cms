@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
+import {withStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FormControl from "@material-ui/core/FormControl";
 import Paper from "@material-ui/core/Paper";
@@ -25,15 +25,8 @@ const styles = theme => ({
         backgroundColor: theme.palette.background.paper,
     },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-        width: '70%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
     },
     cardColor: {
-        backgroundColor: '#fce4ec',
     },
     avatar: {
         margin: 10,
@@ -124,17 +117,14 @@ class AdminView extends Component {
 
         return (
             <div>
-
                 <h1> Admin Settings </h1>
-                <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="outlined" color={"primary"}
+                <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
                         className={classes.button}> Back </Button>
                 <br/>
                 <br/>
                 <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
-                    {this.props.users.map( (user) => {
-                        if(!user.uid) {
-                            return (<div key={ randomBytes(2)}></div>)
-                        } else if (user.uid === fb.auth.currentUser.uid) {
+                    {this.props.users.filter(user => !!user.uid).map( (user) => {
+                        if (user.uid === fb.auth.currentUser.uid) {
                             return (
                                 <div key={user.uid} >
                                 <Grid container className={classes.adminGrid} spacing={3} justify="flex-start" alignItems="center">
@@ -146,7 +136,7 @@ class AdminView extends Component {
                                     <Grid item xs={3}>
                                     <   h3> {user.name} </h3>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item xs={3}>
                                         <h5> {user.email} </h5>
                                     </Grid>
                                     <Grid item xs={4}>
@@ -168,7 +158,7 @@ class AdminView extends Component {
                                     <Grid item xs={3}>
                                     <   h3> {user.name} </h3>
                                     </Grid>
-                                    <Grid item xs={2}>
+                                    <Grid item xs={3}>
                                         <h5> {user.email} </h5>
                                     </Grid>
                                     <Grid item xs={4}>

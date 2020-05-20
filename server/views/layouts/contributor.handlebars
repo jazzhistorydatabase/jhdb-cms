@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-7589884-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push( arguments );
+        }
+        gtag( 'js', new Date() );
+        gtag( 'config', 'UA-7589884-1' );
+    </script>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="author" content="JazzHistoryDatabase"/>
+
+
+
+
+    <!-- Stylesheets
+    ============================================= -->
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/style.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/dark.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/x-font-woff"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/JHDB.css" type="text/css"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <!-- Document Title
+    ============================================= -->
+    <title>Jazz History Database</title>
+
+</head>
+
+<body class="">
+
+<!-- Document Wrapper
+============================================= -->
+
+<div id="wrapper" class="clearfix">
+
+
+
+    <!-- Header
+    ============================================= -->
+    <script src="https://www.w3schools.com/lib/w3.js"></script>
+    <div w3-include-html="header-new.html"></div>
+    <script>
+        w3.includeHTML();
+    </script>
+    {{header}}
+
+    <!-- Page Title
+    ============================================= -->
+    <!-- Intro -->
+    <style>
+        #page-title {
+            padding: 0 0;
+        }
+
+        img.resize {
+            width: auto;
+            /* you can use % */
+            height: 300px;
+        }
+
+        a.resize {
+            max-height: 300px;
+            height: 300px;
+        }
+
+        li>a {
+            cursor: pointer;
+        }
+
+        p.caption {
+            height: 60px;
+            font-size: 18px;
+            display: table-cell;
+            vertical-align: middle;
+            white-space: -moz-pre-wrap;
+            white-space: -o-pre-wrap;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #page-menu.sticky-page-menu #page-menu-wrap {
+            top: 60px;
+        }
+    </style>
+
+
+    <!-- Content
+    ============================================= -->
+    <section id="content">
+        <!-- Collection nav bar start-->
+        <div id="page-menu">
+            <div id="page-menu-wrap">
+                <div class="container clearfix">
+                    <div class="menu-title" style="cursor:pointer;" onclick="goToByScroll('section-bio')"> {{name}} Collection </div>
+                    <nav>
+                        <ul>
+                            <li>
+                                <a onclick="goToByScroll('bio')">
+                                    <div>Biography</div>
+                                </a>
+                            </li>
+                            <li>
+                                <a onClick="goToByScroll('images')">
+                                    <div>Images</div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <div>Contributions</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div id="page-submenu-trigger"><i class="icon-reorder"></i></div>
+                </div>
+            </div>
+        </div>
+        <!-- Collection nav bar end -->
+        <!-- Content Wrap starts -->
+        <div class="content-wrap">
+            <div class="container clearfix">
+                <div class="postcontent nobottommargin">
+                    <!-- Bio -->
+                    <div class="container clearfix">
+                        <div class="fancy-title title-bottom-border" id="bio">
+                            <h3>Biography of {{ name }} </h3>
+                        </div>
+                        <!-- Insert bio -->
+                        <div class="row clearfix" style="padding-bottom: 50px; padding-top: 20px;">
+                            <div class="col-sm-12">
+                                {{#if bioUrl}}
+                                    <img class="biophoto" style="padding-left: 20px; padding-bottom: 20px;" width="425" align="right" src={{ bioUrl }}>
+                                {{/if}}
+                                {{{description}}}
+                                <!--<p>-->
+                                    <!--<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#fullBio">-->
+                                        <!--Read Full Biography-->
+                                    <!--</button>-->
+
+                                <!--</p>-->
+                                <!--<div class="collapse" id="fullBio">-->
+                                    <!--{{ description }}-->
+                                <!--</div>-->
+                            </div>
+
+                            {{!-- <div class="col-sm-5">
+                                <img src={{ bioUrl }}>
+                            </div> --}}
+                        </div>
+                    </div>
+
+                    <!-- Images Section -->
+                    <div class="row common-height clearfix" style="padding-left: 15px;">
+                        {{#if images}}
+                            <div class="col-sm-12" style="padding-bottom: 50px;">
+                                <div class="fancy-title title-bottom-border" id="images">
+                                    <h3> Images</h3>
+                                </div>
+                                <!--Carousel-->
+                                <div id="oc-portfolio-sidebar" class="owl-carousel carousel-widget" data-items="{{dataItems}}" data-margin="10" data-loop="true" data-nav="false" data-autoplay="5000">
+                                    {{#each images }}
+                                        <div class="oc-item">
+                                            <div class="iportfolio">
+                                                <div class="portfolio-image">
+                                                    <a href="#">
+                                                        <img src="{{url}}" alt="{{name}}">
+                                                    </a>
+
+                                                    <div class="portfolio-overlay">
+                                                        <a href="{{url}}" class="center-icon" data-lightbox="image"><i class="icon-line-plus"></i></a>
+                                                    </div>
+                                                </div>
+                                                <div class="portfolio-desc center nobottompadding">
+                                                    <h3><a href="portfolio-single.html">{{caption}}</a></h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        {{/if}}
+                    </div>
+                    <div class="row common-height clearfix" style="padding-left: 15px;">
+                        {{#if audio}}
+                            <div class="col-sm-12" style="padding-bottom: 50px;">
+                                <div>
+                                    <div class="fancy-title title-bottom-border">
+                                        <h3 id="section-interviews">Audio</h3>
+                                    </div>
+                                    {{#each audio}}
+                                        <div class="row" style="padding-left: 20px; padding-top: 10px;">
+                                            <div class="col-sm-4" style="padding-right: 10px;">
+                                                <audio controls style="height: 60px; display: table-cell; vertical-align: middle;">
+                                                    <source src={{url}} type="audio/mp3">
+                                                    Your browser does not support the audio element.
+                                                </audio>
+                                            </div>
+                                            <div class="col-sm-8" style="word-wrap: break-word;">
+                                                <p class="caption">{{caption}}</p>
+                                            </div>
+                                        </div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        {{/if}}
+                    </div>
+                    {{#if video}}
+                        <div class="row common-height clearfix" style="padding-left: 15px;">
+                            <div class="col-sm-12">
+                                <div class="fancy-title title-bottom-border">
+                                    <h3 id="section-interviews">Videos</h3>
+                                </div>
+                                {{#each video}}
+                                    <iframe frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="356" height="200" type="text/html" style="max-width: 80%;"
+                                    src={{url}}><div><small><a href="https://youtubeembedcode.com/pl/">youtubeembedcode.com/pl/</a></small></div><div><small><a href="https://add-link-exchange.com">https://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/nl/">youtubeembedcode nl</a></small></div><div><small><a href="https://add-link-exchange.com">https://add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/en">youtubeembedcode.com/en/</a></small></div><div><small><a href="https://add-link-exchange.com">add-link-exchange.com</a></small></div><div><small><a href="https://youtubeembedcode.com/es/">youtubeembedcode es</a></small></div><div><small><a href="https://add-link-exchange.com">w://add-link-exchange.com</a></small></div></iframe>
+                                    <p class="center" style="height: 60px; font-size: 18px; padding-top: 10px;">{{caption}}</p>
+                                {{/each}}
+                            </div>
+                        </div>
+                    {{/if}}
+                </div>
+                <div class="sidebar nobottommargin col_last">
+                    <div class="sidebar-widgets-wrap">
+                        <div class="row common-height clearfix">
+                            <div class="col-sm-12">
+                                <div class="fancy-title title-bottom-border">
+                                    <h3 id="section-interviews">Contributions</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group">
+                            <a href="http://www.jazzhistorydatabase.com/archives/totem-pole/" class="list-group-item">
+                                <h4 class="list-group-heading"><i class="i-plain icon-thumbs-up"></i>Totem Pole</h4>
+                                <p class="list-group-item-text">Although there were more than a hundred ballrooms within
+                                    driving distance of Boston, MA, the Totem Pole was universally acknowledged as one
+                                    of the largest and certainly the most elegant. </p>
+                            </a>
+                            <a href="http://www.jazzhistorydatabase.com/archives/totem-pole/" class="list-group-item">
+                                <h4 class="list-group-heading"><i class="i-plain icon-thumbs-up"></i>Totem Pole</h4>
+                                <p class="list-group-item-text">Although there were more than a hundred ballrooms within
+                                    driving distance of Boston, MA, the Totem Pole was universally acknowledged as one
+                                    of the largest and certainly the most elegant. </p>
+                            </a>
+                            <a href="http://www.jazzhistorydatabase.com/archives/totem-pole/" class="list-group-item">
+                                <h4 class="list-group-heading"><i class="i-plain icon-thumbs-up"></i>Totem Pole</h4>
+                                <p class="list-group-item-text">Although there were more than a hundred ballrooms within
+                                    driving distance of Boston, MA, the Totem Pole was universally acknowledged as one
+                                    of the largest and certainly the most elegant. </p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Footer
+    ============================================= -->
+
+{{footer}}
+
+
+
+<!-- #wrapper end -->
+
+<!-- Go To Top
+============================================= -->
+<div id="gotoTop" class="icon-angle-up"></div>
+
+<!-- External JavaScripts
+============================================= -->
+<script type="text/javascript" src="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/js/jquery.js"></script>
+<script type="text/javascript" src="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/js/plugins.js"></script>
+<script>
+    function goToByScroll( id ) {
+        $( 'html,body' ).animate( {
+            scrollTop: $( "#" + id ).offset().top - 115
+        }, 'slow' );
+    }
+</script>
+<!-- Footer Scripts
+============================================= -->
+<script type="text/javascript" src="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/js/functions.js"></script>
+
+</body>
+</html>

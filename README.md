@@ -67,7 +67,7 @@ This project utilizes two bundling systems to minimize the bundle size being pus
 ## Workflow
 - Tasks are tracked via issues - if you come across a bug or would like to request a feature, please submit it in the [issues tab](https://github.com/jazzhistorydatabase/jhdb-cms/issues)
 - Kanban boards for the active and past development cycle reside in the [projects tab](https://github.com/jazzhistorydatabase/jhdb-cms/projects)
-- Development is tracked in the [#db-dev channel on the JazzHistoryDatabase Slack](https://jhdb.slack.com/messages/CFRMA6BBK/) (accessible to WPI students and by invitation)
+- Development is tracked in the [#db-dev channel on the Jazz History Database Slack](https://jhdb.slack.com/messages/CFRMA6BBK/) (accessible to WPI students and by invitation)
 
 #
 

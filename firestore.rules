@@ -14,9 +14,23 @@ service cloud.firestore {
       return (request.auth.uid in get(/databases/$(database)/documents/Users/admin).data) &&
       			(get(/databases/$(database)/documents/Users/admin).data[request.auth.uid] == true);
     }
+    
+    function getContrib(id) {
+      return get(/databases/$(database)/documents/Contributions/$(id));
+    }
+    
+    function userIsOwner(doc) {
+      return (doc != null && "owner" in doc.data && request.auth.uid == doc.data.owner);
+    }
 
   	match /Contributions/{document=**} {
-    	allow read, write: if userExists() && userIsAuthorized();
+      allow create: if userExists() && userIsAuthorized();
+    	allow read, write: if userExists() && userIsAuthorized() && (userIsAdmin() || userIsOwner(resource));
+    }
+    
+  	match /Contributions/{contrib}/{sub=**} {
+      allow create: if userExists() && userIsAuthorized();
+    	allow read, write: if userExists() && userIsAuthorized() && (userIsAdmin() || userIsOwner(getContrib(contrib)));
     }
 
     match /Users/admin {
@@ -30,7 +44,8 @@ service cloud.firestore {
     }
 
     match /Users/{uid} {
-    	allow create, read, write: if (userExists() && userIsAdmin()) || (request.auth.uid == uid);
+      allow read;
+    	allow create, write: if (userIsAdmin() || request.auth.uid == uid);
     }
 
     match /Contributions/published {
@@ -38,6 +53,4 @@ service cloud.firestore {
       allow write: if userExists() && userIsAdmin();
     }
   }
-
-
 }

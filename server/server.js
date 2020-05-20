@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require('path');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
+const axios = require('axios');
 
 const logger = require('./logger');
 
@@ -31,6 +32,8 @@ const oauth2 = require('simple-oauth2').create(credentials);
 
 // Fetch cli args
 const IS_DEV = process.env["DEV"];
+const PORT = process.env.PORT || 8080;
+
 logger.info(`Starting server in ${IS_DEV ? "dev" : "prod"} mode`);
 
 fb.initializeApp({
@@ -52,7 +55,7 @@ app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 
-let fetchContributionByName = (req, res, contributionName, callback) => {
+let fetchContributionByName = (req, res, contributionName, template, callback) => {
     const collRoot = fb.firestore().collection("Contributions");
     let collsRef;
     let collName = contributionName.toLowerCase().replace(/-/g, " ")
@@ -71,7 +74,7 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
             logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
             snapshots.forEach(snapshot => {
                 let collRef = snapshot.data();
-                callback(req, res, collRef);
+                callback(req, res, collRef, template);
             });
         }
     }).catch( err => {
@@ -81,59 +84,79 @@ let fetchContributionByName = (req, res, contributionName, callback) => {
 };
 
 // Define function to render with handlebars
-let renderFromFirebase = (req, res, collRef) => {
+let renderFromFirebase = (req, res, collRef, template) => {
     if (!collRef) return;
+
+    // Get images
     let images = [];
     let collectionDoc = collRef;
-    collRef.ref.collection("Images").get().then( imgSnapshot => {
-        imgSnapshot.forEach(doc => {
-            images.push(doc.data());
+    let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
+        logger.success(`Successfully fetched ${imgSnapshot.size} images for ${collRef.name} doc id: ${collRef.ref.id}`);
+        images = imgSnapshot.docs.map(doc => {
+            return doc.data();
         });
-        let audio = [];
-        collRef.ref.collection("Audio").get().then( audioSnapshot => {
-            audioSnapshot.forEach(doc => {
-                audio.push(doc.data());
-            });
-
-            let video = [];
-            collRef.ref.collection("Video").get().then( videoSnapshot => {
-                videoSnapshot.forEach(doc => {
-                    let data = doc.data();
-                    data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
-                    video.push(data);
-                });
-
-                logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
-
-                collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
-
-                collectionDoc.images = images;
-                collectionDoc.audio = audio;
-                collectionDoc.video = video;
-                res.render("preview", collectionDoc);
-                logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
-                return;
-            }).catch( err => {
-                logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-                res.render("preview", collectionDoc);
-            });
-        }).catch( err => {
-            logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-            res.render("preview", collectionDoc);
+        images.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
         });
     }).catch( err => {
         logger.error(`Error fetching images for name: ${collRef.name} id: ${collRef.ref.id}`, err);
-        res.render("preview", collectionDoc);
     });
+    // Get audio
+    let audio = [];
+    let getAudio = collRef.ref.collection("Audio").get().then( audioSnapshot => {
+        logger.success(`Successfully fetched ${audioSnapshot.size} audio entries for ${collRef.name} doc id: ${collRef.ref.id}`);
+        audio = audioSnapshot.docs.map(doc => {
+            return doc.data();
+        });
+    }).catch( err => {
+        logger.error(`Error fetching audio for name: ${collRef.name} id: ${collRef.ref.id}`, err);
+    });
+    // Get video
+    let video = [];
+    let getVideo = collRef.ref.collection("Video").get().then( videoSnapshot => {
+        logger.success(`Successfully fetched ${videoSnapshot.size} videos for ${collRef.name} doc id: ${collRef.ref.id}`);
+        video = videoSnapshot.docs.map(doc => {
+            let data = doc.data();
+            data.url = "https://www.youtube.com/embed/" + data.url.split("/")[3];
+            return data;
+        });
+        video = video.sort((a, b) => {
+            if (!a.index) return -1;
+            if (!b.index) return 1;
+            return a.index - b.index;
+        });
+    }).catch( err => {
+        logger.error(`Error fetching video for name: ${collRef.name} id: ${collRef.ref.id}`, err);
+    });
+    
+    Promise.all([getImages, getAudio, getVideo]).then(vals => {
+        logger.log(`Rendering preview template with name: ${collRef.name} found doc id: ${collRef.ref.id}`);
+        collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
+        
+        collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
+
+        collectionDoc.images = images;
+        collectionDoc.audio = audio;
+        collectionDoc.video = video;
+        collectionDoc.layout = template;
+        res.render(template, collectionDoc);
+        logger.success(`Successfully rendered preview template with name: ${collRef.name} doc id: ${collRef.ref.id}`);
+        return;
+    }).catch( err => {
+        logger.error(`Render error: ${collRef.name} id: ${collRef.ref.id}`, err);
+        res.render(template, collectionDoc);
+    })
 };
 
 let previewReqHandler = (req, res) => {
     let collName = req.params.collection.toLowerCase();
     logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, renderFromFirebase);
+    fetchContributionByName(req, res, collName, "template", renderFromFirebase);
 }
 
-app.get("/preview/header-new.html", (req, res) => {
+app.get("/header-new.php", (req, res) => {
     logger.info('User request preview/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
@@ -157,11 +180,11 @@ let publishedReqHandler = (req, res) => {
     fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
         if (snapshot.exists) {
             let publishedList = snapshot.data();
-            fetchContributionByName(req, res, collName, (req, res, collRef) => {
+            fetchContributionByName(req, res, collName, "template", (req, res, collRef, template) => {
                 if (!collRef) return;
                 if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
                     // This contribution is published - proceed
-                    renderFromFirebase(req, res, collRef);
+                    renderFromFirebase(req, res, collRef, template);
                 } else {
                     logger.error(`Contribution "${collName}" is not published.`);
                     res.send("This contribution is not published!");
@@ -181,28 +204,39 @@ app.get("/published/header-new.html", (req, res) => {
 
 app.get("/published/:collection", publishedReqHandler);
 
-app.get("/upload", (req, res) => {
-    logger.info('User requesting upload link. Validating token...');
-    let token = req.query["auth"];
-    fb.auth().verifyIdToken(token).then(decodedToken => {
-        logger.success(`Successfully validated token for user account_id: ${decodedToken.uid} name: ${decodedToken.name}`)
-        
-        let path = "/jhdb global/"+decodedToken.name.toLowerCase();
-        let time = new Date();
-        time.setTime(time.getTime() + (1*60*60*1000)); // Add 1hr to current time
-        time.setSeconds(0, 0); // Remove seconds/millis
-        let deadline = time.toISOString().replace(".000", ""); // Remove millis from ISO string so dbx doesn't complain
-        // TODO: Find a less hacky way to do this^ (pass in format string to ISOString()?)
-        
-        logger.log(`Generating upload link for account_id: ${decodedToken.uid} path: ${path} deadline: ${deadline}`);
+// Enable json
+app.use(express.json());
 
-        dbx.fileRequestsCreate({"title": `JHDB File Upload - ${decodedToken.name} [Contributor Portal]`, "destination": path, "deadline": {"deadline": deadline}}).then( (dat => {
-            logger.success(`Successfully sent upload link for account_id: ${decodedToken.uid} path: ${path}`);
-            console.log(dat);
-            res.send(dat && dat.url);
-        })).catch(err => {
-            logger.error(`Failed to generate upload link for account_id: ${decodedToken.uid} path: ${path}`, err);
-            res.send(err);
+app.post("/upload", (req, res) => {
+    logger.info('User requesting upload link. Validating token...');
+    const token = req.body.auth;
+    const folder = req.body.folder;
+    fb.auth().verifyIdToken(token).then(decodedToken => {
+        const uid = decodedToken.uid;
+        logger.success(`Successfully validated token for user account_id: ${uid}`)
+        // Get user info from db
+        fb.firestore().collection('Users').doc(uid).get().then(snapshot => {
+            logger.success(`Successfully fetched user data for account_id: ${uid}`);
+            const user = snapshot.data();
+            let path = `/jhdb global/${user.name.toLowerCase()}/${folder ? folder+'/' : ''}`;
+            let time = new Date();
+            time.setTime(time.getTime() + (1*60*60*1000)); // Add 1hr to current time
+            time.setSeconds(0, 0); // Remove seconds/millis
+            let deadline = time.toISOString().replace(".000", ""); // Remove millis from ISO string so dbx doesn't complain
+            // TODO: Find a less hacky way to do this^ (pass in format string to ISOString()?)
+            
+            logger.log(`Generating upload link for account_id: ${decodedToken.uid} path: ${path} deadline: ${deadline}`);
+    
+            dbx.fileRequestsCreate({"title": `File Upload - ${user.name}/${folder ? folder : ""} [Contributor Portal]`, "destination": path, "deadline": {"deadline": deadline}}).then( (dat => {
+                logger.success(`Successfully sent upload link for account_id: ${decodedToken.uid} path: ${path}`);
+                console.log(dat);
+                res.send(dat && dat.url);
+            })).catch(err => {
+                logger.error(`Failed to generate upload link for account_id: ${decodedToken.uid} path: ${path}`, err);
+                res.send(err);
+            });
+        }, err => {
+            logger.error(`Error fetching user info from db for id: ${uid}`);
         });
     }).catch(err => {
         logger.err('Error authenticating user token for upload request', err);
@@ -210,7 +244,55 @@ app.get("/upload", (req, res) => {
     });
 });
 
+// 
+app.post("/publish", (req, res) => {
+    const token = req.body.auth;
+    const name = req.body.name;
+    const slug = name.toLowerCase().replace(/ /gi, '-');
+    logger.info(`User request publish for page ${slug}`)
+    if(!slug) {
+        res.status(404).send("No such page found");
+    }
+    const force = req.body.force;
+    fb.auth().verifyIdToken(token).then(decodedToken => {
+        const uid = decodedToken.uid;
+        logger.success(`Successfully validated token for user account_id: ${uid} requesting to publish ${slug}`)
+        // Get user info from db
+        fb.firestore().collection('Users').doc('admin').get().then(snapshot => {
+            logger.success(`Successfully get admin users, checking account_id: ${uid}`)
+            if(snapshot.data()[uid]) {
+                logger.success(`User ${uid} is admin, beginning publish`);
+                axios.get(`http://0.0.0.0:${PORT}/preview/${slug}`).then( resp => {
+                    logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
+                    dbx.filesUpload({
+                        "path": `/jhdb global/Published/${slug}/index.php`,
+                        "mode": "overwrite",
+                        "contents": resp.data
+                    }).then(() => {
+                        logger.success(`Successfully uploaded html file to dropbox for ${slug}`);
+                        res.status(200).send("Upload success!");
+                    }, (err) => {
+                        logger.error(`Error uploading html file to dropbox for ${slug}`, err);
+                        res.status(500).send("Error uploading to Dropbox");
+                    });
+                }).catch(err => {
+                    logger.error(`Error fetching preview for ${name}`, err);
+                    res.status(500).send("Error downloading preview page");
+                });
+            } else {
+                logger.error(`User with account_id: ${uid} is not authorized to publish`)
+                res.status(403).send("Not authorized");
+            }
+        }, err => {
+            logger.error(`Error fetching user admin doc to check account id: ${uid}`, err);
+            res.status(500).send("Error fetching admin doc");
+        });
+    }, err => {
+        logger.error(`Error validating token, can not publish ${slug}`)
+        res.status(403).send("Failed to validate token");
 
+    });
+});
 
 
 // Login
@@ -244,7 +326,7 @@ let createFirebaseAccount = (dropboxID, user) => {
         return fb.auth().createCustomToken(dropboxID);
     }).catch(err => {
         logger.log(`No such firebase user for id: ${dropboxID}, creating one`)
-        fb.auth().createUser(userData).then( () => {
+        return fb.auth().createUser(userData).then( () => {
             logger.success(`Created new firebase user for id: ${dropboxID}, generating firebase token`)
             return fb.auth().createCustomToken(dropboxID);
         }).catch(err => {
@@ -277,8 +359,19 @@ app.get("/login", (req, res) => {
         logger.info(`Getting firebase account for user with id: ${dropboxUserID}`)
         dbx.usersGetAccount({account_id: dropboxUserID}).then( user => {
             createFirebaseAccount(dropboxUserID, user).then( token => {
-                logger.success(`Got firebase token for user with id: ${dropboxUserID}`);
-                res.redirect("/#"+token);
+                logger.success(`Got firebase token for user with id: ${dropboxUserID}, updating db`);
+                fb.firestore().collection('Users').doc(dropboxUserID).set({
+                    uid: user['account_id'],
+                    email: user['email'],
+                    name: (user['name'] ? user.name['display_name'] : false) || "Unnamed Contributor",
+                    displayPhoto: user['profile_photo_url'] || "",
+                }).then( () => {
+                    logger.success(`Successfully updated database entry for user id: ${dropboxUserID}`);
+                    res.redirect("/#"+token);
+                }).catch(err => {
+                    logger.error(`Failed to updat database entry for user id: ${dropboxUserID}`, err);
+                    res.redirect("/#"+token);
+                });
             }).catch( err => {
                 logger.error(`Error getting firebase token for user with id: ${dropboxUserID}`, err);
                 res.send(err);
@@ -289,7 +382,7 @@ app.get("/login", (req, res) => {
         });
     }, error => {
         logger.error(`Login error - couldn't get token from code, redirect_uri: ${callbackUri}`);
-        res.send(error.context)
+        res.send(error.context);
     });
 });
 
@@ -300,7 +393,6 @@ app.use("/images", express.static("./templates/images"));
 
 
 // Start the server
-const PORT = process.env.PORT || 8080;
 logger.info("Binding to port "+PORT);
 app.listen(PORT, () => {
     logger.success(`App listening on port ${PORT}`);
