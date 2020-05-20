@@ -54,6 +54,7 @@ const app = express();
 app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
+app.set('trust proxy', true);
 
 let fetchContributionByName = (req, res, contributionName, template, callback) => {
     const collRoot = fb.firestore().collection("Contributions");
@@ -299,7 +300,7 @@ app.post("/publish", (req, res) => {
 
 let apiUrl = (req, suffix) => {
     // Enforce https if not running in dev mode
-    let stem = `${IS_DEV ? 'http' : 'https'}://${req.get('host')}`;
+    let stem = `${IS_DEV ? 'http' : 'https'}://${req.get('x-forwarded-host') || req.get('host')}`;
     return `${stem}${suffix}`;
 }
 
