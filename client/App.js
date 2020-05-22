@@ -206,8 +206,8 @@ class App extends Component {
                     If you have just signed in, give it a few seconds...
                 </h5>
                 <br />
-                <h3>Getting Started Walk-Through</h3>
-                <iframe title="info-loggedout" width="560" height="315" style={{marginLeft: 'auto', marginRight: 'auto'}} src="https://www.youtube.com/embed/GirVi49SW_g" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <h3>Getting Started Walk-Through (Click to play, then press f for fullscreen)</h3>
+                <iframe title="info-loggedout" width="800" height="600" style={{maxHeight: "80%", maxWidth: "80%"}} src="https://www.youtube.com/embed/GirVi49SW_g?start=195" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen;" allowfullscreen></iframe>
             </div>);
         } else if(!this.state.pageLoadDone) {
             return (<div className={this.props.classes.loading}>
@@ -240,8 +240,8 @@ class App extends Component {
 							You can upload files to the JHDB archive by selecting the Upload tab above. If you have already sent us files, they should have been uploaded for you already and you can skip this step. You can then build pages in the Pages tab. If you have any questions or run into difficulties, please don't hesitate to send us an email and our team will be happy to help you out!
 						</Typography>
                         <br />
-                        <h3>Getting Started Walk-Through</h3>
-                        <iframe title="info-loggedin" width="560" height="315" src="https://www.youtube.com/embed/GirVi49SW_g?start=195" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <h3>Getting Started Walk-Through (Click to play, then press f for fullscreen)</h3>
+                        <iframe title="info-loggedin" width="800" height="600" style={{maxHeight: "80%", maxWidth: "80%"}} src="https://www.youtube.com/embed/GirVi49SW_g?start=195" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen;" allowfullscreen></iframe>
                     </Paper>
                 </div>
             case 1:
