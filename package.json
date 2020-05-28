@@ -48,7 +48,7 @@
   "scripts": {
     "deploy": "gcloud app deploy",
     "start": "node build/main.js",
-    "dev:react": "parcel watch client/index.html --public-url ./",
+    "dev:react": "parcel watch client/index.html --hot --hot-port 8081 --public-url ./",
     "dev:express": "cross-env BROWSER=none DEV=true npx backpack dev",
     "dev": "cross-env BROWSER=none DEV=true concurrently --kill-others --names \" PARCEL  , EXPRESS \" \"npm run dev:react\" \"npm run dev:express\"",
     "build": "backpack build && parcel build client/index.html --public-url ./",
