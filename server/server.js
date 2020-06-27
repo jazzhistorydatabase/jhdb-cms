@@ -137,7 +137,16 @@ let renderFromFirebase = (req, res, collRef, template) => {
         collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
         
         collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
-
+        video.forEach( vid => {
+            if(vid.url) {
+                const id = vid.url.substring(vid.url.lastIndexOf('/') + 1);
+                if(!vid.thumbnail) {
+                    vid.thumbnail = `http://i3.ytimg.com/vi/${id}/maxresdefault.jpg`;
+                }
+                vid.url = `https://www.youtube.com/watch?v=${id}`;
+            }
+        })
+        console.log(video);
         collectionDoc.images = images;
         collectionDoc.audio = audio;
         collectionDoc.video = video;

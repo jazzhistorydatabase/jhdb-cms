@@ -44,6 +44,7 @@
   "proxy": "http://localhost:8080",
   "scripts": {
     "deploy": "gcloud app deploy",
+    "devdeploy": "gcloud app deploy --version dev --no-promote",
     "start": "node build/main.js",
     "dev:react": "parcel watch client/index.html --public-url ./",
     "dev:express": "cross-env BROWSER=none DEV=true npx backpack dev",
