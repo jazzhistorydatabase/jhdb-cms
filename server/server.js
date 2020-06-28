@@ -146,7 +146,17 @@ let renderFromFirebase = (req, res, collRef, template) => {
                 vid.url = `https://www.youtube.com/watch?v=${id}`;
             }
         })
-        console.log(video);
+
+        console.log(collectionDoc);
+        if(!collectionDoc.imagesTitle) collectionDoc.imagesTitle = "Images";
+        if(!collectionDoc.audioTitle) collectionDoc.audioTitle = "Audio";
+        if(!collectionDoc.videosTitle) collectionDoc.videosTitle = "Videos";
+        if(!collectionDoc.bioPrefix) {
+            collectionDoc.bioPrefix = "Biography of ";
+        } else if(collectionDoc.bioPrefix === 'DISABLED') {
+            collectionDoc.bioPrefix = '';
+        }
+        
         collectionDoc.images = images;
         collectionDoc.audio = audio;
         collectionDoc.video = video;
