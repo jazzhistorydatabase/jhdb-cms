@@ -30,7 +30,6 @@
     <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css"/>
     <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css"/>
     <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.2/tiny-slider.css">
     <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/JHDB.css" type="text/css"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -108,7 +107,8 @@
         }
 
         .portfolio-desc {
-            padding-left: 20px; 
+            margin-top: 0px;
+            padding: 15px;
             background-color: #333333;
             border-top: #19ABFF solid 3px;
         }
@@ -127,6 +127,11 @@
             margin-bottom: 20px;
             width: 500px;
             max-width: 100%;
+        }
+
+        audio {
+            width: 100%;
+            height: 55px;
         }
 
     </style>
@@ -222,28 +227,36 @@
 
             <!-- Audio Section -->
 
-
             {{#if audio}}
                 <div class="row common-height clearfix">
                     <div class="col-sm-12 col-padding">
-                        <div>
-                            <div class="fancy-title title-bottom-border">
-                                <h2 id="section-interviews">Audio</h2>
-                            </div>
-                            {{#each audio}}
-                                <div class="row" style="padding-left: 20px; padding-top: 20px;">
-                                    <div class="col-sm-4" style="padding-right: 10px;">
-                                        <audio controls style="height: 60px; display: table-cell; vertical-align: middle;">
-                                            <source src={{url}} type="audio/mp3">
-                                            Your browser does not support the audio element.
-                                        </audio>
-                                    </div>
-                                    <div class="col-sm-8" style="word-wrap: break-word;">
-                                        <p class="caption">{{caption}}</p>
-                                    </div>
-                                </div>
-                            {{/each}}
+                        <div class="fancy-title title-bottom-border">
+                            <h2>Audio</h2>
                         </div>
+                        <section id="audio">
+                            <div class="container clearfix"  style="padding-top: 20px">
+                                <!-- Portfolio Items
+                                ============================================= -->
+                                <div id="pf-audio" class="portfolio grid-container portfolio-masonry clearfix">
+                                    {{#each audio }}
+                                        <article style="min-width: 25%;" class="portfolio-item">
+                                            <div class="portfolio-image">
+                                                <div style="background-color: #333333; padding-left: 10px; padding-right: 10px; padding-bottom: 5px;">
+                                                    <audio controls style="height: 60px; width: 100%">
+                                                        <source src={{url}} type="audio/mp3">
+                                                        Your browser does not support the audio element.
+                                                    </audio>
+                                                </div>
+                                                <div class="portfolio-desc">
+                                                    <h7>{{caption}}</h7>
+                                                </div>
+                                                {{!-- {{/if}} --}}
+                                            </div>
+                                        </article>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             {{/if}}
@@ -273,7 +286,7 @@
                                                     </div>
                                                 </div>
                                                 {{#if caption}}
-                                                <div class="portfolio-desc" style="">
+                                                <div class="portfolio-desc">
                                                     <h7>{{caption}}</h7>
                                                 </div>
                                                 {{/if}}
@@ -309,7 +322,6 @@ include '../footer-new.php';
 ============================================= -->
 <script type="text/javascript" src="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/jquery.js"></script>
 <script type="text/javascript" src="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/plugins.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.2/min/tiny-slider.js"></script>
 <script>
     function goToByScroll( id ) {
         $( 'html,body' ).animate( {
