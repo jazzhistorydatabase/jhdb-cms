@@ -103,6 +103,32 @@
             top: 60px;
         }
 
+        .portfolio-item {
+            margin-top: 10px;
+        }
+
+        .portfolio-desc {
+            padding-left: 20px; 
+            background-color: #333333;
+            border-top: #19ABFF solid 3px;
+        }
+
+        .portfolio-desc h7 {
+            color: white;
+        }
+
+        .biophoto, .portfolio-image {
+            border-radius: 5px;
+            border: solid 1px whitesmoke;
+        }
+
+        .biophoto {
+            margin-left: 20px; 
+            margin-bottom: 20px;
+            width: 500px;
+            max-width: 100%;
+        }
+
     </style>
 
 
@@ -147,7 +173,7 @@
                     <div class="container clearfix" style=" padding-top: 20px;">
                         <div class="col-sm-12">
                             {{#if bioUrl}}
-                                <img class="biophoto" style="padding-left: 20px; padding-bottom: 20px;" width="500" align="right" src={{ bioUrl }}>
+                                <img class="biophoto" width="500" align="right" src={{ bioUrl }}>
                             {{/if}}
                             {{{description}}}
                         </div>
@@ -160,19 +186,16 @@
             {{#if images}}
                 <div class="row common-height clearfix">
                     <div class="col-sm-12 col-padding">
-                        <div class="fancy-title title-bottom-border" id="images">
+                        <div class="fancy-title title-bottom-border">
                             <h2> Images</h2>
                         </div>
                         <section id="images">
                             <div class="container clearfix"  style="padding-top: 20px">
-                                <div id="portfolio-shuffle" class="portfolio-shuffle" data-container="#pf-images">
-                                    <i class="icon-random"></i>
-                                </div>
                                 <!-- Portfolio Items
                                 ============================================= -->
                                 <div id="pf-images" class="portfolio grid-container portfolio-masonry clearfix" data-lightbox="gallery">
                                     {{#each images }}
-                                        <article style="min-width: 25%; margin-top: 10px;" class="portfolio-item">
+                                        <article style="min-width: 25%;" class="portfolio-item">
                                             <div class="portfolio-image">
                                                 <a href="#">
                                                     <img src="{{url}}" alt="{{caption}}">
@@ -183,8 +206,8 @@
                                                     </div>
                                                 </div>
                                                 {{#if caption}}
-                                                <div class="portfolio-desc" style="padding-left: 20px; background-color: #333333">
-                                                    <h7 style="color: white;">{{caption}}</h7>
+                                                <div class="portfolio-desc">
+                                                    <h7>{{caption}}</h7>
                                                 </div>
                                                 {{/if}}
                                             </div>
@@ -196,6 +219,10 @@
                     </div>
                 </div>
             {{/if}}
+
+            <!-- Audio Section -->
+
+
             {{#if audio}}
                 <div class="row common-height clearfix">
                     <div class="col-sm-12 col-padding">
@@ -220,6 +247,9 @@
                     </div>
                 </div>
             {{/if}}
+
+            <!-- Video Section -->
+
             {{#if video}}
                 <div class="row common-height clearfix">
                     <div class="col-sm-12 col-padding">
@@ -228,14 +258,11 @@
                         </div>
                         <section id="videos">
                             <div class="container clearfix"  style="padding-top: 20px">
-                                <div id="portfolio-shuffle" class="portfolio-shuffle" data-container="#pf-videos">
-                                    <i class="icon-random"></i>
-                                </div>
                                 <!-- Portfolio Items
                                 ============================================= -->
                                 <div id="pf-videos" class="portfolio grid-container portfolio-masonry clearfix">
                                     {{#each video }}
-                                        <article style="min-width: 50%; margin-top: 10px;" class="portfolio-item">
+                                        <article style="min-width: 50%;" class="portfolio-item">
                                             <div class="portfolio-image">
                                                 <a href="#">
                                                     <img src="{{thumbnail}}" alt="{{caption}}">
@@ -246,8 +273,8 @@
                                                     </div>
                                                 </div>
                                                 {{#if caption}}
-                                                <div class="portfolio-desc" style="padding-left: 20px; background-color: #333333">
-                                                    <h7 style="color: white;">{{caption}}</h7>
+                                                <div class="portfolio-desc" style="">
+                                                    <h7>{{caption}}</h7>
                                                 </div>
                                                 {{/if}}
                                             </div>
