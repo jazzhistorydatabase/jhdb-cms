@@ -26,6 +26,7 @@
     "firebase": "^7.15.3",
     "firebase-admin": "^8.12.1",
     "isomorphic-fetch": "^2.2.1",
+    "jimp": "^0.13.0",
     "load-script": "^1.0.0",
     "parcel": "^1.12.4",
     "re-base": "^4.0.0",
