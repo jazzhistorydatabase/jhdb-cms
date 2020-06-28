@@ -6,6 +6,7 @@ const path = require('path');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
 const axios = require('axios');
+const jimp = require('jimp');
 
 const logger = require('./logger');
 
@@ -264,7 +265,7 @@ app.post("/upload", (req, res) => {
     });
 });
 
-// 
+// Publish Endpoint
 app.post("/publish", (req, res) => {
     const token = req.body.auth;
     const name = req.body.name;
@@ -309,6 +310,103 @@ app.post("/publish", (req, res) => {
         });
     }, err => {
         logger.error(`Error validating token, can not publish ${slug}`)
+        res.status(403).send("Failed to validate token");
+
+    });
+});
+
+// Optimize Endpoint
+app.post("/optimize", (req, res) => {
+    const token = req.body.auth;
+    const collectionPath = req.body.ref;
+    logger.info(`User request optimize images in collection ${collectionPath}`)
+
+    fb.auth().verifyIdToken(token).then(decodedToken => {
+        const uid = decodedToken.uid;
+        logger.success(`Successfully validated token for user account_id: ${uid} requesting to optimize ${collectionPath}`)
+        // Get user info from db
+        fb.firestore().collection('Users').doc('authorized').get().then(snapshot => {
+            logger.success(`Successfully get authorized users, checking account_id: ${uid}`)
+            if(snapshot.data()[uid]) {
+                logger.success(`User ${uid} is authorized, beginning optimization`);
+                fb.firestore().collection(collectionPath).get().then(snapshot => {
+                    logger.success('Fetched image Data');
+                    const docs =  snapshot.docs.map(doc => doc.data());
+                    logger.success('Parsed image data');
+                    docs.forEach(doc => {
+                        fb.firestore().doc(doc.ref.path).update({
+                            'optimizing': true,
+                        }).then(() => {
+                            logger.info("Successfully set optimizing status in firebase");
+                            return jimp.read(doc.url)
+                        }, err => {
+                            logger.error(`Error setting optimizing status`, err);
+                        }).then( image => {
+                            let large = image.clone(), 
+                                thumb = image.clone();
+                            if(image.bitmap.width > 2000 || image.bitmap.height > 2000) {
+                                large = large.scaleToFit(2000, 2000);
+                            }
+                            if(image.bitmap.width > 800 || image.bitmap.height > 800) {
+                                thumb = thumb.scaleToFit(800, 800);
+                            }
+                            large = large.quality(80);
+                            thumb = thumb.quality(80);
+                            const filename = `${doc.caption ? doc.caption.toLowerCase().replace(/ /g, '-') : ''}_${doc.ref.id}`;
+
+                            let pGetBuffers = [large.getBufferAsync(jimp.MIME_PNG),
+                                               thumb.getBufferAsync(jimp.MIME_PNG)];
+                            Promise.all(pGetBuffers).then(buffers => {
+                                const [lgBuff, thumbBuff] = buffers;
+                                let lgUp = dbx.filesUpload({
+                                    "path": `/jhdb global/Published/images/${filename}-lg.png`,
+                                    "mode": "overwrite",
+                                    "contents": lgBuff
+                                });
+                                let thumbUp = dbx.filesUpload({
+                                    "path": `/jhdb global/Published/images/${filename}-thumb.png`,
+                                    "mode": "overwrite",
+                                    "contents": thumbBuff
+                                });
+                                return Promise.all([lgUp, thumbUp]);
+                            }, err => {
+                                logger.error('Error getting image buffers');
+                                res.status(500).send('Error getting image buffers');
+                            }).then(uploadedImgs => {
+                                console.log('uploaded');
+                                fb.firestore().doc(doc.ref.path).update({
+                                    'webLarge': `../images/${filename}-lg.png`,
+                                    'webThumb': `../images/${filename}-thumb.png`,
+                                    'optimizing': false,
+                                    'optimized': true
+                                }).then(() => {
+                                    logger.info(`Final db upate for iamge ${doc.url} success!`);
+                                }, err => {
+                                    logger.error("Error updating firebase");
+                                });
+                            }, err => {
+                                logger.error("Error uploading to dbx");
+                            });
+                        }, err => {
+                            logger.error(`Error opening image at url ${doc.url}`, err);
+                        });
+                    });
+                    logger.info("loop done");
+                    res.status(200).send("Successfully started image optimization!");
+                }, err => {
+                    logger.error(`Failed to process image data for ${collectionPath}`, err)
+                    res.status(500).send("Couldn't fetch images collection");
+                });
+            } else {
+                logger.error(`User with account_id: ${uid} is not authorized`)
+                res.status(403).send("Not authorized");
+            }
+        }, err => {
+            logger.error(`Error fetching user authorized doc to check account id: ${uid}`, err);
+            res.status(500).send("Error fetching authorized doc");
+        });
+    }, err => {
+        logger.error(`Error validating token, can not optimize ${collectionPath}`)
         res.status(403).send("Failed to validate token");
 
     });

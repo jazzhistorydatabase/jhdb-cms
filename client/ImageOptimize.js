@@ -20,6 +20,7 @@ const optimizeImages = (collRef) => {
             ref: collRef.path
         }).then(resp => {
             window.alert("Image Optimization Complete!");
+            console.log(resp);
         }).catch( err => {
             window.alert("Error optimizing images - please contact developers for support\n\n" + err);
             console.log(err);
