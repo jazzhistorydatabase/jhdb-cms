@@ -57,7 +57,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 app.set('trust proxy', true);
 
-let fetchContributionByName = (req, res, contributionName, template, callback) => {
+let fetchContributionByName = (req, res, contributionName, template, callback, isPreview=true) => {
     const collRoot = fb.firestore().collection("Contributions");
     let collsRef;
     let collName = contributionName.toLowerCase().replace(/-/g, " ")
@@ -70,13 +70,12 @@ let fetchContributionByName = (req, res, contributionName, template, callback) =
         if (snapshots.empty) { // No such collection
             logger.error(`No matching contributions found for name: ${contributionName}`);
             res.send("No matching contributions found");
-            callback(req, res, null);
             return;
         } else {
             logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
             snapshots.forEach(snapshot => {
                 let collRef = snapshot.data();
-                callback(req, res, collRef, template);
+                callback(req, res, collRef, template, isPreview);
             });
         }
     }).catch( err => {
@@ -86,7 +85,7 @@ let fetchContributionByName = (req, res, contributionName, template, callback) =
 };
 
 // Define function to render with handlebars
-let renderFromFirebase = (req, res, collRef, template) => {
+let renderFromFirebase = (req, res, collRef, template, isPreview) => {
     if (!collRef) return;
 
     // Get images
@@ -95,7 +94,12 @@ let renderFromFirebase = (req, res, collRef, template) => {
     let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
         logger.success(`Successfully fetched ${imgSnapshot.size} images for ${collRef.name} doc id: ${collRef.ref.id}`);
         images = imgSnapshot.docs.map(doc => {
-            return doc.data();
+            let imageData =  doc.data();
+            if(isPreview) {
+                imageData['webLarge'] = imageData['url'];
+                imageData['webThumb'] = imageData['url'];
+            }
+            return imageData;
         });
         images.sort((a, b) => {
             if (!a.index) return -1;
@@ -177,6 +181,12 @@ let previewReqHandler = (req, res) => {
     fetchContributionByName(req, res, collName, "template", renderFromFirebase);
 }
 
+let renderReqHandler = (req, res) => {
+    let collName = req.params.collection.toLowerCase();
+    logger.info(`User request preview for collection: ${collName}`);
+    fetchContributionByName(req, res, collName, "template", renderFromFirebase, false);
+}
+
 app.get("/header-new.php", (req, res) => {
     logger.info('User request preview/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
@@ -194,36 +204,13 @@ app.get("/preview/branch", (req, res) => {
 app.use("/mockup", express.static(path.join(__dirname, './mockup')));
 
 app.get("/preview/:collection", previewReqHandler);
+app.get("/render/:collection", renderReqHandler);
 
-let publishedReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request view published collection: ${collName}`);
-    fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
-        if (snapshot.exists) {
-            let publishedList = snapshot.data();
-            fetchContributionByName(req, res, collName, "template", (req, res, collRef, template) => {
-                if (!collRef) return;
-                if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
-                    // This contribution is published - proceed
-                    renderFromFirebase(req, res, collRef, template);
-                } else {
-                    logger.error(`Contribution "${collName}" is not published.`);
-                    res.send("This contribution is not published!");
-                }
-            });
-        } else {
-            console.log("Unable to fetch published list from Firebase!");
-            res.sendStatus(500);
-        }
-    });
-};
 
 app.get("/published/header-new.html", (req, res) => {
     logger.info('User request published/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
-
-app.get("/published/:collection", publishedReqHandler);
 
 // Enable json
 app.use(express.json());
@@ -283,7 +270,7 @@ app.post("/publish", (req, res) => {
             logger.success(`Successfully get admin users, checking account_id: ${uid}`)
             if(snapshot.data()[uid]) {
                 logger.success(`User ${uid} is admin, beginning publish`);
-                axios.get(`http://0.0.0.0:${PORT}/preview/${slug}`).then( resp => {
+                axios.get(`http://0.0.0.0:${PORT}/render/${slug}`).then( resp => {
                     logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
                     dbx.filesUpload({
                         "path": `/jhdb global/Published/${slug}/index.php`,

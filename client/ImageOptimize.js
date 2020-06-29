@@ -19,7 +19,7 @@ const optimizeImages = (collRef) => {
             auth: token,
             ref: collRef.path
         }).then(resp => {
-            window.alert("Image Optimization Complete!");
+            window.alert("Successfully started image optimization. Images will display a spinner during the optimization process - if an image appears stuck optimizing for more than a few minutes, please try again or contact the JHDB Global team for assistance.");
             console.log(resp);
         }).catch( err => {
             window.alert("Error optimizing images - please contact developers for support\n\n" + err);

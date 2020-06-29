@@ -56,6 +56,7 @@ class FileUpload extends Component {
             } else {
                 fileDoc.caption = event.target.value;
             }
+            fileDoc.optimized = false;
             this.setState({fileDoc: fileDoc});
         };
 
@@ -109,7 +110,8 @@ class FileUpload extends Component {
             fileDoc['name'] = file[0].name || "";
             fileDoc['url'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
             fileDoc['icon'] = file[0].icon || "";
-            fileDoc['thumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";   
+            fileDoc['thumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
+            fileDoc['optimized'] = false;
         }
         this.setState({fileDoc: fileDoc});
     }
