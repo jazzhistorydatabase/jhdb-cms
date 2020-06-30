@@ -150,6 +150,11 @@ class FileUpload extends Component {
             fileUploadIcon = <CheckIcon />;
         }
 
+        const isUnoptimizedImage =  this.props.fileType === 'Images' && 
+                                    this.state.fileDoc && 
+                                    this.state.fileDoc['url'] && 
+                                    !this.state.fileDoc["optimized"];
+
         return (
             <div className={classes.root}>
                     
@@ -198,7 +203,7 @@ class FileUpload extends Component {
                         {/* Filename text replace caption if bio */}
                         <Grid item xs={this.props.bio ? 9 : 4}  style={{display: !isVideo ? 'inline-block' : 'none'}}>
                             <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
-                                <div style={{display: this.state.fileDoc && this.state.fileDoc['url'] && !this.state.fileDoc["optimized"] ? 'inline-block' : 'none'}}>
+                                <div style={{display: isUnoptimizedImage ? 'inline-block' : 'none'}}>
                                     <Tooltip title="Image not optimized, generate thumbnails below after filling in captions">
                                         <WarningIcon color="error"/>
                                     </Tooltip>

@@ -302,6 +302,11 @@ app.post("/publish", (req, res) => {
     });
 });
 
+const pause = (milliseconds) => {
+	var dt = new Date();
+	while ((new Date()) - dt <= milliseconds) { /* Do nothing */ }
+}
+
 // Optimize Endpoint
 app.post("/optimize", (req, res) => {
     const token = req.body.auth;
@@ -316,12 +321,27 @@ app.post("/optimize", (req, res) => {
             logger.success(`Successfully get authorized users, checking account_id: ${uid}`)
             if(snapshot.data()[uid]) {
                 logger.success(`User ${uid} is authorized, beginning optimization`);
-                fb.firestore().collection(collectionPath).get().then(snapshot => {
-                    logger.success('Fetched image Data');
-                    const docs =  snapshot.docs.map(doc => doc.data());
-                    logger.success('Parsed image data');
-                    docs.forEach(doc => {
-                        fb.firestore().doc(doc.ref.path).update({
+
+                let slug;
+                fb.firestore().collection(collectionPath).parent.get().then(doc => {
+                    slug = doc.data().name.toLowerCase().replace(/ /gi, '-');
+                    return fb.firestore().collection(collectionPath).get();
+                }, err => {
+                    logger.error(`Error getting parent doc for ${collectionPath}`);
+                }).then(snapshot => {
+                    logger.success(`Fetched image data ${collectionPath}`);
+                    let docs =  snapshot.docs.map(doc => [doc, doc.data()]);
+                    logger.success(`Parsed image data, ${docs.length} images in ${collectionPath}`);
+                    docs = docs.filter(doc => !doc['optimized']);
+                    logger.success(`Filtered ${docs.length} unoptimized images ${collectionPath}`);
+                    // Process images - promise chains for each image run in parallel
+                    // imgProcs is array of promises for processed image data
+                    let imgProcs = docs.map(async docData => {
+                        const docRef = docData[0];
+                        const doc = docData[1];
+                        let filename;
+
+                        let imgData = await fb.firestore().doc(docRef.ref.path).update({
                             'optimizing': true,
                         }).then(() => {
                             logger.info("Successfully set optimizing status in firebase");
@@ -339,47 +359,74 @@ app.post("/optimize", (req, res) => {
                             }
                             large = large.quality(80);
                             thumb = thumb.quality(80);
-                            const filename = `${doc.caption ? doc.caption.toLowerCase().replace(/ /g, '-') : ''}_${doc.ref.id}`;
+
+                            const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
+                            filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/ /g, '-') : ''}_${docRef.id}`;
 
                             let pGetBuffers = [large.getBufferAsync(jimp.MIME_PNG),
                                                thumb.getBufferAsync(jimp.MIME_PNG)];
-                            Promise.all(pGetBuffers).then(buffers => {
-                                const [lgBuff, thumbBuff] = buffers;
-                                let lgUp = dbx.filesUpload({
-                                    "path": `/jhdb global/Published/images/${filename}-lg.png`,
-                                    "mode": "overwrite",
-                                    "contents": lgBuff
-                                });
-                                let thumbUp = dbx.filesUpload({
-                                    "path": `/jhdb global/Published/images/${filename}-thumb.png`,
-                                    "mode": "overwrite",
-                                    "contents": thumbBuff
-                                });
-                                return Promise.all([lgUp, thumbUp]);
-                            }, err => {
-                                logger.error('Error getting image buffers');
-                                res.status(500).send('Error getting image buffers');
-                            }).then(uploadedImgs => {
-                                console.log('uploaded');
-                                fb.firestore().doc(doc.ref.path).update({
-                                    'webLarge': `../images/${filename}-lg.png`,
-                                    'webThumb': `../images/${filename}-thumb.png`,
-                                    'optimizing': false,
-                                    'optimized': true
-                                }).then(() => {
-                                    logger.info(`Final db upate for iamge ${doc.url} success!`);
-                                }, err => {
-                                    logger.error("Error updating firebase");
-                                });
-                            }, err => {
-                                logger.error("Error uploading to dbx");
-                            });
+                            return Promise.all(pGetBuffers);
                         }, err => {
                             logger.error(`Error opening image at url ${doc.url}`, err);
+                        }).then(buffers => {
+                            const [lgBuff, thumbBuff] = buffers;
+                            return {
+                                'lgBuff': lgBuff,
+                                'thumbBuff': thumbBuff,
+                                'uploadPath': `/jhdb global/Published/${slug}/images/${filename}`,
+                                'docRef': docRef,
+                                'filename': filename,
+                            };
+                        }, err => {
+                            logger.error('Error getting image buffers', err);
+                            res.status(500).send('Error getting image buffers');
                         });
+
+                        logger.log("Processing image data...")
+                        return imgData;
                     });
-                    logger.info("loop done");
-                    res.status(200).send("Successfully started image optimization!");
+
+                    // Wait until all images have been processed, then begin upload
+                    Promise.all(imgProcs).then(sessions => {
+                        logger.success("Reached end of batch");
+
+                        // Process uploads synchronously - this chains upload function promises
+                        // and appends dropbox responses to accumulator array (results) to be returned by
+                        // sessions.reduce(). The final result array is passed to the resolver (then) for
+                        // the containing Promise.all call above.
+                        return sessions.reduce((p, item) => {
+                            return p.then(async results => {
+                                logger.log(`Uploading lg and thumb for ${item['uploadPath']}`);
+                                let lgUp = await dbx.filesUpload({
+                                    "path": `${item['uploadPath']}-lg.png`,
+                                    "mode": "overwrite",
+                                    "contents": item['lgBuff']
+                                });
+                                let thumbUp = await dbx.filesUpload({
+                                    "path": `${item['uploadPath']}-thumb.png`,
+                                    "mode": "overwrite",
+                                    "contents": item['thumbBuff']
+                                });
+                                await fb.firestore().doc(item.docRef.ref.path).update({
+                                    'webLarge': `./images/${item.filename}-lg.png`,
+                                    'webThumb': `./images/${item.filename}-thumb.png`,
+                                    'optimizing': false,
+                                    'optimized': true
+                                });
+                                return [...results, lgUp, thumbUp]
+                            }).catch(err => {
+                                logger.err(`Error uploading ${item['uploadPath']} to dbx`, err)
+                            });
+                        }, Promise.resolve([]));
+                    }, err => {
+                        logger.err(`Error processing images for ${collectionPath}`, err);
+                    }).then( (uploads) => {
+                        logger.success("Image optimization complete");
+                        res.status(200).send(uploads);
+                    }, err => {
+                        logger.error(`Error processing file upload sequence for processed images ${collectionPath}`, err);
+                        res.status(500).send("Error processing uploads");
+                    });
                 }, err => {
                     logger.error(`Failed to process image data for ${collectionPath}`, err)
                     res.status(500).send("Couldn't fetch images collection");

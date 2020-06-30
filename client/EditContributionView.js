@@ -258,7 +258,7 @@ class EditContributionView extends Component {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
         const isPublished = (this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'));
-        const approvalPending = contrib && (contrib.approval === 'pending');
+        const approvalPending = contrib && (contrib.approval === 'pending' || contrib.approval === 'published');
 
         let approvalText = "Request Approval";
         let publishedText = "Publish";
