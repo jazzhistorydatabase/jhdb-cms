@@ -137,7 +137,26 @@ let renderFromFirebase = (req, res, collRef, template) => {
         collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
         
         collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
+        video.forEach( vid => {
+            if(vid.url) {
+                const id = vid.url.substring(vid.url.lastIndexOf('/') + 1);
+                if(!vid.thumbnail) {
+                    vid.thumbnail = `http://i3.ytimg.com/vi/${id}/maxresdefault.jpg`;
+                }
+                vid.url = `https://www.youtube.com/watch?v=${id}`;
+            }
+        })
 
+        console.log(collectionDoc);
+        if(!collectionDoc.imagesTitle) collectionDoc.imagesTitle = "Images";
+        if(!collectionDoc.audioTitle) collectionDoc.audioTitle = "Audio";
+        if(!collectionDoc.videosTitle) collectionDoc.videosTitle = "Videos";
+        if(!collectionDoc.bioPrefix) {
+            collectionDoc.bioPrefix = "Biography of ";
+        } else if(collectionDoc.bioPrefix === 'DISABLED') {
+            collectionDoc.bioPrefix = '';
+        }
+        
         collectionDoc.images = images;
         collectionDoc.audio = audio;
         collectionDoc.video = video;
