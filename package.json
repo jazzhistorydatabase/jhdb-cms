@@ -26,7 +26,6 @@
     "firebase": "^7.15.3",
     "firebase-admin": "^8.12.1",
     "isomorphic-fetch": "^2.2.1",
-    "jimp": "^0.13.0",
     "load-script": "^1.0.0",
     "parcel": "^1.12.4",
     "re-base": "^4.0.0",
@@ -45,7 +44,6 @@
   "proxy": "http://localhost:8080",
   "scripts": {
     "deploy": "gcloud app deploy",
-    "devdeploy": "gcloud app deploy --version dev --no-promote",
     "start": "node build/main.js",
     "dev:react": "parcel watch client/index.html --public-url ./",
     "dev:express": "cross-env BROWSER=none DEV=true npx backpack dev",
