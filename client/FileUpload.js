@@ -8,10 +8,11 @@ import LinkOffIcon from '@material-ui/icons/LinkOff';
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Tooltip from '@material-ui/core/Tooltip';
+import WarningIcon from '@material-ui/icons/Warning';
 
 import fb from "./firebase";
 import dbx from './dropbox.js';
-import { Grid, InputLabel } from '@material-ui/core';
+import { CircularProgress, Grid, InputLabel } from '@material-ui/core';
 
 const styles = theme => ({
     root: {
@@ -37,7 +38,6 @@ class FileUpload extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            anotherKey: null,
             fileDoc: undefined,
         };
 
@@ -56,7 +56,8 @@ class FileUpload extends Component {
             } else {
                 fileDoc.caption = event.target.value;
             }
-            this.setState({fileDoc: fileDoc, anotherKey: event.target.value});
+            fileDoc.optimized = false;
+            this.setState({fileDoc: fileDoc});
         };
 
         this.handleLinkBlur = event => {
@@ -109,7 +110,8 @@ class FileUpload extends Component {
             fileDoc['name'] = file[0].name || "";
             fileDoc['url'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
             fileDoc['icon'] = file[0].icon || "";
-            fileDoc['thumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";   
+            fileDoc['thumbnail'] = (file[0].link && file[0].link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
+            fileDoc['optimized'] = false;
         }
         this.setState({fileDoc: fileDoc});
     }
@@ -138,13 +140,20 @@ class FileUpload extends Component {
         }
         const isVideo = (this.props.fileType === 'Video');
         let fileUploadIcon;
-        if(!doc[url]) {
+        if(doc['optimizing']) {
+            fileUploadIcon = <CircularProgress color="primary" />;
+        } else if(!doc[url]) {
             fileUploadIcon = <AddIcon />;
         } else if(doc[thumbnail] && doc[thumbnail].match(/.*(png|jpg|jpeg).*/gi)) {
             fileUploadIcon = <img className={classes.fabImg} alt="Select" src={doc[thumbnail]} />;
         } else {
             fileUploadIcon = <CheckIcon />;
         }
+
+        const isUnoptimizedImage =  this.props.fileType === 'Images' && 
+                                    this.state.fileDoc && 
+                                    this.state.fileDoc['url'] && 
+                                    !this.state.fileDoc["optimized"];
 
         return (
             <div className={classes.root}>
@@ -194,6 +203,11 @@ class FileUpload extends Component {
                         {/* Filename text replace caption if bio */}
                         <Grid item xs={this.props.bio ? 9 : 4}  style={{display: !isVideo ? 'inline-block' : 'none'}}>
                             <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
+                                <div style={{display: isUnoptimizedImage ? 'inline-block' : 'none'}}>
+                                    <Tooltip title="Image not optimized, generate thumbnails below after filling in captions">
+                                        <WarningIcon color="error"/>
+                                    </Tooltip>
+                                </div>
                                 {(this.state.fileDoc && this.state.fileDoc[name]) || "Choose a file..."} 
                             </Typography>
                         </Grid>
@@ -205,7 +219,7 @@ class FileUpload extends Component {
                                     label="Caption"
                                     style={{margin: 5, width: "100%"}}
                                     multiline
-                                    defaultValue={(this.state.fileDoc && this.state.fileDoc[caption]) || ""}
+                                    defaultValue={(this.state.fileDoc && this.state.fileDoc['caption']) || ""}
                                     onChange={this.handleTextChange}
                                     margin="normal"
                                     variant="filled"
