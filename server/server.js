@@ -6,6 +6,7 @@ const path = require('path');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
 const axios = require('axios');
+const jimp = require('jimp');
 
 const logger = require('./logger');
 
@@ -56,7 +57,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 app.set('trust proxy', true);
 
-let fetchContributionByName = (req, res, contributionName, template, callback) => {
+let fetchContributionByName = (req, res, contributionName, template, callback, isPreview=true) => {
     const collRoot = fb.firestore().collection("Contributions");
     let collsRef;
     let collName = contributionName.toLowerCase().replace(/-/g, " ")
@@ -69,13 +70,12 @@ let fetchContributionByName = (req, res, contributionName, template, callback) =
         if (snapshots.empty) { // No such collection
             logger.error(`No matching contributions found for name: ${contributionName}`);
             res.send("No matching contributions found");
-            callback(req, res, null);
             return;
         } else {
             logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
             snapshots.forEach(snapshot => {
                 let collRef = snapshot.data();
-                callback(req, res, collRef, template);
+                callback(req, res, collRef, template, isPreview);
             });
         }
     }).catch( err => {
@@ -85,7 +85,7 @@ let fetchContributionByName = (req, res, contributionName, template, callback) =
 };
 
 // Define function to render with handlebars
-let renderFromFirebase = (req, res, collRef, template) => {
+let renderFromFirebase = (req, res, collRef, template, isPreview) => {
     if (!collRef) return;
 
     // Get images
@@ -94,7 +94,12 @@ let renderFromFirebase = (req, res, collRef, template) => {
     let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
         logger.success(`Successfully fetched ${imgSnapshot.size} images for ${collRef.name} doc id: ${collRef.ref.id}`);
         images = imgSnapshot.docs.map(doc => {
-            return doc.data();
+            let imageData =  doc.data();
+            if(isPreview) {
+                imageData['webLarge'] = imageData['url'];
+                imageData['webThumb'] = imageData['url'];
+            }
+            return imageData;
         });
         images.sort((a, b) => {
             if (!a.index) return -1;
@@ -137,7 +142,26 @@ let renderFromFirebase = (req, res, collRef, template) => {
         collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
         
         collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
+        video.forEach( vid => {
+            if(vid.url) {
+                const id = vid.url.substring(vid.url.lastIndexOf('/') + 1);
+                if(!vid.thumbnail) {
+                    vid.thumbnail = `http://i3.ytimg.com/vi/${id}/maxresdefault.jpg`;
+                }
+                vid.url = `https://www.youtube.com/watch?v=${id}`;
+            }
+        })
 
+        console.log(collectionDoc);
+        if(!collectionDoc.imagesTitle) collectionDoc.imagesTitle = "Images";
+        if(!collectionDoc.audioTitle) collectionDoc.audioTitle = "Audio";
+        if(!collectionDoc.videosTitle) collectionDoc.videosTitle = "Videos";
+        if(!collectionDoc.bioPrefix) {
+            collectionDoc.bioPrefix = "Biography of ";
+        } else if(collectionDoc.bioPrefix === 'DISABLED') {
+            collectionDoc.bioPrefix = '';
+        }
+        
         collectionDoc.images = images;
         collectionDoc.audio = audio;
         collectionDoc.video = video;
@@ -157,6 +181,12 @@ let previewReqHandler = (req, res) => {
     fetchContributionByName(req, res, collName, "template", renderFromFirebase);
 }
 
+let renderReqHandler = (req, res) => {
+    let collName = req.params.collection.toLowerCase();
+    logger.info(`User request preview for collection: ${collName}`);
+    fetchContributionByName(req, res, collName, "template", renderFromFirebase, false);
+}
+
 app.get("/header-new.php", (req, res) => {
     logger.info('User request preview/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
@@ -174,36 +204,13 @@ app.get("/preview/branch", (req, res) => {
 app.use("/mockup", express.static(path.join(__dirname, './mockup')));
 
 app.get("/preview/:collection", previewReqHandler);
+app.get("/render/:collection", renderReqHandler);
 
-let publishedReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request view published collection: ${collName}`);
-    fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
-        if (snapshot.exists) {
-            let publishedList = snapshot.data();
-            fetchContributionByName(req, res, collName, "template", (req, res, collRef, template) => {
-                if (!collRef) return;
-                if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
-                    // This contribution is published - proceed
-                    renderFromFirebase(req, res, collRef, template);
-                } else {
-                    logger.error(`Contribution "${collName}" is not published.`);
-                    res.send("This contribution is not published!");
-                }
-            });
-        } else {
-            console.log("Unable to fetch published list from Firebase!");
-            res.sendStatus(500);
-        }
-    });
-};
 
 app.get("/published/header-new.html", (req, res) => {
     logger.info('User request published/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
-
-app.get("/published/:collection", publishedReqHandler);
 
 // Enable json
 app.use(express.json());
@@ -245,7 +252,7 @@ app.post("/upload", (req, res) => {
     });
 });
 
-// 
+// Publish Endpoint
 app.post("/publish", (req, res) => {
     const token = req.body.auth;
     const name = req.body.name;
@@ -263,7 +270,7 @@ app.post("/publish", (req, res) => {
             logger.success(`Successfully get admin users, checking account_id: ${uid}`)
             if(snapshot.data()[uid]) {
                 logger.success(`User ${uid} is admin, beginning publish`);
-                axios.get(`http://0.0.0.0:${PORT}/preview/${slug}`).then( resp => {
+                axios.get(`http://0.0.0.0:${PORT}/render/${slug}`).then( resp => {
                     logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
                     dbx.filesUpload({
                         "path": `/jhdb global/Published/${slug}/index.php`,
@@ -290,6 +297,150 @@ app.post("/publish", (req, res) => {
         });
     }, err => {
         logger.error(`Error validating token, can not publish ${slug}`)
+        res.status(403).send("Failed to validate token");
+
+    });
+});
+
+const pause = (milliseconds) => {
+	var dt = new Date();
+	while ((new Date()) - dt <= milliseconds) { /* Do nothing */ }
+}
+
+// Optimize Endpoint
+app.post("/optimize", (req, res) => {
+    const token = req.body.auth;
+    const collectionPath = req.body.ref;
+    logger.info(`User request optimize images in collection ${collectionPath}`)
+
+    fb.auth().verifyIdToken(token).then(decodedToken => {
+        const uid = decodedToken.uid;
+        logger.success(`Successfully validated token for user account_id: ${uid} requesting to optimize ${collectionPath}`)
+        // Get user info from db
+        fb.firestore().collection('Users').doc('authorized').get().then(snapshot => {
+            logger.success(`Successfully get authorized users, checking account_id: ${uid}`)
+            if(snapshot.data()[uid]) {
+                logger.success(`User ${uid} is authorized, beginning optimization`);
+
+                let slug;
+                fb.firestore().collection(collectionPath).parent.get().then(doc => {
+                    slug = doc.data().name.toLowerCase().replace(/ /gi, '-');
+                    return fb.firestore().collection(collectionPath).get();
+                }, err => {
+                    logger.error(`Error getting parent doc for ${collectionPath}`);
+                }).then(snapshot => {
+                    logger.success(`Fetched image data ${collectionPath}`);
+                    let docs =  snapshot.docs.map(doc => [doc, doc.data()]);
+                    logger.success(`Parsed image data, ${docs.length} images in ${collectionPath}`);
+                    docs = docs.filter(doc => !doc['optimized']);
+                    logger.success(`Filtered ${docs.length} unoptimized images ${collectionPath}`);
+                    // Process images - promise chains for each image run in parallel
+                    // imgProcs is array of promises for processed image data
+                    let imgProcs = docs.map(async docData => {
+                        const docRef = docData[0];
+                        const doc = docData[1];
+                        let filename;
+
+                        let imgData = await fb.firestore().doc(docRef.ref.path).update({
+                            'optimizing': true,
+                        }).then(() => {
+                            logger.info("Successfully set optimizing status in firebase");
+                            return jimp.read(doc.url)
+                        }, err => {
+                            logger.error(`Error setting optimizing status`, err);
+                        }).then( image => {
+                            let large = image.clone(), 
+                                thumb = image.clone();
+                            if(image.bitmap.width > 2000 || image.bitmap.height > 2000) {
+                                large = large.scaleToFit(2000, 2000);
+                            }
+                            if(image.bitmap.width > 800 || image.bitmap.height > 800) {
+                                thumb = thumb.scaleToFit(800, 800);
+                            }
+                            large = large.quality(80);
+                            thumb = thumb.quality(80);
+
+                            const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
+                            filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/ /g, '-') : ''}_${docRef.id}`;
+
+                            let pGetBuffers = [large.getBufferAsync(jimp.MIME_PNG),
+                                               thumb.getBufferAsync(jimp.MIME_PNG)];
+                            return Promise.all(pGetBuffers);
+                        }, err => {
+                            logger.error(`Error opening image at url ${doc.url}`, err);
+                        }).then(buffers => {
+                            const [lgBuff, thumbBuff] = buffers;
+                            return {
+                                'lgBuff': lgBuff,
+                                'thumbBuff': thumbBuff,
+                                'uploadPath': `/jhdb global/Published/${slug}/images/${filename}`,
+                                'docRef': docRef,
+                                'filename': filename,
+                            };
+                        }, err => {
+                            logger.error('Error getting image buffers', err);
+                            res.status(500).send('Error getting image buffers');
+                        });
+
+                        logger.log("Processing image data...")
+                        return imgData;
+                    });
+
+                    // Wait until all images have been processed, then begin upload
+                    Promise.all(imgProcs).then(sessions => {
+                        logger.success("Reached end of batch");
+
+                        // Process uploads synchronously - this chains upload function promises
+                        // and appends dropbox responses to accumulator array (results) to be returned by
+                        // sessions.reduce(). The final result array is passed to the resolver (then) for
+                        // the containing Promise.all call above.
+                        return sessions.reduce((p, item) => {
+                            return p.then(async results => {
+                                logger.log(`Uploading lg and thumb for ${item['uploadPath']}`);
+                                let lgUp = await dbx.filesUpload({
+                                    "path": `${item['uploadPath']}-lg.png`,
+                                    "mode": "overwrite",
+                                    "contents": item['lgBuff']
+                                });
+                                let thumbUp = await dbx.filesUpload({
+                                    "path": `${item['uploadPath']}-thumb.png`,
+                                    "mode": "overwrite",
+                                    "contents": item['thumbBuff']
+                                });
+                                await fb.firestore().doc(item.docRef.ref.path).update({
+                                    'webLarge': `./images/${item.filename}-lg.png`,
+                                    'webThumb': `./images/${item.filename}-thumb.png`,
+                                    'optimizing': false,
+                                    'optimized': true
+                                });
+                                return [...results, lgUp, thumbUp]
+                            }).catch(err => {
+                                logger.err(`Error uploading ${item['uploadPath']} to dbx`, err)
+                            });
+                        }, Promise.resolve([]));
+                    }, err => {
+                        logger.err(`Error processing images for ${collectionPath}`, err);
+                    }).then( (uploads) => {
+                        logger.success("Image optimization complete");
+                        res.status(200).send(uploads);
+                    }, err => {
+                        logger.error(`Error processing file upload sequence for processed images ${collectionPath}`, err);
+                        res.status(500).send("Error processing uploads");
+                    });
+                }, err => {
+                    logger.error(`Failed to process image data for ${collectionPath}`, err)
+                    res.status(500).send("Couldn't fetch images collection");
+                });
+            } else {
+                logger.error(`User with account_id: ${uid} is not authorized`)
+                res.status(403).send("Not authorized");
+            }
+        }, err => {
+            logger.error(`Error fetching user authorized doc to check account id: ${uid}`, err);
+            res.status(500).send("Error fetching authorized doc");
+        });
+    }, err => {
+        logger.error(`Error validating token, can not optimize ${collectionPath}`)
         res.status(403).send("Failed to validate token");
 
     });
