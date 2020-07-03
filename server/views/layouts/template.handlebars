@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en-US">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-7589884-1"></script>
     <script>
@@ -14,7 +13,7 @@
         gtag( 'config', 'UA-7589884-1' );
     </script>
 
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <meta name="author" content="JazzHistoryDatabase"/>
 
 
@@ -23,14 +22,14 @@
     <!-- Stylesheets
     ============================================= -->
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/bootstrap.css" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/style.css" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/dark.css" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css"/>
-    <link rel="stylesheet" href="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/css/JHDB.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/style.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/dark.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/font-icons.css" type="text/x-font-woff"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/animate.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/magnific-popup.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/responsive.css" type="text/css"/>
+    <link rel="stylesheet" href="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/css/JHDB.css" type="text/css"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
@@ -40,7 +39,7 @@
 
 </head>
 
-<body>
+<body class="">
 
 <!-- Document Wrapper
 ============================================= -->
@@ -101,39 +100,6 @@
         #page-menu.sticky-page-menu #page-menu-wrap {
             top: 60px;
         }
-
-        .portfolio-item {
-            margin-top: 10px;
-        }
-
-        .portfolio-desc {
-            margin-top: 0px;
-            padding: 15px;
-            background-color: #333333;
-            border-top: #19ABFF solid 3px;
-        }
-
-        .portfolio-desc h7 {
-            color: white;
-        }
-
-        .biophoto, .portfolio-image {
-            border-radius: 5px;
-            border: solid 1px whitesmoke;
-        }
-
-        .biophoto {
-            margin-left: 20px; 
-            margin-bottom: 20px;
-            width: 500px;
-            max-width: 100%;
-        }
-
-        audio {
-            width: 100%;
-            height: 55px;
-        }
-
     </style>
 
 
@@ -169,30 +135,45 @@
         <!-- Content Wrap starts -->
         <div class="content-wrap">
             <!-- Bio -->
-            <div class="row common-height clearfix">
-                <div class="col-sm-12 col-padding">
-                    <div class="fancy-title title-bottom-border" id="bio">
-                        <h2>{{bioPrefix}}{{ name }} </h2>
+            <div class="container clearfix" style="padding-left: 20px; padding-right: 20px;">
+                <div class="fancy-title title-bottom-border" id="bio">
+                    <h2>Biography of {{ name }} </h2>
+                </div>
+                <!-- Insert bio -->
+                <div class="row clearfix" style=" padding-top: 20px;">
+                    <div class="col-sm-12">
+                        {{#if bioUrl}}
+                            <img class="biophoto" style="padding-left: 20px; padding-bottom: 20px;" width="500" align="right" src={{ bioUrl }}>
+                        {{/if}}
+                        {{{description}}}
+                        {{!-- {{#each descriptionParagraphs}}
+                            <p class="bio" style="font-size: 1.6em;">
+                                {{ paragraph }}
+                            </p>
+                        {{/each}} --}}
+                        <!--<p>-->
+                            <!--<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#fullBio">-->
+                                <!--Read Full Biography-->
+                            <!--</button>-->
+
+                        <!--</p>-->
+                        <!--<div class="collapse" id="fullBio">-->
+                            <!--{{ description }}-->
+                        <!--</div>-->
                     </div>
-                    <!-- Insert bio -->
-                    <div class="container clearfix" style=" padding-top: 20px;">
-                        <div class="col-sm-12">
-                            {{#if bioUrl}}
-                                <img class="biophoto" width="500" align="right" src={{ bioUrl }}>
-                            {{/if}}
-                            {{{description}}}
-                        </div>
-                    </div>
+
+                    {{!-- <div class="col-sm-5">
+                        <img src={{ bioUrl }}>
+                    </div> --}}
                 </div>
             </div>
 
             <!-- Images Section -->
-
-            {{#if images}}
-                <div class="row common-height clearfix">
+            <div class="row common-height clearfix">
+                {{#if images}}
                     <div class="col-sm-12 col-padding">
-                        <div class="fancy-title title-bottom-border">
-                            <h2>{{imagesTitle}}</h2>
+                        <div class="fancy-title title-bottom-border" id="images">
+                            <h2> Images</h2>
                         </div>
                         <section id="images">
                             <div class="container clearfix"  style="padding-top: 20px">
@@ -216,58 +197,46 @@
                                                 </div>
                                                 {{/if}}
                                             </div>
-                                        </article>
-                                    {{/each}}
+                                        </div>
+                                        <div class="portfolio-desc center nobottompadding">
+                                            <h3><a href="portfolio-single.html">{{caption}}</a></h3>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-            {{/if}}
-
-            <!-- Audio Section -->
-
-            {{#if audio}}
-                <div class="row common-height clearfix">
-                    <div class="col-sm-12 col-padding">
-                        <div class="fancy-title title-bottom-border">
-                            <h2>{{audioTitle}}</h2>
+                            {{/each}}
                         </div>
-                        <section id="audio">
-                            <div class="container clearfix"  style="padding-top: 20px">
-                                <!-- Portfolio Items
-                                ============================================= -->
-                                <div id="pf-audio" class="portfolio grid-container portfolio-masonry clearfix">
-                                    {{#each audio }}
-                                        <article style="min-width: 25%;" class="portfolio-item">
-                                            <div class="portfolio-image">
-                                                <div style="background-color: #333333; padding-left: 10px; padding-right: 10px; padding-bottom: 5px;">
-                                                    <audio controls style="height: 60px; width: 100%">
-                                                        <source src={{url}} type="audio/mp3">
-                                                        Your browser does not support the audio element.
-                                                    </audio>
-                                                </div>
-                                                <div class="portfolio-desc">
-                                                    <h7>{{caption}}</h7>
-                                                </div>
-                                                {{!-- {{/if}} --}}
-                                            </div>
-                                        </article>
-                                    {{/each}}
-                                </div>
-                            </div>
-                        </section>
                     </div>
-                </div>
-            {{/if}}
-
-            <!-- Video Section -->
-
+                {{/if}}
+            </div>
+            <div class="row common-height clearfix">
+                {{#if audio}}
+                    <div class="col-sm-12 col-padding">
+                        <div>
+                            <div class="fancy-title title-bottom-border">
+                                <h2 id="section-interviews">Audio</h2>
+                            </div>
+                            {{#each audio}}
+                                <div class="row" style="padding-left: 20px; padding-top: 10px;">
+                                    <div class="col-sm-4" style="padding-right: 10px;">
+                                        <audio controls style="height: 60px; display: table-cell; vertical-align: middle;">
+                                            <source src={{url}} type="audio/mp3">
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    </div>
+                                    <div class="col-sm-8" style="word-wrap: break-word;">
+                                        <p class="caption">{{caption}}</p>
+                                    </div>
+                                </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                {{/if}}
+            </div>
             {{#if video}}
                 <div class="row common-height clearfix">
                     <div class="col-sm-12 col-padding">
-                        <div class="fancy-title title-bottom-border" id="images">
-                            <h2>{{videosTitle}}</h2>
+                        <div class="fancy-title title-bottom-border">
+                            <h2 id="section-interviews">Videos</h2>
                         </div>
                         <section id="videos">
                             <div class="container clearfix"  style="padding-top: 20px">
@@ -302,7 +271,7 @@
         </div>
     </section>
 </div>
-</div>
+
 <!-- Footer
     ============================================= -->
 <?php
@@ -320,8 +289,8 @@ include '../footer-new.php';
 
 <!-- External JavaScripts
 ============================================= -->
-<script type="text/javascript" src="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/jquery.js"></script>
-<script type="text/javascript" src="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/plugins.js"></script>
+<script type="text/javascript" src="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/js/jquery.js"></script>
+<script type="text/javascript" src="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/js/plugins.js"></script>
 <script>
     function goToByScroll( id ) {
         $( 'html,body' ).animate( {
@@ -331,7 +300,7 @@ include '../footer-new.php';
 </script>
 <!-- Footer Scripts
 ============================================= -->
-<script type="text/javascript" src="https://www.jazzhistorydatabase.com/scripts/canvas/HTML/js/functions.js"></script>
+<script type="text/javascript" src="https://www-staging.jazzhistorydatabase.com/scripts/canvas/HTML/js/functions.js"></script>
 
 </body>
 </html>
