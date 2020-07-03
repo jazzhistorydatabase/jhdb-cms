@@ -12,6 +12,7 @@ import 'typeface-roboto';
 import fb from "./firebase";
 import MediaUpload from "./MediaUpload";
 import FileUpload from "./FileUpload";
+import ImageOptimize from './ImageOptimize';
 import axios from 'axios';
 import { AssignmentTurnedIn } from '@material-ui/icons';
 import { Publish } from '@material-ui/icons';
@@ -257,7 +258,7 @@ class EditContributionView extends Component {
         const classes = this.props.classes;
         const contrib = this.state.contributionData;
         const isPublished = (this.props.publishedList && contrib &&  (this.props.publishedList[contrib.ref.id] === 'true'));
-        const approvalPending = contrib && (contrib.approval === 'pending');
+        const approvalPending = contrib && (contrib.approval === 'pending' || contrib.approval === 'published');
 
         let approvalText = "Request Approval";
         let publishedText = "Publish";
@@ -417,7 +418,9 @@ class EditContributionView extends Component {
                                     isSubpage={contrib && contrib.imagesSubpage}
                                     isPendingApproval={contrib && (contrib.approval === 'pending')}
                                     collection={this.props.selectedContribution.ref.collection("Images")}
-                                    onChange={this.handleChildChange}/>
+                                    onChange={this.handleChildChange} />
+                        <ImageOptimize 
+                                    collection={this.props.selectedContribution.ref.collection("Images")} />
                         <MediaUpload uploadName="Audio"
                                     sectionTitle={contrib && contrib.audioTitle}
                                     onSectionTitleChange={this.handleAudioTitleChange}
