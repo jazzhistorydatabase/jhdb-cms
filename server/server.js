@@ -56,6 +56,13 @@ app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 app.set('trust proxy', true);
 
+let logUsage = () => {
+    const mem = Math.round(process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100;
+    const totalMem = Math.round(process.memoryUsage().heapTotal / 1024 / 1024 * 100) / 100;
+    const memRSS = Math.round(process.memoryUsage().rss / 1024 / 1024 * 100) / 100;
+    logger.info(`Resource Usage\nCPU\t${process.cpuUsage().user}\nMemory\t${mem}MB / ${totalMem}MB\nMem RSS\t${memRSS}`)
+}
+
 let fetchContributionByName = (req, res, contributionName, template, callback, isPreview=true) => {
     const collRoot = fb.firestore().collection("Contributions");
     let collsRef;
@@ -307,6 +314,7 @@ app.post("/optimize", (req, res) => {
     const docPath = req.body.ref;
     const parentPage = req.body.parentPage;
     logger.info(`User request optimize images in collection ${docPath}`)
+    logUsage();
     let uid, slug;
     slug = parentPage.toLowerCase().replace(/ /gi, '-');
 
@@ -345,6 +353,7 @@ app.post("/optimize", (req, res) => {
         // Process image data
         logger.success(`Fetched image metadata ${docPath}`);
         let doc = snapshot.data();
+        logUsage();
         const isOptimized = doc['optimized'];
         logger.success(`Parsed image data at ${docPath}, optimized status: ${isOptimized}`);
         if(isOptimized) {
@@ -389,8 +398,11 @@ app.post("/optimize", (req, res) => {
             res.status(500).send("Error downloading image");
         }).then( async image => {
             logger.log(`Image loaded, processing ${docPath}`);
+            logUsage();
             let large = image.clone(), 
-                thumb = image.clone();
+            thumb = image.clone();
+            logger.log(`Cloned ${docPath}`);
+            logUsage();
             let meta = await image.metadata();
             
             if(meta.width > 2000 || meta.height > 2000) {
@@ -434,6 +446,7 @@ app.post("/optimize", (req, res) => {
     }).then(async item => {
         if (!item) return undefined;
         logger.log("Uploading")
+        logUsage();
         logger.log(`Uploading lg and thumb for ${item['uploadPath']}`);
         let lgUp = await dbx.filesUpload({
             "path": `${item['uploadPath']}-lg.png`,
@@ -462,6 +475,7 @@ app.post("/optimize", (req, res) => {
     }).then( (uploads) => {
         if (!uploads) return Promise.reject();
         logger.success(`Image ${docPath} optimized successfully`);
+        logUsage();
         res.status(200).send(uploads);
     }, err => {
         logger.error(`Error processing file upload sequence for processed images ${docPath}`, err);
@@ -469,6 +483,7 @@ app.post("/optimize", (req, res) => {
     }).catch(err => {
         // We either skipped it or hit an error, in any case a response has already been sent
         logger.error(`Image ${docPath} was not optimized`, err);
+        logUsage();
     });
 });
 
