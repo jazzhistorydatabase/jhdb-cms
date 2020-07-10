@@ -3,6 +3,8 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import Rebase from 're-base'
 
+import React, { useState, useEffect } from 'react';
+
 import clientConfig from './client-creds.json';
 
 const fb = {
@@ -13,6 +15,7 @@ const fb = {
 
         fb.db = firebase.firestore(this.app);
         fb.auth = firebase.auth();
+        // Rebase is EOL, swap out with firebase hooks
         fb.base = Rebase.createClass(fb.db);
 
         let token = window.location.hash.substr(1) || window.sessionStorage.getItem("fbjwt");
@@ -48,5 +51,75 @@ const fb = {
     }
 
 
-}
+};
+
 export default fb;
+
+// Firebase hooks (replacing re-base)
+export const useDoc = (path) => {
+
+    let [doc, setDoc] = useState(null);
+    let [loading, setLoading] = useState(true);
+    let [error, setError] = useState(null);
+
+    useEffect( () => {
+        const ref = fb.db.doc(path);
+        ref.onSnapshot( snapshot => {
+            let data = snapshot.data();
+            if(data) {
+                data['ref'] = ref;
+                setTimeout(() => {
+                    setDoc(data).then(() => { 
+                        setLoading(false)
+                    });
+                }, 5000);
+            } else {
+                setError(snapshot);
+                setLoading(false);
+            }
+        }, err => {
+            setError(err);
+            setLoading(false);
+        });
+    }, [path]);
+
+    const updateDoc = (data) => {
+        return fb.db.doc(path).update(data);
+    }
+
+    return [doc, updateDoc, loading, error];
+};
+
+export const useCollection = (path) => {
+
+    let [collection, setCollection] = useState([]);
+    let [loading, setLoading] = useState(true);
+    let [error, setError] = useState(null);
+
+    useEffect( () => {
+        const ref = fb.db.collection(path);
+        ref.onSnapshot( snapshot => {
+            if(!snapshot.empty) {
+                const docs = snapshot.docs.map(docSnapshot => {
+                    let doc = docSnapshot.data();
+                    doc['ref'] = docSnapshot.ref;
+                    return doc;
+                });
+                setCollection(docs);
+                setLoading(false);
+            } else {
+                setError(snapshot);
+                setLoading(false);
+            }
+        }, err => {
+            setError(err);
+            setLoading(false);
+        });
+    }, [path]);
+
+    const addDoc = (data) => {
+        return fb.db.collection(path).addDoc(data);
+    }
+
+    return [collection, addDoc, loading, error];
+};
