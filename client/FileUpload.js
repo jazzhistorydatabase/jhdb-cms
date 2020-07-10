@@ -139,21 +139,27 @@ class FileUpload extends Component {
             return <div />;
         }
         const isVideo = (this.props.fileType === 'Video');
-        let fileUploadIcon;
-        if(doc['optimizing']) {
-            fileUploadIcon = <CircularProgress color="primary" />;
-        } else if(!doc[url]) {
-            fileUploadIcon = <AddIcon />;
-        } else if(doc[thumbnail] && doc[thumbnail].match(/.*(png|jpg|jpeg).*/gi)) {
-            fileUploadIcon = <img className={classes.fabImg} alt="Select" src={doc[thumbnail]} />;
-        } else {
-            fileUploadIcon = <CheckIcon />;
-        }
-
         const isUnoptimizedImage =  this.props.fileType === 'Images' && 
                                     this.state.fileDoc && 
                                     this.state.fileDoc['url'] && 
                                     !this.state.fileDoc["optimized"];
+
+        let fileUploadIcon, tooltipText;
+        if(doc['optimizing']) {
+            fileUploadIcon = <CircularProgress color="primary" />;
+            tooltipText = "Optimizing image, please wait...";
+        } else if(!doc[url]) {
+            fileUploadIcon = <AddIcon />;
+            tooltipText = "Click to select file"
+        } else if(isUnoptimizedImage) {
+            fileUploadIcon = <WarningIcon />;
+            tooltipText = "Image not optimized, generate optimized images below after filling in captions. Click to change file"
+        } else if(doc[thumbnail] && doc[thumbnail].match(/.*(png|jpg|jpeg).*/gi)) {
+            fileUploadIcon = <img className={classes.fabImg} alt="Select" src={doc[thumbnail]} />;
+            tooltipText = "Click to change file"
+        } else {
+            fileUploadIcon = <CheckIcon />;
+        }
 
         return (
             <div className={classes.root}>
@@ -179,11 +185,11 @@ class FileUpload extends Component {
                         </Grid>
                         {/* File select FAB and filename text (only if not video) */}
                         <Grid item xs={1}  style={{display: !isVideo ? 'inline-block' : 'none'}}>
-                            <Tooltip title={"Click to " + (doc[url] ? "change" : "select") + " file"}>
+                            <Tooltip title={tooltipText}>
                                 <Fab
                                     size="small"
                                     color="primary"
-                                    style={doc[url] ? {backgroundColor: 'green'} : {}}
+                                    style={doc[url] ? {backgroundColor: (isUnoptimizedImage ? 'red' : 'green')} : {}}
                                     aria-label="Upload"
                                     className={classes.fab}
                                     onClick={

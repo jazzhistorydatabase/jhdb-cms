@@ -420,6 +420,7 @@ class EditContributionView extends Component {
                                     collection={this.props.selectedContribution.ref.collection("Images")}
                                     onChange={this.handleChildChange} />
                         <ImageOptimize 
+                                    parentPage={this.props.selectedContribution}
                                     collection={this.props.selectedContribution.ref.collection("Images")} />
                         <MediaUpload uploadName="Audio"
                                     sectionTitle={contrib && contrib.audioTitle}

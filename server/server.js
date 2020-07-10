@@ -1,12 +1,11 @@
 const express = require('express');
 const exphbs  = require('express-handlebars');
 const fb = require("firebase-admin");
-const fs = require("fs");
 const path = require('path');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
 const axios = require('axios');
-const jimp = require('jimp');
+const sharp = require('sharp');
 
 const logger = require('./logger');
 
@@ -97,7 +96,7 @@ let renderFromFirebase = (req, res, collRef, template, isPreview) => {
             let imageData =  doc.data();
             if(isPreview) {
                 imageData['webLarge'] = imageData['url'];
-                imageData['webThumb'] = imageData['url'];
+                imageData['webThumb'] = imageData['thumbnail'];
             }
             return imageData;
         });
@@ -302,147 +301,174 @@ app.post("/publish", (req, res) => {
     });
 });
 
-const pause = (milliseconds) => {
-	var dt = new Date();
-	while ((new Date()) - dt <= milliseconds) { /* Do nothing */ }
-}
-
 // Optimize Endpoint
 app.post("/optimize", (req, res) => {
     const token = req.body.auth;
-    const collectionPath = req.body.ref;
-    logger.info(`User request optimize images in collection ${collectionPath}`)
+    const docPath = req.body.ref;
+    const parentPage = req.body.parentPage;
+    logger.info(`User request optimize images in collection ${docPath}`)
+    let uid, slug;
+    slug = parentPage.toLowerCase().replace(/ /gi, '-');
 
+    // Verify user token
     fb.auth().verifyIdToken(token).then(decodedToken => {
-        const uid = decodedToken.uid;
-        logger.success(`Successfully validated token for user account_id: ${uid} requesting to optimize ${collectionPath}`)
+        // Token validated, extract uid
+        uid = decodedToken.uid;
+        logger.success(`Successfully validated token for user account_id: ${uid} requesting to optimize ${docPath}`)
+
         // Get user info from db
-        fb.firestore().collection('Users').doc('authorized').get().then(snapshot => {
-            logger.success(`Successfully get authorized users, checking account_id: ${uid}`)
-            if(snapshot.data()[uid]) {
-                logger.success(`User ${uid} is authorized, beginning optimization`);
-
-                let slug;
-                fb.firestore().collection(collectionPath).parent.get().then(doc => {
-                    slug = doc.data().name.toLowerCase().replace(/ /gi, '-');
-                    return fb.firestore().collection(collectionPath).get();
-                }, err => {
-                    logger.error(`Error getting parent doc for ${collectionPath}`);
-                }).then(snapshot => {
-                    logger.success(`Fetched image data ${collectionPath}`);
-                    let docs =  snapshot.docs.map(doc => [doc, doc.data()]);
-                    logger.success(`Parsed image data, ${docs.length} images in ${collectionPath}`);
-                    docs = docs.filter(doc => !doc['optimized']);
-                    logger.success(`Filtered ${docs.length} unoptimized images ${collectionPath}`);
-                    // Process images - promise chains for each image run in parallel
-                    // imgProcs is array of promises for processed image data
-                    let imgProcs = docs.map(async docData => {
-                        const docRef = docData[0];
-                        const doc = docData[1];
-                        let filename;
-
-                        let imgData = await fb.firestore().doc(docRef.ref.path).update({
-                            'optimizing': true,
-                        }).then(() => {
-                            logger.info("Successfully set optimizing status in firebase");
-                            return jimp.read(doc.url)
-                        }, err => {
-                            logger.error(`Error setting optimizing status`, err);
-                        }).then( image => {
-                            let large = image.clone(), 
-                                thumb = image.clone();
-                            if(image.bitmap.width > 2000 || image.bitmap.height > 2000) {
-                                large = large.scaleToFit(2000, 2000);
-                            }
-                            if(image.bitmap.width > 800 || image.bitmap.height > 800) {
-                                thumb = thumb.scaleToFit(800, 800);
-                            }
-                            large = large.quality(80);
-                            thumb = thumb.quality(80);
-
-                            const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
-                            filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/ /g, '-') : ''}_${docRef.id}`;
-
-                            let pGetBuffers = [large.getBufferAsync(jimp.MIME_PNG),
-                                               thumb.getBufferAsync(jimp.MIME_PNG)];
-                            return Promise.all(pGetBuffers);
-                        }, err => {
-                            logger.error(`Error opening image at url ${doc.url}`, err);
-                        }).then(buffers => {
-                            const [lgBuff, thumbBuff] = buffers;
-                            return {
-                                'lgBuff': lgBuff,
-                                'thumbBuff': thumbBuff,
-                                'uploadPath': `/jhdb global/Published/${slug}/images/${filename}`,
-                                'docRef': docRef,
-                                'filename': filename,
-                            };
-                        }, err => {
-                            logger.error('Error getting image buffers', err);
-                            res.status(500).send('Error getting image buffers');
-                        });
-
-                        logger.log("Processing image data...")
-                        return imgData;
-                    });
-
-                    // Wait until all images have been processed, then begin upload
-                    Promise.all(imgProcs).then(sessions => {
-                        logger.success("Reached end of batch");
-
-                        // Process uploads synchronously - this chains upload function promises
-                        // and appends dropbox responses to accumulator array (results) to be returned by
-                        // sessions.reduce(). The final result array is passed to the resolver (then) for
-                        // the containing Promise.all call above.
-                        return sessions.reduce((p, item) => {
-                            return p.then(async results => {
-                                logger.log(`Uploading lg and thumb for ${item['uploadPath']}`);
-                                let lgUp = await dbx.filesUpload({
-                                    "path": `${item['uploadPath']}-lg.png`,
-                                    "mode": "overwrite",
-                                    "contents": item['lgBuff']
-                                });
-                                let thumbUp = await dbx.filesUpload({
-                                    "path": `${item['uploadPath']}-thumb.png`,
-                                    "mode": "overwrite",
-                                    "contents": item['thumbBuff']
-                                });
-                                await fb.firestore().doc(item.docRef.ref.path).update({
-                                    'webLarge': `./images/${item.filename}-lg.png`,
-                                    'webThumb': `./images/${item.filename}-thumb.png`,
-                                    'optimizing': false,
-                                    'optimized': true
-                                });
-                                return [...results, lgUp, thumbUp]
-                            }).catch(err => {
-                                logger.err(`Error uploading ${item['uploadPath']} to dbx`, err)
-                            });
-                        }, Promise.resolve([]));
-                    }, err => {
-                        logger.err(`Error processing images for ${collectionPath}`, err);
-                    }).then( (uploads) => {
-                        logger.success("Image optimization complete");
-                        res.status(200).send(uploads);
-                    }, err => {
-                        logger.error(`Error processing file upload sequence for processed images ${collectionPath}`, err);
-                        res.status(500).send("Error processing uploads");
-                    });
-                }, err => {
-                    logger.error(`Failed to process image data for ${collectionPath}`, err)
-                    res.status(500).send("Couldn't fetch images collection");
-                });
-            } else {
-                logger.error(`User with account_id: ${uid} is not authorized`)
-                res.status(403).send("Not authorized");
-            }
-        }, err => {
-            logger.error(`Error fetching user authorized doc to check account id: ${uid}`, err);
-            res.status(500).send("Error fetching authorized doc");
-        });
+        return fb.firestore().collection('Users').doc('authorized').get();
     }, err => {
-        logger.error(`Error validating token, can not optimize ${collectionPath}`)
+        logger.error(`Error validating token, can not optimize ${docPath}`, err);
         res.status(403).send("Failed to validate token");
 
+    }).then(snapshot => {
+        if (!snapshot) return undefined;
+
+        // Check if user authorized
+        logger.success(`Successfully get authorized users, checking account_id: ${uid}`)
+        if(snapshot.data()[uid]) {
+            logger.success(`User ${uid} is authorized, beginning optimization of ${docPath}`);
+            // User is authorized, fetch image data
+            return fb.firestore().doc(docPath).get();
+        } else {
+            logger.error(`User with account_id: ${uid} is not authorized, will not optimize ${docPath}`)
+            return res.status(403).send("Not authorized");
+            // throw new Error("Not authorized");
+        }
+    }, err => {
+        logger.error(`Error fetching authorized users list to check account id: ${uid}, will not optimize ${docPath}`, err);
+        return res.status(500).send("Error fetching authorized doc");
+    }).then(snapshot => {
+        if (!snapshot) return undefined;
+
+        // Process image data
+        logger.success(`Fetched image metadata ${docPath}`);
+        let doc = snapshot.data();
+        const isOptimized = doc['optimized'];
+        logger.success(`Parsed image data at ${docPath}, optimized status: ${isOptimized}`);
+        if(isOptimized) {
+            logger.success(`Image already optimized, skipping ${docPath}`);
+            res.status(200).send("Already optimized");
+        } else {
+            logger.success(`Image not yet optimized, starting processing ${docPath}`);
+            return [snapshot.ref, doc];
+        }
+    }, err => {
+        logger.error(`Failed to process image data for ${collectionPath}`, err)
+        res.status(500).send("Couldn't fetch images collection");
+        
+    }).then(async docData => {
+        if (!docData) return undefined;
+
+        // Optimize images
+        const docRef = docData[0];
+        const doc = docData[1];
+        let filename;
+
+        logger.log("Processing image data...");
+
+        // We do this all in one go because if any of it fails we don't want to upload anything
+        return await fb.firestore().doc(docRef.path).update({
+            'optimizing': true,
+        }).then( () => {
+            logger.success(`Successfully set optimizing status in firebase for ${docPath}, download ${doc.url}`);
+            return axios({
+                'method': 'GET',
+                'url': doc.url,
+                'responseType': 'arraybuffer'
+            });
+        }, err => {
+            logger.error(`Error setting optimizing status ${docPath}`, err);
+            res.status(500).send("Error starting optimization in database");
+        }).then(resp => {
+            logger.log("Read file");
+            return sharp(resp.data);
+        }, err => {
+            logger.error(`Error saving file ${doc.url} for ${docPath}`, err);
+            res.status(500).send("Error downloading image");
+        }).then( async image => {
+            logger.log(`Image loaded, processing ${docPath}`);
+            let large = image.clone(), 
+                thumb = image.clone();
+            let meta = await image.metadata();
+            
+            if(meta.width > 2000 || meta.height > 2000) {
+                large = large.resize(2000, 2000, {
+                    fit: 'inside'
+                });
+            }
+            if(meta.width > 800 || meta.height > 800) {
+                thumb = thumb.resize(800, 800, {
+                    fit: 'inside'
+                });
+            }
+            large = large.png();
+            thumb = thumb.png();
+            const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
+            filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/ /g, '-') : ''}_${docRef.id}`;
+            
+            let pGetBuffers = [large.toBuffer(),
+                                thumb.toBuffer()];
+            return Promise.all(pGetBuffers);
+        }, err => {
+            logger.error(`Error opening fetched image from ${docPath}`, err);
+            res.status(500).send("Error loading image into memory");
+        }).then(buffers => {
+            const [lgBuff, thumbBuff] = buffers;
+            return {
+                'lgBuff': lgBuff,
+                'thumbBuff': thumbBuff,
+                'uploadPath': `/jhdb global/Published/${slug}/images/${filename}`,
+                'docRef': docRef,
+                'filename': filename,
+            };
+        }, err => {
+            logger.error(`Error resizing images ${docPath}`, err);
+            res.status(500).send("Error resizing images");
+        });
+    }, err => {
+        logger.error(`Error unpacking image doc ${docPath}`, err);
+        res.status(500).send("Error unpacking image doc");
+        
+    }).then(async item => {
+        if (!item) return undefined;
+        logger.log("Uploading")
+        logger.log(`Uploading lg and thumb for ${item['uploadPath']}`);
+        let lgUp = await dbx.filesUpload({
+            "path": `${item['uploadPath']}-lg.png`,
+            "mode": "overwrite",
+            "contents": item['lgBuff']
+        });
+        logger.log(`lg done, upload thumb for ${item['uploadPath']}`);
+        let thumbUp = await dbx.filesUpload({
+            "path": `${item['uploadPath']}-thumb.png`,
+            "mode": "overwrite",
+            "contents": item['thumbBuff']
+        });
+        logger.log(`Updating db for ${item['uploadPath']}`);
+        await item.docRef.update({
+            'webLarge': `./images/${item.filename}-lg.png`,
+            'webThumb': `./images/${item.filename}-thumb.png`,
+            'thumbnail': `https://global.jazzhistorydatabase.com/${slug}/images/${item.filename}-thumb.png`,
+            'optimizing': false,
+            'optimized': true
+        });
+        logger.log(`Db update done ${item['uploadPath']}`);
+        return [lgUp, thumbUp];
+    }, err => {
+        logger.err(`Error uploading processed images to dbx ${docPath}`, err);
+        
+    }).then( (uploads) => {
+        if (!uploads) return Promise.reject();
+        logger.success(`Image ${docPath} optimized successfully`);
+        res.status(200).send(uploads);
+    }, err => {
+        logger.error(`Error processing file upload sequence for processed images ${docPath}`, err);
+        res.status(500).send("Error processing uploads");
+    }).catch(err => {
+        // We either skipped it or hit an error, in any case a response has already been sent
+        logger.error(`Image ${docPath} was not optimized`, err);
     });
 });
 
