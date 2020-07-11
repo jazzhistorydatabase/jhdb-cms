@@ -1,0 +1,8 @@
+{
+  "name": "JHDB Global Contributor Portal",
+  "description": "Content management system for global.jazzhistorydatabase.com",
+  "repository": "https://github.com/jazzhistorydatabase/jhdb-cms",
+  "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/master/public/node.svg",
+  "keywords": ["node", "express", "heroku"],
+  "image": "heroku/nodejs"
+}
