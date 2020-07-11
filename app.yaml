@@ -12,6 +12,6 @@
 # limitations under the License.
 
 # [START gae_quickstart_yaml]
-runtime: nodejs10
-instance_class: F4
+runtime: nodejs12
+instance_class: F4_1G
 # [END gae_quickstart_yaml]

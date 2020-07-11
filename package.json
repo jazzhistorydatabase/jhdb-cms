@@ -10,7 +10,7 @@
     "url": "https://github.com/jazzhistorydatabase/jhdb-cms.git"
   },
   "engines": {
-    "node": ">=8"
+    "node": "12.x.x"
   },
   "dependencies": {
     "@material-ui/core": "^4.10.2",
@@ -48,7 +48,7 @@
   "scripts": {
     "deploy": "gcloud app deploy",
     "devdeploy": "gcloud app deploy --version dev --no-promote",
-    "start": "node build/main.js",
+    "start": "node --max-old-space-size=1024 build/main.js",
     "dev:react": "parcel watch client/index.html --public-url ./",
     "dev:express": "cross-env BROWSER=none DEV=true npx backpack dev",
     "dev": "cross-env BROWSER=none DEV=true concurrently --kill-others --names \" PARCEL  , EXPRESS \" \"npm run dev:react\" \"npm run dev:express\"",
