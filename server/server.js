@@ -308,183 +308,159 @@ app.post("/publish", (req, res) => {
     });
 });
 
-// Optimize Endpoint
-app.post("/optimize", (req, res) => {
-    const token = req.body.auth;
-    const docPath = req.body.ref;
-    const parentPage = req.body.parentPage;
-    logger.info(`User request optimize images in collection ${docPath}`)
+const requestGc = () => {
+    if (!global.gc) {
+        logger.error('Requested garbage collection but it is not exposed');
+        return;
+    }
+    logger.info("Pre-GC Usage");
     logUsage();
-    let uid, slug;
-    slug = parentPage.toLowerCase().replace(/ /gi, '-');
+    setTimeout(() => {
+        global.gc();
+        setTimeout( () => {
+            logger.info("Post-GC Usage");
+            logUsage();
+        }, 50);
+    }, 50);
+};
 
-    // Verify user token
-    fb.auth().verifyIdToken(token).then(decodedToken => {
+// Optimize Endpoint
+app.post("/optimize", async (req, res) => {
+    const token = req.body['auth'];
+    const docPath = req.body['ref'];
+    const parentPage = req.body['parentPage'];
+    try {
+        logger.info(`User request optimize images in collection ${docPath}`);
+        logUsage();
+
+        if(!token || !docPath || !parentPage) {
+            logger.error(`Malformed request, will not optimize ${docPath}`);
+            return res.status(400).send("Malformed request  (must specify token, docPath, parentPage)");
+        }
+        // Verify user token
+        const decodedToken = await fb.auth().verifyIdToken(token);
         // Token validated, extract uid
-        uid = decodedToken.uid;
+        const uid = decodedToken.uid;
         logger.success(`Successfully validated token for user account_id: ${uid} requesting to optimize ${docPath}`)
 
         // Get user info from db
-        return fb.firestore().collection('Users').doc('authorized').get();
-    }, err => {
-        logger.error(`Error validating token, can not optimize ${docPath}`, err);
-        res.status(403).send("Failed to validate token");
-
-    }).then(snapshot => {
-        if (!snapshot) return undefined;
-
+        const authorizedSnapshot = await fb.firestore().collection('Users').doc('authorized').get();
+        if (!authorizedSnapshot) {
+            throw new Error("Could not get authorized users from firestore");
+        }
         // Check if user authorized
         logger.success(`Successfully get authorized users, checking account_id: ${uid}`)
-        if(snapshot.data()[uid]) {
-            logger.success(`User ${uid} is authorized, beginning optimization of ${docPath}`);
-            // User is authorized, fetch image data
-            return fb.firestore().doc(docPath).get();
-        } else {
+        if(!authorizedSnapshot.data()[uid]) {
             logger.error(`User with account_id: ${uid} is not authorized, will not optimize ${docPath}`)
-            return res.status(403).send("Not authorized");
-            // throw new Error("Not authorized");
+            return res.status(401).send("User not authorized");
         }
-    }, err => {
-        logger.error(`Error fetching authorized users list to check account id: ${uid}, will not optimize ${docPath}`, err);
-        return res.status(500).send("Error fetching authorized doc");
-    }).then(snapshot => {
-        if (!snapshot) return undefined;
+        logger.success(`User ${uid} is authorized, beginning optimization of ${docPath}`);
+        // User is authorized, fetch image data
+        const imageSnapshot = await fb.firestore().doc(docPath).get();
+        if (!imageSnapshot) {
+            logger.error(`Unable to fetch image metadata from db ${docPath}`);
+            throw new Error("Unable to fetch image metadata from db");
+        };
 
-        // Process image data
+        // Parse image metadata
         logger.success(`Fetched image metadata ${docPath}`);
-        let doc = snapshot.data();
-        logUsage();
+        const doc = imageSnapshot.data();
+        const docRef = imageSnapshot.ref;
         const isOptimized = doc['optimized'];
         logger.success(`Parsed image data at ${docPath}, optimized status: ${isOptimized}`);
         if(isOptimized) {
             logger.success(`Image already optimized, skipping ${docPath}`);
-            res.status(200).send("Already optimized");
-        } else {
-            logger.success(`Image not yet optimized, starting processing ${docPath}`);
-            return [snapshot.ref, doc];
+            return res.status(200).send("Already optimized");
         }
-    }, err => {
-        logger.error(`Failed to process image data for ${collectionPath}`, err)
-        res.status(500).send("Couldn't fetch images collection");
         
-    }).then(async docData => {
-        if (!docData) return undefined;
-
+        logger.success(`Image not yet optimized, starting processing ${docPath}`);
+        logUsage();
+        
         // Optimize images
-        const docRef = docData[0];
-        const doc = docData[1];
-        let filename;
-
-        logger.log("Processing image data...");
 
         // We do this all in one go because if any of it fails we don't want to upload anything
-        return await fb.firestore().doc(docRef.path).update({
+        await fb.firestore().doc(docRef.path).update({
             'optimizing': true,
-        }).then( () => {
-            logger.success(`Successfully set optimizing status in firebase for ${docPath}, download ${doc.url}`);
-            return axios({
-                'method': 'GET',
-                'url': doc.url,
-                'responseType': 'arraybuffer'
-            });
-        }, err => {
-            logger.error(`Error setting optimizing status ${docPath}`, err);
-            res.status(500).send("Error starting optimization in database");
-        }).then(resp => {
-            logger.log("Read file");
-            return sharp(resp.data);
-        }, err => {
-            logger.error(`Error saving file ${doc.url} for ${docPath}`, err);
-            res.status(500).send("Error downloading image");
-        }).then( async image => {
-            logger.log(`Image loaded, processing ${docPath}`);
-            logUsage();
-            let large = image.clone(), 
-            thumb = image.clone();
-            logger.log(`Cloned ${docPath}`);
-            logUsage();
-            let meta = await image.metadata();
-            
-            if(meta.width > 2000 || meta.height > 2000) {
-                large = large.resize(2000, 2000, {
-                    fit: 'inside'
-                });
-            }
-            if(meta.width > 800 || meta.height > 800) {
-                thumb = thumb.resize(800, 800, {
-                    fit: 'inside'
-                });
-            }
-            large = large.png();
-            thumb = thumb.png();
-            const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
-            filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/ /g, '-') : ''}_${docRef.id}`;
-            
-            let pGetBuffers = [large.toBuffer(),
-                                thumb.toBuffer()];
-            return Promise.all(pGetBuffers);
-        }, err => {
-            logger.error(`Error opening fetched image from ${docPath}`, err);
-            res.status(500).send("Error loading image into memory");
-        }).then(buffers => {
-            const [lgBuff, thumbBuff] = buffers;
-            return {
-                'lgBuff': lgBuff,
-                'thumbBuff': thumbBuff,
-                'uploadPath': `/jhdb global/Published/${slug}/images/${filename}`,
-                'docRef': docRef,
-                'filename': filename,
-            };
-        }, err => {
-            logger.error(`Error resizing images ${docPath}`, err);
-            res.status(500).send("Error resizing images");
         });
-    }, err => {
-        logger.error(`Error unpacking image doc ${docPath}`, err);
-        res.status(500).send("Error unpacking image doc");
-        
-    }).then(async item => {
-        if (!item) return undefined;
-        logger.log("Uploading")
+        logger.success(`Successfully set optimizing status in firebase for ${docPath}, download ${doc.url}`);
+        const resp = await axios({
+            'method': 'GET',
+            'url': doc.url,
+            'responseType': 'arraybuffer'
+        });
+        logger.success(`Image fetched, loading into sharp ${docPath}`);
+        const image = sharp(resp.data);
+        logger.success(`Image loaded, processing ${docPath}`);
         logUsage();
-        logger.log(`Uploading lg and thumb for ${item['uploadPath']}`);
-        let lgUp = await dbx.filesUpload({
-            "path": `${item['uploadPath']}-lg.png`,
+
+        let large = image.clone(), 
+        thumb = image.clone();
+        logger.success(`Cloned ${docPath}`);
+        logUsage();
+        
+        // Resize
+        let meta = await image.metadata();
+        if(meta.width > 2000 || meta.height > 2000) {
+            large = large.resize(2000, 2000, {
+                fit: 'inside'
+            });
+        }
+        if(meta.width > 800 || meta.height > 800) {
+            thumb = thumb.resize(800, 800, {
+                fit: 'inside'
+            });
+        }
+        logger.success(`Resized ${docPath}`);
+        logUsage();
+        // Compression and encoding
+        large = large.png();
+        thumb = thumb.png();
+        logger.success(`Encoded ${docPath}`);
+        logUsage();
+        
+        const lgBuff = await large.toBuffer();
+        const thumbBuff = await thumb.toBuffer();
+        logger.success(`Buffered, preparing for upload ${docPath}`);
+        logUsage();
+
+        const slug = parentPage.toLowerCase().replace(/ /gi, '-');
+        const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
+        const filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/ /g, '-') : ''}_${docRef.id}`;
+        const uploadPath = `/jhdb global/Published/${slug}/images/${filename}`;
+
+        logger.log(`Uploading webLarge for ${uploadPath}`);
+        const lgUp = await dbx.filesUpload({
+            "path": `${uploadPath}-lg.png`,
             "mode": "overwrite",
-            "contents": item['lgBuff']
+            "contents": lgBuff
         });
-        logger.log(`lg done, upload thumb for ${item['uploadPath']}`);
-        let thumbUp = await dbx.filesUpload({
-            "path": `${item['uploadPath']}-thumb.png`,
+
+        logger.log(`webLarge done, uploading thumb for ${uploadPath}`);
+        const thumbUp = await dbx.filesUpload({
+            "path": `${uploadPath}-thumb.png`,
             "mode": "overwrite",
-            "contents": item['thumbBuff']
+            "contents": thumbBuff
         });
-        logger.log(`Updating db for ${item['uploadPath']}`);
-        await item.docRef.update({
-            'webLarge': `./images/${item.filename}-lg.png`,
-            'webThumb': `./images/${item.filename}-thumb.png`,
-            'thumbnail': `https://global.jazzhistorydatabase.com/${slug}/images/${item.filename}-thumb.png`,
+
+        logger.success(`Upload success! Updating db for ${uploadPath}`);
+        await docRef.update({
+            'webLarge': `./images/${filename}-lg.png`,
+            'webThumb': `./images/${filename}-thumb.png`,
+            'thumbnail': `https://global.jazzhistorydatabase.com/${slug}/images/${filename}-thumb.png`,
             'optimizing': false,
             'optimized': true
         });
-        logger.log(`Db update done ${item['uploadPath']}`);
-        return [lgUp, thumbUp];
-    }, err => {
-        logger.err(`Error uploading processed images to dbx ${docPath}`, err);
-        
-    }).then( (uploads) => {
-        if (!uploads) return Promise.reject();
+        logger.success(`Db update done ${uploadPath}`);
+
         logger.success(`Image ${docPath} optimized successfully`);
         logUsage();
-        res.status(200).send(uploads);
-    }, err => {
-        logger.error(`Error processing file upload sequence for processed images ${docPath}`, err);
-        res.status(500).send("Error processing uploads");
-    }).catch(err => {
-        // We either skipped it or hit an error, in any case a response has already been sent
+        res.status(200).send([lgUp, thumbUp]);
+        logger.success(`Success response sent for ${docPath}, cleaning up...`);
+        requestGc();
+    } catch(err) {
         logger.error(`Image ${docPath} was not optimized`, err);
-        logUsage();
-    });
+        return res.status(500).send(err);
+    }
 });
 
 

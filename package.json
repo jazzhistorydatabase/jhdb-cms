@@ -48,9 +48,9 @@
   "scripts": {
     "deploy": "gcloud app deploy",
     "devdeploy": "gcloud app deploy --version dev --no-promote",
-    "start": "node --max-old-space-size=1024 build/main.js",
+    "start": "node --expose_gc build/main.js",
     "dev:react": "parcel watch client/index.html --public-url ./",
-    "dev:express": "cross-env BROWSER=none DEV=true npx backpack dev",
+    "dev:express": "cross-env BROWSER=none DEV=true npx backpack dev --expose_gc",
     "dev": "cross-env BROWSER=none DEV=true concurrently --kill-others --names \" PARCEL  , EXPRESS \" \"npm run dev:react\" \"npm run dev:express\"",
     "build": "backpack build && parcel build client/index.html --public-url ./",
     "test": "react-scripts test",
