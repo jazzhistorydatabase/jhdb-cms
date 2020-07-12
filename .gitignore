@@ -183,3 +183,4 @@ fb-server-creds.json
 server-creds.json
 src/client-creds.json
 **/*-creds*.json
+**/.runtimeconfig.json

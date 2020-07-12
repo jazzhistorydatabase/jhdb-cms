@@ -56,28 +56,34 @@ const ImageOptimize = (props) => {
             setOptimizeProgress(progress);
 
             optimImgs.reduce((p, image, index) => {
-                let progressLogged = false;
                 return p.then(async responses => {
                     console.log("Optimizing image #"+index);
-                    let res = await optimizeImage(image);
+
+                    let res;
+                    try {
+                        res = await optimizeImage(image);
+                    } catch(err) {
+                        res = false;
+                        console.log("Request error optimizing image #" + index);
+                        console.log(err);
+                    }
+                    
                     if(res && res['status'] === 200) {
                         console.log("Succeeded optimizing image #"+index);
                         progress.s++;
                         setOptimizeProgress(progress);
-                    } else if(res) {
+                    } else {
                         console.log("Failed optimizing image #"+index);
                         progress.f++;
                         setOptimizeProgress(progress);
                     }
-                    progressLogged = true;
-                    return [...responses, res]
+                    return [...responses, res];
                 }).catch(err => {
-                    console.log("Request error optimizing image #" + index);
+                    console.log("Promise error optimizing image #" + index);
+                    progress.f++;
+                    setOptimizeProgress(progress);
                     console.log(err);
-                    if(!progressLogged) {
-                        progress.f++;
-                        setOptimizeProgress(progress);
-                    }
+                    return [];
                 });
             }, Promise.resolve([]));
         });
