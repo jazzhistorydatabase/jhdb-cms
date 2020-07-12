@@ -154,7 +154,7 @@ exports.optimize = functions.runWith(runtimeOpts).https.onRequest(async (req, re
         step = "preparing upload parameters";
         const slug = parentPage.toLowerCase().replace(/ /gi, '-');
         const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
-        const filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/ /g, '-') : ''}_${docRef.id}`;
+        const filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/[^a-zA-Z\d]/g, '-') : ''}_${docRef.id}`;
         const uploadPath = `/jhdb global/Published/${slug}/images/${filename}`;
         
         step = "uploading web large";
