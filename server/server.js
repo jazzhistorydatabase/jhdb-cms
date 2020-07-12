@@ -309,7 +309,8 @@ app.post("/publish", (req, res) => {
 
 // Optimize Endpoint
 app.post("/optimize", (req, res) => {
-    setTimeout( () => {
+    let retry = false;
+    const doOptimize = () => {
         const cloudFnUrl = IS_DEV ? 
         `http://localhost:5001/${serviceAccount.project_id}/us-central1/optimize` : 
         `https://us-central1-${serviceAccount.project_id}.cloudfunctions.net/optimize`;
@@ -323,10 +324,17 @@ app.post("/optimize", (req, res) => {
             res.status(200).send(result.body);
         }, err => {
             logger.error("Optimize error", err);
-            res.status(500).send(err.message);
+            if(!retry) {
+                logger.info("Retry in 1s...")
+                retry = true;
+                setTimeout(doOptimize, 1000);
+            } else {
+                res.status(500).send(err.message);
+            }
         })
-    }, 500);
-    // .5s delay allows function server to restart. This is necessary to allow function server
+    };
+    setTimeout(doOptimize, 1000);
+    // 1s delay allows function server to restart. This is necessary to allow function server
     // to restart, as we kill it at the end of the previous request. This is a horrendous hack
     // because GCP's node process doesn't free memory properly, maybe we can move this to a 
     // subprocess later to manually free up the memory?
