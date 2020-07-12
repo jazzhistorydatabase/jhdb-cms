@@ -29,7 +29,7 @@ const logUsage = () => {
 
 const runtimeOpts = {
     timeoutSeconds: 150,
-    memory: '1GB'
+    memory: '2GB'
   }
   
 
