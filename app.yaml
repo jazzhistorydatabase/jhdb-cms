@@ -13,5 +13,5 @@
 
 # [START gae_quickstart_yaml]
 runtime: nodejs12
-instance_class: F4_1G
+instance_class: F4
 # [END gae_quickstart_yaml]
