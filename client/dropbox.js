@@ -1,5 +1,6 @@
 import loadScript from 'load-script';
-import clientConfig from './client-creds.json';
+
+let clientConfig = JSON.parse(process.env.CLIENT_CREDS);
 
 const DROPBOX_SDK_URL = 'https://www.dropbox.com/static/api/2/dropins.js';
 const SCRIPT_ID = 'dropboxjs';

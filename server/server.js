@@ -6,10 +6,14 @@ const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
 const axios = require('axios');
 const sharp = require('sharp');
+const fs = require('fs');
 
 const logger = require('./logger');
 
-const serverCredentials = require("./server-creds.json");
+let serverCredentials;
+
+serverCredentials = JSON.parse(process.env.get('SERVER_CREDS'));
+
 const serviceAccount = serverCredentials.firebaseConfig;
 const dropboxKey = serverCredentials.dropboxConfig.appKey;
 const dropboxSecret = serverCredentials.dropboxConfig.appSecret;
@@ -26,7 +30,6 @@ const credentials = {
         authorizeHost: 'https://www.dropbox.com',
         authorizePath: '1/oauth2/authorize'
     }
-    
 };
 const oauth2 = require('simple-oauth2').create(credentials);
 

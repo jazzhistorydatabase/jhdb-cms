@@ -5,7 +5,8 @@ import Rebase from 're-base'
 
 import React, { useState, useEffect } from 'react';
 
-import clientConfig from './client-creds.json';
+let clientConfig = JSON.parse(process.env.CLIENT_CREDS);
+
 
 const fb = {
     // Must be bound to component — ie call initialize.bind(this)(callback) from App.componentWillMount()
