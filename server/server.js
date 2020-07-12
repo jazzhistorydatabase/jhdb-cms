@@ -5,7 +5,6 @@ const path = require('path');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
 const axios = require('axios');
-const sharp = require('sharp');
 
 const logger = require('./logger');
 
