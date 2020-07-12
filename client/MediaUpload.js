@@ -9,6 +9,8 @@ import React, { Component } from 'react';
 import FileUpload from "./FileUpload";
 import fb from "./firebase";
 import dbx from './dropbox.js';
+import { InputLabel } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 
 
 
@@ -105,7 +107,19 @@ class MediaUpload extends Component {
                         <h2 className={classes.mediaUploadTitle}>
                             {this.props.uploadName || ""}
                         </h2>
-                    </FormGroup>
+                    </FormGroup><br/>
+                    <InputLabel>Section Title</InputLabel>
+                    <TextField
+                                variant="filled"
+                                className={classes.textField}
+                                defaultValue={this.props.sectionTitle || ""}
+                                onChange={this.props.onSectionTitleChange}
+                                margin="normal"
+                                placeholder={"Default: " + (this.props.uploadName || "")}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            /><br/><br/>
                     <Button variant="contained" color="primary" className={classes.button}
                             onClick={
                                 () => {
