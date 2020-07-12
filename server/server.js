@@ -1,6 +1,7 @@
 const express = require('express');
 const exphbs  = require('express-handlebars');
 const fb = require("firebase-admin");
+const fs = require("fs");
 const path = require('path');
 const fetch = require('isomorphic-fetch');
 const dropbox = require('dropbox');
@@ -55,14 +56,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
 app.set('trust proxy', true);
 
-let logUsage = () => {
-    const mem = Math.round(process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100;
-    const totalMem = Math.round(process.memoryUsage().heapTotal / 1024 / 1024 * 100) / 100;
-    const memRSS = Math.round(process.memoryUsage().rss / 1024 / 1024 * 100) / 100;
-    logger.info(`Resource Usage\nCPU\t${process.cpuUsage().user}\nMemory\t${mem}MB / ${totalMem}MB\nMem RSS\t${memRSS}`)
-}
-
-let fetchContributionByName = (req, res, contributionName, template, callback, isPreview=true) => {
+let fetchContributionByName = (req, res, contributionName, template, callback) => {
     const collRoot = fb.firestore().collection("Contributions");
     let collsRef;
     let collName = contributionName.toLowerCase().replace(/-/g, " ")
@@ -75,12 +69,13 @@ let fetchContributionByName = (req, res, contributionName, template, callback, i
         if (snapshots.empty) { // No such collection
             logger.error(`No matching contributions found for name: ${contributionName}`);
             res.send("No matching contributions found");
+            callback(req, res, null);
             return;
         } else {
             logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
             snapshots.forEach(snapshot => {
                 let collRef = snapshot.data();
-                callback(req, res, collRef, template, isPreview);
+                callback(req, res, collRef, template);
             });
         }
     }).catch( err => {
@@ -90,7 +85,7 @@ let fetchContributionByName = (req, res, contributionName, template, callback, i
 };
 
 // Define function to render with handlebars
-let renderFromFirebase = (req, res, collRef, template, isPreview) => {
+let renderFromFirebase = (req, res, collRef, template) => {
     if (!collRef) return;
 
     // Get images
@@ -99,12 +94,7 @@ let renderFromFirebase = (req, res, collRef, template, isPreview) => {
     let getImages = collRef.ref.collection("Images").get().then( imgSnapshot => {
         logger.success(`Successfully fetched ${imgSnapshot.size} images for ${collRef.name} doc id: ${collRef.ref.id}`);
         images = imgSnapshot.docs.map(doc => {
-            let imageData =  doc.data();
-            if(isPreview) {
-                imageData['webLarge'] = imageData['url'];
-                imageData['webThumb'] = imageData['thumbnail'];
-            }
-            return imageData;
+            return doc.data();
         });
         images.sort((a, b) => {
             if (!a.index) return -1;
@@ -147,26 +137,7 @@ let renderFromFirebase = (req, res, collRef, template, isPreview) => {
         collectionDoc.shortDescription = collectionDoc && collectionDoc.description && collectionDoc.description.substr(200);
         
         collectionDoc.dataItems = (images.length < 6) ? images.length : 5;
-        video.forEach( vid => {
-            if(vid.url) {
-                const id = vid.url.substring(vid.url.lastIndexOf('/') + 1);
-                if(!vid.thumbnail) {
-                    vid.thumbnail = `http://i3.ytimg.com/vi/${id}/maxresdefault.jpg`;
-                }
-                vid.url = `https://www.youtube.com/watch?v=${id}`;
-            }
-        })
 
-        console.log(collectionDoc);
-        if(!collectionDoc.imagesTitle) collectionDoc.imagesTitle = "Images";
-        if(!collectionDoc.audioTitle) collectionDoc.audioTitle = "Audio";
-        if(!collectionDoc.videosTitle) collectionDoc.videosTitle = "Videos";
-        if(!collectionDoc.bioPrefix) {
-            collectionDoc.bioPrefix = "Biography of ";
-        } else if(collectionDoc.bioPrefix === 'DISABLED') {
-            collectionDoc.bioPrefix = '';
-        }
-        
         collectionDoc.images = images;
         collectionDoc.audio = audio;
         collectionDoc.video = video;
@@ -186,12 +157,6 @@ let previewReqHandler = (req, res) => {
     fetchContributionByName(req, res, collName, "template", renderFromFirebase);
 }
 
-let renderReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, "template", renderFromFirebase, false);
-}
-
 app.get("/header-new.php", (req, res) => {
     logger.info('User request preview/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
@@ -209,13 +174,36 @@ app.get("/preview/branch", (req, res) => {
 app.use("/mockup", express.static(path.join(__dirname, './mockup')));
 
 app.get("/preview/:collection", previewReqHandler);
-app.get("/render/:collection", renderReqHandler);
 
+let publishedReqHandler = (req, res) => {
+    let collName = req.params.collection.toLowerCase();
+    logger.info(`User request view published collection: ${collName}`);
+    fb.firestore().collection("Contributions").doc("published").get().then(snapshot => {
+        if (snapshot.exists) {
+            let publishedList = snapshot.data();
+            fetchContributionByName(req, res, collName, "template", (req, res, collRef, template) => {
+                if (!collRef) return;
+                if (publishedList[collRef.ref.id] && publishedList[collRef.ref.id] === 'true') {
+                    // This contribution is published - proceed
+                    renderFromFirebase(req, res, collRef, template);
+                } else {
+                    logger.error(`Contribution "${collName}" is not published.`);
+                    res.send("This contribution is not published!");
+                }
+            });
+        } else {
+            console.log("Unable to fetch published list from Firebase!");
+            res.sendStatus(500);
+        }
+    });
+};
 
 app.get("/published/header-new.html", (req, res) => {
     logger.info('User request published/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
+
+app.get("/published/:collection", publishedReqHandler);
 
 // Enable json
 app.use(express.json());
@@ -257,7 +245,7 @@ app.post("/upload", (req, res) => {
     });
 });
 
-// Publish Endpoint
+// 
 app.post("/publish", (req, res) => {
     const token = req.body.auth;
     const name = req.body.name;
@@ -275,7 +263,7 @@ app.post("/publish", (req, res) => {
             logger.success(`Successfully get admin users, checking account_id: ${uid}`)
             if(snapshot.data()[uid]) {
                 logger.success(`User ${uid} is admin, beginning publish`);
-                axios.get(`http://0.0.0.0:${PORT}/render/${slug}`).then( resp => {
+                axios.get(`http://0.0.0.0:${PORT}/preview/${slug}`).then( resp => {
                     logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
                     dbx.filesUpload({
                         "path": `/jhdb global/Published/${slug}/index.php`,
@@ -305,39 +293,6 @@ app.post("/publish", (req, res) => {
         res.status(403).send("Failed to validate token");
 
     });
-});
-
-// Optimize Endpoint
-app.post("/optimize", (req, res) => {
-    let retry = false;
-    const doOptimize = () => {
-        const cloudFnUrl = IS_DEV ? 
-        `http://localhost:5001/${serviceAccount.project_id}/us-central1/optimize` : 
-        `https://us-central1-${serviceAccount.project_id}.cloudfunctions.net/optimize`;
-        logger.info("/optimize, proxy to function");
-        axios.post(cloudFnUrl, {
-            auth: req.body['auth'],
-            ref: req.body['ref'],
-            parentPage: req.body['parentPage']
-        }).then(result => {
-            logger.info("Optimize success");
-            res.status(200).send(result.body);
-        }, err => {
-            logger.error("Optimize error", err);
-            if(!retry) {
-                logger.info("Retry in 1s...")
-                retry = true;
-                setTimeout(doOptimize, 1000);
-            } else {
-                res.status(500).send(err.message);
-            }
-        })
-    };
-    setTimeout(doOptimize, 1000);
-    // 1s delay allows function server to restart. This is necessary to allow function server
-    // to restart, as we kill it at the end of the previous request. This is a horrendous hack
-    // because GCP's node process doesn't free memory properly, maybe we can move this to a 
-    // subprocess later to manually free up the memory?
 });
 
 
