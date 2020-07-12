@@ -12,7 +12,7 @@ const logger = require('./logger');
 
 let serverCredentials;
 
-serverCredentials = JSON.parse(process.env.get('SERVER_CREDS'));
+serverCredentials = JSON.parse(process.env.SERVER_CREDS);
 
 const serviceAccount = serverCredentials.firebaseConfig;
 const dropboxKey = serverCredentials.dropboxConfig.appKey;
