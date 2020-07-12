@@ -151,7 +151,7 @@ let renderFromFirebase = (req, res, collRef, template, isPreview) => {
             if(vid.url) {
                 const id = vid.url.substring(vid.url.lastIndexOf('/') + 1);
                 if(!vid.thumbnail) {
-                    vid.thumbnail = `http://i3.ytimg.com/vi/${id}/maxresdefault.jpg`;
+                    vid.thumbnail = `http://i3.ytimg.com/vi/${id}/0.jpg`;
                 }
                 vid.url = `https://www.youtube.com/watch?v=${id}`;
             }
