@@ -309,21 +309,27 @@ app.post("/publish", (req, res) => {
 
 // Optimize Endpoint
 app.post("/optimize", (req, res) => {
-    const cloudFnUrl = IS_DEV ? 
-            `http://localhost:5001/${serviceAccount.project_id}/us-central1/optimize` : 
-            `https://us-central1-${serviceAccount.project_id}.cloudfunctions.net/optimize`;
-    logger.info("/optimize, proxy to function");
-    axios.post(cloudFnUrl, {
-        auth: req.body['auth'],
-        ref: req.body['ref'],
-        parentPage: req.body['parentPage']
-    }).then(result => {
-        logger.info("Optimize success");
-        res.status(200).send(result.body);
-    }, err => {
-        logger.error("Optimize error", err);
-        res.status(500).send(err.message);
-    })
+    setTimeout( () => {
+        const cloudFnUrl = IS_DEV ? 
+        `http://localhost:5001/${serviceAccount.project_id}/us-central1/optimize` : 
+        `https://us-central1-${serviceAccount.project_id}.cloudfunctions.net/optimize`;
+        logger.info("/optimize, proxy to function");
+        axios.post(cloudFnUrl, {
+            auth: req.body['auth'],
+            ref: req.body['ref'],
+            parentPage: req.body['parentPage']
+        }).then(result => {
+            logger.info("Optimize success");
+            res.status(200).send(result.body);
+        }, err => {
+            logger.error("Optimize error", err);
+            res.status(500).send(err.message);
+        })
+    }, 500);
+    // .5s delay allows function server to restart. This is necessary to allow function server
+    // to restart, as we kill it at the end of the previous request. This is a horrendous hack
+    // because GCP's node process doesn't free memory properly, maybe we can move this to a 
+    // subprocess later to manually free up the memory?
 });
 
 

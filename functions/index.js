@@ -189,6 +189,7 @@ exports.optimize = functions.runWith(runtimeOpts).https.onRequest(async (req, re
         logUsage();
         res.status(200).send([lgUp, thumbUp]);
         logger.success(`Success response sent to client for ${docPath}`);
+        process.exit();
     } catch(err) {
         logger.error(`Failed optimizing image ${docPath} while ${step}`, err);
         return res.status(500).send(err);
