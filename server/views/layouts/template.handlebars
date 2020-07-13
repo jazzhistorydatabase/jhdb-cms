@@ -134,12 +134,26 @@
             height: 55px;
         }
 
+        .col-padding {
+            padding-top: 10px;
+        }
+
+        #page-menu-wrap {
+            height: auto;
+        }
+
+        @media only screen and (max-width: 768px) {
+            #page-menu .menu-title {
+                font-size: 25px;
+            }
+        }
     </style>
 
 
     <!-- Content
     ============================================= -->
     <section id="content">
+        <br />
         <!-- Collection nav bar start-->
         <div id="page-menu">
             <div id="page-menu-wrap">
@@ -148,17 +162,34 @@
                     <nav>
                         <ul>
                             <li>
-                                <a onclick="goToByScroll('bio')">
-                                    <div>Biography</div>
+                                <a href="#bio" onclick="goToByScroll('bio')">
+                                    <div>About</div>
                                 </a>
                             </li>
-
+                            {{#if images}}
                             <li>
-                                <a onClick="goToByScroll('images')">
-                                    <div>Images</div>
+                                <a href="#images" onClick="goToByScroll('images')">
+                                    <div>{{imagesTitle}}</div>
 
                                 </a>
                             </li>
+                            {{/if}}
+                            {{#if audio}}
+                            <li>
+                                <a href="#audio" onClick="goToByScroll('audio')">
+                                    <div>{{audioTitle}}</div>
+
+                                </a>
+                            </li>
+                            {{/if}}
+                            {{#if video}}
+                            <li>
+                                <a href="#videos" onClick="goToByScroll('videos')">
+                                    <div>{{videosTitle}}</div>
+
+                                </a>
+                            </li>
+                            {{/if}}
                         </ul>
                     </nav>
                     <div id="page-submenu-trigger"><i class="icon-reorder"></i></div>
