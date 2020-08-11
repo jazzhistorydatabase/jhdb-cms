@@ -1,28 +1,22 @@
-import AppBar from '@material-ui/core/AppBar';
-import React, {Component} from 'react';
-import {Avatar, Divider, Drawer, List, ListItem, ListItemText, ListSubheader, Tabs, Tab} from '@material-ui/core';
+import { AppBar, Avatar, BottomNavigation, BottomNavigationAction, Button, Divider, Drawer, List, ListItem, ListItemText, ListSubheader, Tab, Tabs } from '@material-ui/core';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import { CloseSharp, CloudUploadRounded, Edit, InfoRounded, LibraryBooks, TouchApp, Visibility, SettingsRounded } from '@material-ui/icons';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Helpicon from '@material-ui/icons/Help';
-import SettingsIcon from '@material-ui/icons/Settings';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MenuIcon from '@material-ui/icons/Menu';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import { CloseSharp, InfoRounded, CloudUploadRounded, LibraryBooks } from '@material-ui/icons';
-import {withStyles} from '@material-ui/core/styles';
-
+import { withStyles } from '@material-ui/styles';
+import React, { useState, useEffect } from 'react';
 import 'typeface-roboto';
 import fb from './firebase';
-import HelpDialog from './HelpDialog';
 import genericUserPhoto from './generic-user.jpg';
-import { TouchApp } from '@material-ui/icons';
-import { BottomNavigationAction } from '@material-ui/core';
-import { BottomNavigation } from '@material-ui/core';
-import { Visibility } from '@material-ui/icons';
-import { Edit } from '@material-ui/icons';
-import { Button } from '@material-ui/core';
+import HelpDialog from './HelpDialog';
+import {Link, useHistory} from 'react-router-dom';
 
-const styles = {
+import { useAuthState } from 'react-firebase-hooks/auth';
+
+const styles = theme => ({
     appBar: {
         flexGrow: 1,
         textAlign: 'center',
@@ -51,185 +45,149 @@ const styles = {
     sticky: {
         position: 'sticky',
         top: 0
-    },
-};
-
-class Header extends Component {
-
-    constructor(props) {
-        super(props);
-        this.helpRef = React.createRef();
-
-        this.state = {
-            showHelp: false,
-            showUpload: false,
-            drawerOpen: false,
-        }
-
-        this.onTabChange = this.onTabChange.bind(this);
-        this.onCollectionViewChange = this.onCollectionViewChange.bind(this);
     }
+});
 
-    toggleHelpDialog() {
-        this.setState({
-            showHelp: !this.state.showHelp
-        });
-    }
+const Header = (props) => {
+    const classes = props.classes;
+    const user = props.user;
 
-    toggleUploadDialog() {
-        this.setState({
-            showUpload: !this.state.showUpload
-        });
-    }
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
+    const path = window.location.pathname;
+    const history = useHistory();
 
-    toggleDrawer(event) {
-        if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
+    const toggleDrawer = () => {setDrawerOpen(!drawerOpen)};
+    let [appView, setAppView] = useState(
+        path.includes('page') ? 2 :
+        path.includes('upload') ? 1 : 0
+    );
 
-        this.setState({drawerOpen: !this.state.drawerOpen});
+    let pageView = 0;
+    if (path.includes('preview')) pageView = 1;
+
+
+    let onTabChange = (evt, value) => {
+        const ops = ['/', '/upload', '/pages'];
+        history.push(ops[value]);
+        setAppView(value);
     };
 
-    handleAdminButtonClick() {
-        this.toggleDrawer();
-        this.props.adminSwap();
+    let onPageViewChange = (evt, value) => {
+        console.log(value);
     };
 
-    onTabChange(event, value) {
-        this.props.handleTabChange(value);
-    }
+    let loginButton = user ? (
+        <ListItem button color="inherit"
+                  onClick={fb.signOut}>
+            <ExitToAppIcon/>
+            <ListItemText primary="Sign Out"></ListItemText>
+        </ListItem>
+    ) : (
+        <ListItem button color="inherit"
+                  onClick={() => {
+                      return fb.showAuthPopup()
+                  }}>
+            <LockOpenIcon/>
+            <ListItemText primary="Sign In With Dropbox"></ListItemText>
+        </ListItem>
 
-    onCollectionViewChange(event, value) {
-        this.props.handleCollectionViewChange(value);
-    }
+    );
 
-
-    render() {
-        const classes = this.props.classes;
-
-        let loginButton = this.props.user ? (
-            <ListItem button color="inherit"
-                      onClick={this.props.handleSignOut}>
-                <ExitToAppIcon/>
-                <ListItemText primary="Sign Out"></ListItemText>
-            </ListItem>
-        ) : (
-            <ListItem button color="inherit"
-                      onClick={() => {
-                          return fb.showAuthPopup()
-                      }}>
-                <LockOpenIcon/>
-                <ListItemText primary="Sign In With Dropbox"></ListItemText>
-            </ListItem>
-
-        );
-
-        let userDetail = this.props.user ? (
-            <div>
+    return (
+        <div>
+            <Drawer className={classes.drawer} open={drawerOpen} onClose={toggleDrawer}>
+                {/* Close Button */}
+                <ListItem button onClick={toggleDrawer}>
+                    <CloseSharp />
+                    <ListItemText primary="Close Menu"/>
+                </ListItem>
+                {/* User Detail */}
                 <Avatar
-                    alt={(this.props.user && this.props.user.name) || "Unnamed Contributor"}
-                    src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
-                    className={classes.bigAvatar}/>
-                <ListSubheader className={classes.avatarName}>{this.props.user.displayName} </ListSubheader>
-            </div>
-        ) : (
-            <div>
-                <Avatar
-                    alt={"No User"}
-                    src={(this.props.user && this.props.user.displayPhoto) || genericUserPhoto}
+                    alt={ (user ? (user.name || "Unnamed Contributor") : "No User") }
+                    src={ (user && user.displayPhoto) || genericUserPhoto }
                     className={classes.bigAvatar}/>
                 <ListSubheader className={classes.avatarName}>
-                    {"Not Signed In"}
+                    {user ? user.name : "Not Signed In"} 
                 </ListSubheader>
-            </div>
-        );
-
-        let adminButton = this.props.adminButton ? (
-            <ListItem button color="primary" aria-label="Admin" onClick={() => {
-                return this.handleAdminButtonClick.bind(this)()
-            }}>
-                <SettingsIcon/>
-                <ListItemText primary={"Admin Settings"}></ListItemText>
-            </ListItem>
-        ) : (<div/>);
-
-        return (
-            <div>
-                <Drawer className={classes.drawer} open={this.state.drawerOpen} onClose={this.toggleDrawer.bind(this)}>
-                    <ListItem button onClick={this.toggleDrawer.bind(this)}>
-                        <CloseSharp />
-                        <ListItemText primary="Close Menu"/>
-                    </ListItem>
-                    {userDetail}
-                    <List>
-                        <Divider/>
-                        {loginButton}
-                        {adminButton}
+                {/* Drawer Buttons */}
+                <List>
+                    <Divider/>
+                    {loginButton}
+                    { user && user.admin &&
                         <ListItem button
-                                  size="small"
-                                  color='inherit'
-                                  aria-label="Upload"
-                                  onClick={this.toggleHelpDialog.bind(this)}>
-                            <Helpicon/>
-                            <ListItemText primary={"Help"}></ListItemText>
+                                size="small"
+                                color='inherit'
+                                aria-label="Admin"
+                                onClick={() => {history.push('/admin')}}>
+                                <SettingsRounded />
+                                <ListItemText primary={"Admin"} />
                         </ListItem>
-                    </List>
-                    <div style={{"width": "1vw"}}></div>
-                    <div>
-                        <br/>
-                    </div>
-                </Drawer>
-                <AppBar position="static">
-                    <Toolbar>
-                        <Button
-                            size="large"
-                            color="inherit"
-                            className={classes.menuButton}
-                            startIcon={<MenuIcon style={{fontSize: 35}} />}
-                            aria-label="menu"
-                            onClick={this.toggleDrawer.bind(this)} >Menu</Button>
-                        <div className={classes.appBar}>
-                            <Typography variant="h6" align="center" color="inherit">
-                                Jazz History Database
-                            </Typography>
-                            <Typography variant="h5" align="center" color="inherit">
-                                <b>Global Contributor Portal</b>
-                            </Typography>
-                        </div>                        
-                        <HelpDialog
-                            show={this.state.showHelp}
-                            toggle={this.toggleHelpDialog.bind(this)}/>
-                    </Toolbar>
-                    <Tabs disabled={!this.props.user} centered
-                          style={{visibility: this.props.user ? 'visible' : 'collapse'}}
-                          value={this.props.tabValue} 
-                          onChange={this.onTabChange} 
-                        //   variant="fullWidth" 
-                          indicatorColor="secondary" 
-                          textColor="secondary">
-                        <Tab label="Information" icon={<InfoRounded />} />
-                        <Tab label="Media Upload" icon={<CloudUploadRounded />} />
-                        <Tab label="Pages" icon={<LibraryBooks />} />
-                    </Tabs>
-                </AppBar>
-                <BottomNavigation value={this.props.collectionView}
-                                  onChange={this.onCollectionViewChange}
-                                  color="primary" showLabels 
-                                  className={classes.sticky}
-                                  style={{display: (this.props.tabValue === 2 ? 'flex' : 'none')}}>
-                        <BottomNavigationAction label="Select" icon={<TouchApp />} />
-                        <BottomNavigationAction style={this.props.contributionSelected ? {display: 'none'} : {}}
-                                                label="Select collection to continue" />
-                        <BottomNavigationAction style={this.props.contributionSelected ? {} : {display: 'none'}}
-                                                label="Edit" icon={<Edit />} />
-                        <BottomNavigationAction style={this.props.contributionSelected ? {} : {display: 'none'}}
-                                                label="Preview" icon={<Visibility />} />
-                </BottomNavigation>
-            </div>
-        );
-    }
-
+                    }
+                    <ListItem button
+                                size="small"
+                                color='inherit'
+                                aria-label="Upload"
+                                onClick={() => {setShowHelp(!showHelp)}}>
+                        <Helpicon/>
+                        <ListItemText primary={"Help"} />
+                    </ListItem>
+                </List>
+                <div style={{"width": "1vw"}}></div>
+                <br/>
+            </Drawer>
+            <AppBar position="static">
+                <Toolbar>
+                    <Button
+                        size="large"
+                        color="inherit"
+                        className={classes.menuButton}
+                        startIcon={<MenuIcon style={{fontSize: 35}} />}
+                        aria-label="menu"
+                        onClick={toggleDrawer} >
+                            {window.screen.width >= 408 && "Menu"}
+                        </Button>
+                    <div className={classes.appBar}>
+                        <Typography variant="h6" align="center" color="inherit">
+                            Jazz History Database
+                        </Typography>
+                        <Typography variant="h5" align="center" color="inherit">
+                            <b>
+                                {(window.screen.width >= 408) && "Global "}
+                                Contributor Portal
+                            </b>
+                        </Typography>
+                    </div>                        
+                    <HelpDialog
+                        show={showHelp}
+                        toggle={() => {setShowHelp(!showHelp)}}/>
+                </Toolbar>
+                <Tabs   centered
+                        style={{visibility: (user && user.authorized) ? 'visible' : 'collapse'}}
+                        value={appView} 
+                        onChange={onTabChange} 
+                        indicatorColor="secondary" 
+                        textColor="secondary">
+                    <Tab label="Information" icon={<InfoRounded />} />
+                    <Tab label="Media Upload" icon={<CloudUploadRounded />} />
+                    <Tab label="Pages" icon={<LibraryBooks />} />
+                </Tabs>
+            </AppBar>
+            <BottomNavigation value={pageView}
+                                onChange={onPageViewChange}
+                                color="primary" showLabels 
+                                className={classes.sticky}
+                                style={{display: (props.tabValue === 2 ? 'flex' : 'none')}}>
+                    <BottomNavigationAction label="Select" icon={<TouchApp />} />
+                    <BottomNavigationAction style={props.contributionSelected ? {display: 'none'} : {}}
+                                            label="Select collection to continue" />
+                    <BottomNavigationAction style={props.contributionSelected ? {} : {display: 'none'}}
+                                            label="Edit" icon={<Edit />} />
+                    <BottomNavigationAction style={props.contributionSelected ? {} : {display: 'none'}}
+                                            label="Preview" icon={<Visibility />} />
+            </BottomNavigation>
+        </div>
+    );
 }
 
 export default withStyles(styles)(Header);
-

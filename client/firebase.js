@@ -22,13 +22,44 @@ const fb = {
         if(window.location.hash && token) {
             fb.auth.signInWithCustomToken(token);
             window.sessionStorage.setItem("fbjwt", token);
-            window.location.href = "/";
+            window.location.href = "#";
         } else if(token) {
             fb.auth.signInWithCustomToken(token);
         }
 
         fb.auth.onAuthStateChanged(function (user) {
             if (user) {
+                let u = {
+                    uid: user.uid,
+                    displayName: user.email
+                };
+                 // Get user data
+                 let userProm = fb.db.collection("Users").doc(user.uid).get().then((snapshot) => {
+                    const dbUser = snapshot.exists && snapshot.data();
+                    Object.keys(dbUser).forEach(key => {
+                        u[key] = dbUser[key];
+                    });
+                    return Promise.resolve(true);
+                });
+                // Get authorized
+                let authProm = fb.db.collection("Users").doc("authorized").get().then((snapshot) => {
+                    u["authorized"] = snapshot.exists && snapshot.data()[u.uid];
+                    return Promise.resolve(true);
+                });
+                // Get admin
+                let adminProm = fb.db.collection("Users").doc("admin").get().then((snapshot) => {
+                    u["admin"] = snapshot.exists && snapshot.data()[u.uid];
+                    return Promise.resolve(true);
+                });
+
+                Promise.all([userProm, authProm, adminProm]).then( () => {
+                    fb.user = u;
+                    callback(u);
+                }, (err) => {
+                    console.log(err);
+                    fb.user = u;
+                    callback(u);
+                });
                 callback(user);
             } else {
                 callback(null);
@@ -40,7 +71,7 @@ const fb = {
         fb.auth.currentUser.getIdToken(true).then(callback);
     },
 
-    showAuthPopup: function (providerName) {
+    showAuthPopup: function () {
         if(window.confirm("NOTICE:\n\nYou will be redirected to Dropbox to sign in - if you are signed in to a Dropbox account other than your JHDB-issued account, please press cancel and sign out before continuing. Alternatively, you can log into the contributor portal from a Private/Incognito window.", "NOTICE"))
             window.location.href = "/redirect";
     },
@@ -65,14 +96,14 @@ export const useDoc = (path) => {
     useEffect( () => {
         const ref = fb.db.doc(path);
         ref.onSnapshot( snapshot => {
+            if(!snapshot.exists) {
+                throw new Error("No such doc");
+            }
             let data = snapshot.data();
             if(data) {
                 data['ref'] = ref;
-                setTimeout(() => {
-                    setDoc(data).then(() => { 
-                        setLoading(false)
-                    });
-                }, 5000);
+                setDoc(data);
+                setLoading(false);
             } else {
                 setError(snapshot);
                 setLoading(false);
@@ -87,17 +118,57 @@ export const useDoc = (path) => {
         return fb.db.doc(path).update(data);
     }
 
-    return [doc, updateDoc, loading, error];
+    return [doc, loading, error, updateDoc];
 };
 
-export const useCollection = (path) => {
+export const useDocDelayedUpdate = (path, updateDelayMs) => {
+    let [doc, updateDoc, loading, error] = useDoc(path);
+
+    let [docLocal, setDocLocal] = useState({});
+    let [queuedUpdates, setQueuedUpdates] = useState({});
+    let [updateTimeout, setUpdateTimeout] = useState(null);
+    
+    useEffect( () => {
+        setDocLocal(doc);
+    }, [doc]);
+    
+    const updateDocDelayed = (data) => {
+        if(updateTimeout) {
+            clearTimeout(updateTimeout);
+        }
+
+        let upd = queuedUpdates;
+        let updDoc = docLocal;
+        for(let key in Object.keys(data)) {
+            upd[key] = data[key];
+            updDoc[key] = data[key];
+        }
+        setDocLocal(upd);
+        setQueuedUpdates(upd);
+
+        setUpdateTimeout(
+            setTimeout( () => {
+                updateDoc(queuedUpdates);
+                setUpdateTimeout(null);
+            }, updateDelayMs)
+        );
+    }
+
+    return [docLocal, updateDocDelayed, loading, error, updateTimeout !== null];
+
+}
+
+export const useCollection = (path, query=undefined) => {
 
     let [collection, setCollection] = useState([]);
     let [loading, setLoading] = useState(true);
     let [error, setError] = useState(null);
 
     useEffect( () => {
-        const ref = fb.db.collection(path);
+        let ref = fb.db.collection(path);
+        if(query && query.length == 3) {
+            ref = ref.where(...query);
+        }
         ref.onSnapshot( snapshot => {
             if(!snapshot.empty) {
                 const docs = snapshot.docs.map(docSnapshot => {
@@ -118,7 +189,7 @@ export const useCollection = (path) => {
     }, [path]);
 
     const addDoc = (data) => {
-        return fb.db.collection(path).addDoc(data);
+        return fb.db.collection(path).add(data);
     }
 
     return [collection, addDoc, loading, error];

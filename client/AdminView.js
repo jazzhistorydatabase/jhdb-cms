@@ -69,6 +69,12 @@ class AdminView extends Component {
             state: 'authorized',
             withRefs: true
         });
+
+        fb.base.bindCollection(fb.db.collection("Users"), {
+            context: this,
+            state: 'users',
+            withRefs: true
+        });
     }
 
     handleChange(evt, user) {
@@ -118,12 +124,11 @@ class AdminView extends Component {
         return (
             <div>
                 <h1> Admin Settings </h1>
-                <Button onClick={this.handleBeforeButtonClick.bind(this)} variant="contained" color={"primary"}
+                <Button onClick={() => {window.history.back()}} variant="contained" color={"primary"}
                         className={classes.button}> Back </Button>
                 <br/>
                 <br/>
-                <Paper className={classes.paper} elevation={3} square={false} classes={{root: classes.cardColor}}>
-                    {this.props.users.filter(user => !!user.uid).map( (user) => {
+                    {this.state.users.filter(user => !!user.uid).map( (user) => {
                         if (user.uid === fb.auth.currentUser.uid) {
                             return (
                                 <div key={user.uid} >
@@ -183,7 +188,6 @@ class AdminView extends Component {
                         );
                     })}
 
-                </Paper>
             </div>
 
         );

@@ -25,7 +25,6 @@ const credentials = {
         authorizeHost: 'https://www.dropbox.com',
         authorizePath: '1/oauth2/authorize'
     }
-    
 };
 const oauth2 = require('simple-oauth2').create(credentials);
 
@@ -387,6 +386,7 @@ app.get('/redirect', (req, res) => {
     logger.info(`Beginning OAuth Code Flow redirect, redirect_uri: ${redirectUri}`);
     const redir = oauth2.authorizationCode.authorizeURL({
       redirect_uri: callbackUri(req),
+    //   scope: "account_info.read files.content.read files.metadata.read"
     });
     res.redirect(redir);
 });
@@ -434,9 +434,15 @@ app.get("/login", (req, res) => {
 
 
 // Host compiled contributor portal
-app.use("/", express.static("dist"));
 app.use("/images", express.static("./templates/images"));
-
+app.use("/", express.static("dist"));
+// Allow React Router to handle subroutes
+app.use("/:route/", express.static("dist"));
+app.use("/:route/:subroute", express.static("dist"));
+// App Manifest
+app.get("/manifest.json", (req, res) => {
+    res.sendFile("./dist/manifest.json", {root: __dirname});
+});
 
 // Start the server
 logger.info("Binding to port "+PORT);
