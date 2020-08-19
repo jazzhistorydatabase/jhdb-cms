@@ -1,18 +1,22 @@
 import React, {useState} from 'react';
-import {useHistory} from 'react-router-dom';
+import {useHistory, useLocation, Route} from 'react-router-dom';
 import { withStyles } from '@material-ui/styles';
 import { Add, Done, PriorityHigh, Cached } from '@material-ui/icons';
+import { SearchRounded } from '@material-ui/icons';
 
 import { Button, CircularProgress, List } from '@material-ui/core';
-
-import fb, { useCollection, useDoc } from './firebase';
-import { Switch } from '@material-ui/core';
+import { InputAdornment } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
+import { Checkbox } from '@material-ui/core';
 import { FormControlLabel } from '@material-ui/core';
 import { ListItem } from '@material-ui/core';
 import { ListItemAvatar } from '@material-ui/core';
 import { Avatar } from '@material-ui/core';
 import { ListItemText } from '@material-ui/core';
 import { Divider } from '@material-ui/core';
+
+import EditPageView from './EditPageView';
+import fb, { useCollection, useDoc } from './firebase';
 
 const styles = theme => ({
     root: {
@@ -24,6 +28,9 @@ const styles = theme => ({
 
 const PageListView = (props) => {
     const history = useHistory();
+    const location = useLocation();
+
+    const classes = props.classes;
     let [collection, addPage, loadingPages, pagesError] = useCollection('Contributions', 
             // If not admin, query for only my pages
             props.user.admin ? undefined : ['owner', '==', props.user.uid]);
@@ -35,6 +42,12 @@ const PageListView = (props) => {
 
     let pages = collection && collection.filter(e => !!e.type);
     let [filterOwned, setFilterOwned] = useState(false);
+    let [search, setSearch] = useState("");
+
+    pages = pages.filter(p => (
+            (p.name && p.name.includes(search)) || 
+            (p.description && p.description.includes(search))
+        ));
     if(filterOwned) {
         pages = pages.filter(p => p.owner === props.user.uid);
     }
@@ -65,6 +78,30 @@ const PageListView = (props) => {
         }
     };
 
+    const showList = location.pathname.split('pages')[1].length <= 1;
+
+    if(!showList) {
+        if(loading) {
+            return (loading && <span><br/><CircularProgress /><br />Loading Page...</span>)
+        }
+        return <Route path="/pages/:id" component={(props) => {
+            const pget = pages && pages.filter(p => p.ref.id === props.match.params.id);
+            const page = pget && pget[0]; 
+            if(!page) {
+                return (
+                    <div>
+                        <h4>No such page</h4>
+                        <Button variant="contained"
+                                color="primary"
+                                onClick={() => {history.push('/pages')}}>
+                            Back
+                        </Button>
+                    </div>
+                )
+            }
+            return <EditPageView page={page} />
+        }}></Route>
+    }
 
     return (
         <div className={props.classes.root}>
@@ -76,15 +113,31 @@ const PageListView = (props) => {
                         Create New Page
             </Button>
             <br /><br />
+            <TextField
+                className={classes.margin}
+                id="input-with-icon-textfield"
+                variant="outlined"
+                placeholder="Search Pages"
+                onChange={(evt) => {setSearch(evt.target.value)}}
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchRounded />
+                        </InputAdornment>
+                    ),
+                }}
+            />
+            <br />
             {props.user.admin && 
                 <FormControlLabel
                         color={"primary"}
                         label={<div style={{display: 'flex', alignItems: 'center'}}>
                                 Only Show My Pages
                             </div>}
-                        labelPlacement="start"
+                        labelPlacement="end"
+                        style={{marginLeft: 5}}
                         control={
-                            <Switch
+                            <Checkbox
                                 disabled={loading}
                                 checked={filterOwned}
                                 onChange={() => {setFilterOwned(!filterOwned)}}
@@ -112,7 +165,7 @@ const PageListView = (props) => {
                         <div key={e.ref.id || e.name}>
                             <Divider />
                             <ListItem button 
-                                    onClick={() => {history.push(`/edit/${e.ref.id}`)}}>
+                                    onClick={() => {history.push(`/pages/${e.ref.id}`)}}>
                                 <ListItemAvatar>
                                     <Avatar src={e['bioUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
                                 </ListItemAvatar>

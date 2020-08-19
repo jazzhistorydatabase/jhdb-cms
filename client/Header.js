@@ -63,20 +63,12 @@ const Header = (props) => {
         path.includes('upload') ? 1 : 0
     );
 
-    let pageView = 0;
-    if (path.includes('preview')) pageView = 1;
-
-
     let onTabChange = (evt, value) => {
         const ops = ['/', '/upload', '/pages'];
         history.push(ops[value]);
         setAppView(value);
     };
-
-    let onPageViewChange = (evt, value) => {
-        console.log(value);
-    };
-
+    
     let loginButton = user ? (
         <ListItem button color="inherit"
                   onClick={fb.signOut}>
@@ -173,19 +165,6 @@ const Header = (props) => {
                     <Tab label="Pages" icon={<LibraryBooks />} />
                 </Tabs>
             </AppBar>
-            <BottomNavigation value={pageView}
-                                onChange={onPageViewChange}
-                                color="primary" showLabels 
-                                className={classes.sticky}
-                                style={{display: (props.tabValue === 2 ? 'flex' : 'none')}}>
-                    <BottomNavigationAction label="Select" icon={<TouchApp />} />
-                    <BottomNavigationAction style={props.contributionSelected ? {display: 'none'} : {}}
-                                            label="Select collection to continue" />
-                    <BottomNavigationAction style={props.contributionSelected ? {} : {display: 'none'}}
-                                            label="Edit" icon={<Edit />} />
-                    <BottomNavigationAction style={props.contributionSelected ? {} : {display: 'none'}}
-                                            label="Preview" icon={<Visibility />} />
-            </BottomNavigation>
         </div>
     );
 }

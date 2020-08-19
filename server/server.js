@@ -439,6 +439,7 @@ app.use("/", express.static("dist"));
 // Allow React Router to handle subroutes
 app.use("/:route/", express.static("dist"));
 app.use("/:route/:subroute", express.static("dist"));
+app.use("/:route/:subroute/:subsubroute", express.static("dist"));
 // App Manifest
 app.get("/manifest.json", (req, res) => {
     res.sendFile("./dist/manifest.json", {root: __dirname});

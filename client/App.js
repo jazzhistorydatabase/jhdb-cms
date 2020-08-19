@@ -6,7 +6,6 @@ import {
 } from "react-router-dom";
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import { lightBlue } from '@material-ui/core/colors';
-import { useAuthState } from 'react-firebase-hooks/auth';
 
 import { CircularProgress, Link } from '@material-ui/core';
 import Paper from "@material-ui/core/Paper";
@@ -81,7 +80,6 @@ const App = (props) => {
     const [user, setUser] = useState(undefined);
     const [rootClass, setRootClass] = useState(classes.rootHidden);
     const [appClass, setAppClass] = useState(classes.hidden);
-
 
     useEffect(() => {
         setRootClass(classes.root);

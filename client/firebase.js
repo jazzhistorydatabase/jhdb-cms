@@ -95,7 +95,7 @@ export const useDoc = (path) => {
 
     useEffect( () => {
         const ref = fb.db.doc(path);
-        ref.onSnapshot( snapshot => {
+        const unsub = ref.onSnapshot( snapshot => {
             if(!snapshot.exists) {
                 throw new Error("No such doc");
             }
@@ -112,6 +112,7 @@ export const useDoc = (path) => {
             setError(err);
             setLoading(false);
         });
+        return unsub;
     }, [path]);
 
     const updateDoc = (data) => {
@@ -120,6 +121,62 @@ export const useDoc = (path) => {
 
     return [doc, loading, error, updateDoc];
 };
+
+const f = () => {};
+
+export const useDelayedUpdate = (doc, updateDelayMs) => {
+    let [docLocal, setDocLocal] = useState(doc);
+    let [queuedUpdates, setQueuedUpdates] = useState({});
+    let [updateTimeout, setUpdateTimeout] = useState(null);
+    let [error, setError]  = useState(null);
+    let [success, setSuccess]  = useState(null);
+
+    useEffect( () => {
+        setDocLocal(doc);
+        return () => {
+            // Clean up timer
+            if(updateTimeout) {
+                clearTimeout(updateTimeout);
+            }
+        }
+    }, [doc, updateTimeout]);
+
+    const updateDoc = (data) => {
+        return doc.ref.update(data).then(() => {
+            setSuccess(Object.keys(data).length);
+        }, err => {
+            setError(err);
+        });
+    }
+    
+    const updateDocDelayed = (data) => {
+        console.log(data);
+        if(updateTimeout) {
+            clearTimeout(updateTimeout);
+        }
+        setError(null);
+        setSuccess(null);
+
+        let upd = queuedUpdates;
+        let updDoc = docLocal;
+        Object.keys(data).forEach(key => {
+            upd[key] = data[key];
+            updDoc[key] = data[key];
+        });
+        setQueuedUpdates(upd);
+        setDocLocal(updDoc);
+
+        setUpdateTimeout(
+            setTimeout( () => {
+                updateDoc(upd);
+                setUpdateTimeout(null);
+            }, updateDelayMs)
+        );
+    }
+
+    return [docLocal, updateDocDelayed, updateTimeout !== null, success, error];
+
+}
 
 export const useDocDelayedUpdate = (path, updateDelayMs) => {
     let [doc, updateDoc, loading, error] = useDoc(path);
@@ -130,7 +187,14 @@ export const useDocDelayedUpdate = (path, updateDelayMs) => {
     
     useEffect( () => {
         setDocLocal(doc);
-    }, [doc]);
+
+        return () => {
+            // Clean up timer
+            if(updateTimeout) {
+                clearTimeout(updateTimeout);
+            }
+        }
+    }, [doc, updateTimeout]);
     
     const updateDocDelayed = (data) => {
         if(updateTimeout) {
@@ -169,7 +233,7 @@ export const useCollection = (path, query=undefined) => {
         if(query && query.length == 3) {
             ref = ref.where(...query);
         }
-        ref.onSnapshot( snapshot => {
+        const unsub = ref.onSnapshot( snapshot => {
             if(!snapshot.empty) {
                 const docs = snapshot.docs.map(docSnapshot => {
                     let doc = docSnapshot.data();
@@ -186,7 +250,8 @@ export const useCollection = (path, query=undefined) => {
             setError(err);
             setLoading(false);
         });
-    }, [path]);
+        return unsub;
+    }, [path, query]);
 
     const addDoc = (data) => {
         return fb.db.collection(path).add(data);
