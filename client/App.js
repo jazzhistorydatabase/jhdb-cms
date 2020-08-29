@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import { lightBlue } from '@material-ui/core/colors';
+import { SnackbarProvider } from 'notistack';
 
 import { CircularProgress, Link } from '@material-ui/core';
 import Paper from "@material-ui/core/Paper";
@@ -107,42 +108,44 @@ const App = (props) => {
                 <div className={appClass}>
                     <Router>
                         <MuiThemeProvider theme={theme}>
-                            <Header user={user} />
-                            {!user &&
-                                <h3 style={{marginLeft: 10, textAlign: 'left'}}>
-                                    <ArrowUpwardSharp/><ArrowUpwardSharp/><ArrowUpwardSharp/>
-                                    <br/>
-                                    Please sign in to continue (See MENU)
-                                </h3>
-                            }
-                            {user && !user.authorized && 
-                                <h3>
-                                    <br/>
-                                    This account is not authorized. Make sure you have logged in with your JHDB-provided Dropbox account
-                                    <br/>
-                                    If you are still unsure of how to proceed, send us an email at <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link>
-                                </h3>
-                            }
-                            {user && user.authorized &&
-                                <Paper className={classes.paper} elevation={3}>
-                                    <Switch>
-                                        <Route exact path="/">
-                                            <InfoView />
-                                        </Route>
-                                        <Route path="/upload">
-                                            <UploadView user={user} />
-                                        </Route>
-                                        <Route path="/pages">
-                                            <PageListView user={user} />
-                                        </Route>
-                                        <Route path="/admin">
-                                            <AdminView user={user}
-                                                        adminSwap={window.history.back}
-                                                        users={[user]} />
-                                        </Route>
-                                    </Switch>
-                                </Paper>
-                            }
+                            <SnackbarProvider maxSnack={1}>
+                                <Header user={user} />
+                                {!user &&
+                                    <h3 style={{marginLeft: 10, textAlign: 'left'}}>
+                                        <ArrowUpwardSharp/><ArrowUpwardSharp/><ArrowUpwardSharp/>
+                                        <br/>
+                                        Please sign in to continue (See MENU)
+                                    </h3>
+                                }
+                                {user && !user.authorized && 
+                                    <h3>
+                                        <br/>
+                                        This account is not authorized. Make sure you have logged in with your JHDB-provided Dropbox account
+                                        <br/>
+                                        If you are still unsure of how to proceed, send us an email at <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link>
+                                    </h3>
+                                }
+                                {user && user.authorized &&
+                                    <Paper className={classes.paper} elevation={3}>
+                                        <Switch>
+                                            <Route exact path="/">
+                                                <InfoView />
+                                            </Route>
+                                            <Route path="/upload">
+                                                <UploadView user={user} />
+                                            </Route>
+                                            <Route path="/pages">
+                                                <PageListView user={user} />
+                                            </Route>
+                                            <Route path="/admin">
+                                                <AdminView user={user}
+                                                            adminSwap={window.history.back}
+                                                            users={[user]} />
+                                            </Route>
+                                        </Switch>
+                                    </Paper>
+                                }
+                            </SnackbarProvider>
                         </MuiThemeProvider>
                     </Router>
                 </div>

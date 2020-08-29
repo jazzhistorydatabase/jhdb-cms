@@ -3,7 +3,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import Rebase from 're-base'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import clientConfig from './client-creds.json';
 
@@ -122,30 +122,31 @@ export const useDoc = (path) => {
     return [doc, loading, error, updateDoc];
 };
 
-const f = () => {};
 
-export const useDelayedUpdate = (doc, updateDelayMs) => {
+export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
     let [docLocal, setDocLocal] = useState(doc);
     let [queuedUpdates, setQueuedUpdates] = useState({});
     let [updateTimeout, setUpdateTimeout] = useState(null);
-    let [error, setError]  = useState(null);
-    let [success, setSuccess]  = useState(null);
+    let [isUpdating, setUpdating]  = useState(false);
 
     useEffect( () => {
         setDocLocal(doc);
-        return () => {
-            // Clean up timer
-            if(updateTimeout) {
-                clearTimeout(updateTimeout);
-            }
+        setUpdating(false);
+    }, [doc]);
+
+    useEffect( () => () => {
+        // Clean up timer
+        if(updateTimeout) {
+            clearTimeout(updateTimeout);
         }
-    }, [doc, updateTimeout]);
+    }, [updateTimeout])
 
     const updateDoc = (data) => {
         return doc.ref.update(data).then(() => {
-            setSuccess(Object.keys(data).length);
+            onSuccess(Object.keys(data).length);
         }, err => {
-            setError(err);
+            onError(err);
+            setUpdating(false);
         });
     }
     
@@ -154,8 +155,6 @@ export const useDelayedUpdate = (doc, updateDelayMs) => {
         if(updateTimeout) {
             clearTimeout(updateTimeout);
         }
-        setError(null);
-        setSuccess(null);
 
         let upd = queuedUpdates;
         let updDoc = docLocal;
@@ -165,6 +164,7 @@ export const useDelayedUpdate = (doc, updateDelayMs) => {
         });
         setQueuedUpdates(upd);
         setDocLocal(updDoc);
+        setUpdating(true);
 
         setUpdateTimeout(
             setTimeout( () => {
@@ -174,7 +174,7 @@ export const useDelayedUpdate = (doc, updateDelayMs) => {
         );
     }
 
-    return [docLocal, updateDocDelayed, updateTimeout !== null, success, error];
+    return [docLocal, updateDocDelayed, isUpdating];
 
 }
 
