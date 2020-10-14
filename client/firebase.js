@@ -2,13 +2,13 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import Rebase from 're-base'
+import isEqual from 'lodash.isequal'
 
 import React, { useState, useEffect, useRef } from 'react';
 
 import clientConfig from './client-creds.json';
 
 const fb = {
-    // Must be bound to component — ie call initialize.bind(this)(callback) from App.componentWillMount()
     initialize: function (callback) {
         var config = clientConfig.firebaseConfig;
         this.app = firebase.initializeApp(config);
@@ -101,9 +101,28 @@ export const useDoc = (path) => {
             }
             let data = snapshot.data();
             if(data) {
-                data['ref'] = ref;
-                setDoc(data);
-                setLoading(false);
+                // Check if there's a diff with local data
+                let diff = false;
+                if(!doc) {
+                    // First pull is always a diff
+                    console.log('doc is null, will update');
+                    diff = true;
+                } else {
+                    Object.keys(data).forEach(key => {
+                        if(data[key] !== doc[key]) {
+                            console.log(`Key ${key} is different!`)
+                            diff = true;
+                        }
+                    });
+                }
+                // If there is, update local data
+                if(diff) {
+                    data['ref'] = ref;
+                    setDoc(data);
+                    setLoading(false);
+                } else {
+                    console.log("No diff, won't update");
+                }
             } else {
                 setError(snapshot);
                 setLoading(false);
@@ -151,7 +170,6 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
     }
     
     const updateDocDelayed = (data) => {
-        console.log(data);
         if(updateTimeout) {
             clearTimeout(updateTimeout);
         }
@@ -238,6 +256,7 @@ export const useCollection = (path, query=undefined) => {
                 const docs = snapshot.docs.map(docSnapshot => {
                     let doc = docSnapshot.data();
                     doc['ref'] = docSnapshot.ref;
+                    //  check for diff
                     return doc;
                 });
                 setCollection(docs);
