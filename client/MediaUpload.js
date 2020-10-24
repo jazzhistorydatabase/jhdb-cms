@@ -1,5 +1,5 @@
 import Button from "@material-ui/core/Button";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Label from "@material-ui/core/FormControlLabel";
 import FormGroup from "@material-ui/core/FormGroup";
 import Paper from "@material-ui/core/Paper";
 import { withStyles } from '@material-ui/core/styles';
@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import FileUpload from "./FileUpload";
 import fb from "./firebase";
 import dbx from './dropbox.js';
+import { FormControlLabel } from '@material-ui/core';
 import { InputLabel } from '@material-ui/core';
 import { TextField } from '@material-ui/core';
 
@@ -27,6 +28,7 @@ class MediaUpload extends Component {
             contribText: '',
             collection: [],
             add: '',
+            manualAudio: false,
         };
     }
 
@@ -92,7 +94,8 @@ class MediaUpload extends Component {
         fileUploads = fileUploads.map((fileDoc) => {
             return (
                 <FileUpload key={fileDoc.index || fileDoc.name || randomBytes(2)}
-                            fileType={this.props.uploadName}
+                            fileType={this.state.manualAudio ? "Video" : this.props.uploadName}
+                            isActuallyAudio={this.state.manualAudio}
                             fileIndex={fileDoc.index}
                             fileDoc={fileDoc}
                             isPendingApproval={this.props.isPendingApproval}
@@ -132,6 +135,22 @@ class MediaUpload extends Component {
                             }>
                         ++ Bulk Add
                     </Button>
+                    <br />
+                    {this.props.uploadName === "Audio" && this.props.admin &&
+                        <FormControlLabel
+                            color={"primary"}
+                            label={"Manual Link Entry"}
+                            labelPlacement="end"
+                            control={
+                                <Switch
+                                    checked={this.state.manualAudio}
+                                    onChange={() => {this.setState({
+                                        manualAudio: !this.state.manualAudio
+                                    })}}
+                                    name="manualSwitch"
+                                    color="secondary"
+                                />}
+                        />}
                     <h4>
                         {fileUploads}
                     </h4>
