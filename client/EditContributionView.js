@@ -341,7 +341,7 @@ class EditContributionView extends Component {
                                     label={<div style={{display: 'flex', alignItems: 'center'}}>No Prefix</div>}
                                     labelPlacement="start"
                                     control={
-                                        <Switch
+                                     <Switch
                                             checked={(contrib && (contrib.bioPrefix === 'DISABLED'))}
                                             onChange={(evt) => {
                                                 evt.target.value = evt.target.checked ? "DISABLED" : "";
@@ -414,6 +414,7 @@ class EditContributionView extends Component {
                         <br/>
                         <MediaUpload uploadName="Images"
                                     sectionTitle={contrib && contrib.imagesTitle}
+                                    admin={this.props.admin}
                                     onSectionTitleChange={this.handleImagesTitleChange}
                                     isSubpage={contrib && contrib.imagesSubpage}
                                     isPendingApproval={contrib && (contrib.approval === 'pending')}
@@ -423,6 +424,7 @@ class EditContributionView extends Component {
                                     parentPage={this.props.selectedContribution}
                                     collection={this.props.selectedContribution.ref.collection("Images")} />
                         <MediaUpload uploadName="Audio"
+                                    admin={this.props.admin}
                                     sectionTitle={contrib && contrib.audioTitle}
                                     onSectionTitleChange={this.handleAudioTitleChange}
                                     isSubpage={contrib && contrib.audioSubpage}
@@ -430,6 +432,7 @@ class EditContributionView extends Component {
                                     collection={this.props.selectedContribution.ref.collection("Audio")}
                                     onChange={this.handleChildChange}/>
                         <MediaUpload uploadName="Video"
+                                    admin={this.props.admin}
                                     sectionTitle={contrib && contrib.videosTitle}
                                     onSectionTitleChange={this.handleVideosTitleChange}
                                     isSubpage={contrib && contrib.videoSubpage}
