@@ -74,6 +74,17 @@ class EditContributionView extends Component {
                 this.setState({contributionData: data});
             }
         };
+        
+        this.handleSubmitterChange = event => {
+            let data = this.state.contributionData;
+            if ((data && (data.approval === 'pending'))) {
+                window.alert("Please rescind your request for approval before making changes.");
+                return false;
+            } else {
+                data.submitter = event.target.value;
+                this.setState({contributionData: data});
+            }
+        };
     
         this.handleCheckBoxChange = event => {
             let data = this.state.contributionData;
@@ -328,6 +339,18 @@ class EditContributionView extends Component {
                                 className={classes.textField}
                                 defaultValue={(contrib && contrib.name) || ""}
                                 onChange={this.handleNameChange}
+                                margin="normal"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                            <FormLabel component="legend">Submitted By (optional)</FormLabel>
+                            <TextField
+                                id="standard-name"
+                                variant="filled"
+                                className={classes.textField}
+                                defaultValue={(contrib && contrib.submitter) || ""}
+                                onChange={this.handleSubmitterChange}
                                 margin="normal"
                                 InputLabelProps={{
                                     shrink: true,

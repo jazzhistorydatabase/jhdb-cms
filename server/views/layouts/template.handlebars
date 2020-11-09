@@ -205,6 +205,9 @@
                     <div class="fancy-title title-bottom-border" id="bio">
                         <h2>{{bioPrefix}}{{ name }} </h2>
                     </div>
+                     {{#if submitter}}
+                        <h6><i>Submitted by {{submitter}}</i></h6>
+                    {{/if}}
                     <!-- Insert bio -->
                     <div class="container clearfix" style=" padding-top: 20px;">
                         <div class="col-sm-12">
