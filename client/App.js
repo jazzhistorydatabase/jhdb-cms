@@ -25,6 +25,9 @@ import PageListView from './PageListView';
 const theme = createMuiTheme({
     typography: {
         useNextVariants: true,
+        h6: {
+            marginTop: 15,
+        }
     },
     palette: {
         type: 'dark',
@@ -71,6 +74,12 @@ const styles = theme => ({
         opacity: 0.0,
         visibility: 'hidden',
         transition: 'opacity 500ms 0ms',
+    },
+    snackbarContainer: {
+        // top: 20,
+        // right: 20,
+        // left: 'auto',
+        // bottom: 'auto',
     }
 });
 
@@ -83,8 +92,10 @@ const App = (props) => {
     const [appClass, setAppClass] = useState(classes.hidden);
 
     useEffect(() => {
+        console.log("fb init ueff")
         setRootClass(classes.root);
         if (!fb.app) {
+            console.log("appInit")
             fb.initialize((user) => {
                 setUser(user);
                 setApp(fb.app);
@@ -108,7 +119,12 @@ const App = (props) => {
                 <div className={appClass}>
                     <Router>
                         <MuiThemeProvider theme={theme}>
-                            <SnackbarProvider maxSnack={1}>
+                            <SnackbarProvider maxSnack={1}
+                                              anchorOrigin={{
+                                                  vertical: 'top',
+                                                  horizontal: 'right'
+                                              }}
+                                              classes={{containerRoot: classes.snackbarContainer}}>
                                 <Header user={user} />
                                 {!user &&
                                     <h3 style={{marginLeft: 10, textAlign: 'left'}}>

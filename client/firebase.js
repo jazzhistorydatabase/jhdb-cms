@@ -14,9 +14,19 @@ const fb = {
         this.app = firebase.initializeApp(config);
 
         fb.db = firebase.firestore(this.app);
-        fb.auth = firebase.auth();
+        fb.auth = firebase.auth(this.app);
         // Rebase is EOL, swap out with firebase hooks
         fb.base = Rebase.createClass(fb.db);
+        // Emulators
+        // if (location.hostname === "localhost") {
+        //     fb.db.useEmulator('http://localhost:8000/');
+        //     fb.db.settings({
+        //         host: 'localhost:8000',
+        //         ssl: false
+        //     });
+        //     fb.auth.useEmulator('http://localhost:9099/');
+        //     window.fb = fb;
+        // }
 
         let token = window.location.hash.substr(1) || window.sessionStorage.getItem("fbjwt");
         if(window.location.hash && token) {
@@ -88,16 +98,18 @@ export default fb;
 
 // Firebase hooks (replacing re-base)
 export const useDoc = (path) => {
-
+    console.log(`useDoc(${path})`)
     let [doc, setDoc] = useState(null);
     let [loading, setLoading] = useState(true);
     let [error, setError] = useState(null);
 
     useEffect( () => {
+        console.log(`useDocEffect(${path})`)
         const ref = fb.db.doc(path);
         const unsub = ref.onSnapshot( snapshot => {
+            console.log(`useDocSnapshot(${path})`)
             if(!snapshot.exists) {
-                throw new Error("No such doc");
+                throw new Error("No such doc: " + path);
             }
             let data = snapshot.data();
             if(data) {
@@ -128,6 +140,7 @@ export const useDoc = (path) => {
                 setLoading(false);
             }
         }, err => {
+            console.error(err);
             setError(err);
             setLoading(false);
         });
@@ -149,6 +162,7 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
     let [isUpdating, setUpdating]  = useState(false);
 
     useEffect( () => {
+        console.log(`delayedDocUpdated(${doc.ref.path})`)
         setDocLocal(doc);
         setUpdating(false);
     }, [doc]);
@@ -164,6 +178,7 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
         return doc.ref.update(data).then(() => {
             onSuccess(Object.keys(data).length);
         }, err => {
+            console.error(err);
             onError(err);
             setUpdating(false);
         });
@@ -242,16 +257,20 @@ export const useDocDelayedUpdate = (path, updateDelayMs) => {
 
 export const useCollection = (path, query=undefined) => {
 
+    console.log(`useColl(${path})`)
+
     let [collection, setCollection] = useState([]);
     let [loading, setLoading] = useState(true);
     let [error, setError] = useState(null);
 
     useEffect( () => {
+        console.log(`useCollEffect(${path} ${query})`)
         let ref = fb.db.collection(path);
         if(query && query.length == 3) {
             ref = ref.where(...query);
         }
         const unsub = ref.onSnapshot( snapshot => {
+            console.log(`useCollSnapshot(${path})`)
             if(!snapshot.empty) {
                 const docs = snapshot.docs.map(docSnapshot => {
                     let doc = docSnapshot.data();
@@ -262,15 +281,17 @@ export const useCollection = (path, query=undefined) => {
                 setCollection(docs);
                 setLoading(false);
             } else {
-                setError(snapshot);
+                setCollection([]);
                 setLoading(false);
             }
         }, err => {
+            console.error(err);
             setError(err);
             setLoading(false);
         });
         return unsub;
-    }, [path, query]);
+    // query is not a dependency as conditional queries would cause an infinite loop
+    }, [path]);
 
     const addDoc = (data) => {
         return fb.db.collection(path).add(data);

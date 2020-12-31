@@ -10,8 +10,10 @@ const styles = theme => ({
         textAlign: 'left',
         display: 'block',
         overflow: 'auto',
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
+        paddingTop: theme.spacing(0),
+        paddingBottom: theme.spacing(0),
+        marginTop: 0,
+        marginBottom: 0,
     },
     editorContainer: {
         minHeight: 200,
@@ -21,8 +23,17 @@ const styles = theme => ({
         overflow: 'auto',
         padding: 6,
     },
-    editorToolbar: {
-
+    toolbarVisible: {
+        bottom: 0,
+        opacity: 1,
+        // height: 39,
+        transition: 'opacity 0.5s, bottom 0.5s',
+    },
+    toolbarHidden: {
+        bottom: -70,
+        opacity: 0,
+        // height: 0,
+        transition: 'opacity 0.5s, bottom 0.5s',
     }
 });
 
@@ -31,6 +42,7 @@ const RichTextEditor = (props) => {
 
     const [loading, setLoading] = useState(true);
     const [focus, setFocus] = useState(false);
+    const [editor, setEditor] = useState(null);
     
     // Random ref for toolbar container id
     const toolbarContainer = useRef(`mke-edit-${(Math.trunc(Math.random() * 0xFFFFF)).toString(16)}`);
@@ -41,24 +53,32 @@ const RichTextEditor = (props) => {
             ...props.style,
         }}>
             <div id={toolbarContainer.current}
+                className={focus ? classes.toolbarVisible : classes.toolbarHidden}
+                // These need to be inline to override TinyMce styles
                 style={{
-                    zIndex: 10,
-                    height: 39,
                     position: 'fixed',
-                    bottom: 0,
+                    zIndex: 10,
                     left: 0,
                     width: '100%',
+                    height: 39,
                     textAlign: 'center',
-                }}></div>
+                }}>
+            </div>
             <div className={classes.editorContainer} 
                  style={{
                         borderBottom: (focus ? '2px solid #039BE5' : '1px solid white'), 
-            }}>
+                 }}
+                 onClick={() => {
+                    if(editor && !focus) {
+                        editor.focus();
+                    }
+                }}>
                 {loading && <CircularProgress />}
                 <Editor
                     apiKey="8owmaqt97ssegw4b2kgx45y2ivg5vh79nec7qcf5wax12s0p"
                     inline
                     toolbar_mode={"wrap"}
+                    style={{minHeight: 200}}
                     init={{
                         width: '100%',
                         theme_advanced_resizing_min_height: 200,
@@ -72,7 +92,9 @@ const RichTextEditor = (props) => {
                         toolbar:
                         'undo redo | h2 h3 paragraph | bold italic blockquote | bullist numlist outdent indent | removeformat',
                         init_instance_callback: (e) => {
-                            // e.editorManager.activeEditor.focus();
+                            if(!editor) {
+                                setEditor(e.editorManager.activeEditor);
+                            }
                         },
                         setup: function (editor) {
                             // Hack to keep the thing around

@@ -8,6 +8,7 @@ const axios = require('axios');
 
 const logger = require('./logger');
 
+/*=== Load credentials ===*/
 const serverCredentials = require("./server-creds.json");
 const serviceAccount = serverCredentials.firebaseConfig;
 const dropboxKey = serverCredentials.dropboxConfig.appKey;
@@ -26,19 +27,23 @@ const credentials = {
         authorizePath: '1/oauth2/authorize'
     }
 };
+
+/*=== Init oauth2 handler ===*/
 const oauth2 = require('simple-oauth2').create(credentials);
 
-// Fetch cli args
+/*=== Load environment ===*/
 const IS_DEV = process.env["DEV"];
+const IS_LOCAL = process.env["LOCAL"];
 const PORT = process.env.PORT || 8080;
 
 logger.info(`Starting server in ${IS_DEV ? "dev" : "prod"} mode`);
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
-    databaseURL: "https://" + serviceAccount.project_id + "firebaseio.com"
+    databaseURL: IS_LOCAL ? "http://localhost:8000" : "https://" + serviceAccount.project_id + "firebaseio.com"
 });
 
+/*=== Initialize dropbox integration ===*/
 const dbx = new dropbox.Dropbox({
     "clientId": dropboxKey, 
     "clientSecret": dropboxSecret, 
@@ -46,9 +51,10 @@ const dbx = new dropbox.Dropbox({
     "fetch": fetch
 });
 
+/*=== Create express server ===*/
 const app = express();
 
-// Configure handlebars
+/*=== Configure handlebars ===*/
 app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
@@ -90,8 +96,11 @@ let fetchContributionByName = (req, res, contributionName, template, callback, i
 
 // Define function to render with handlebars
 let renderFromFirebase = (req, res, collRef, template, isPreview) => {
-    if (!collRef) return;
-
+    if (!collRef) {
+        logger.error("Erorr: Can't render null data");
+        return;
+    }
+    logger.info(`Rendering page ${collRef.ref.path} in ${isPreview ? 'preview' : 'publish'} mode`);
     // Get images
     let images = [];
     let collectionDoc = collRef;
@@ -180,9 +189,33 @@ let renderFromFirebase = (req, res, collRef, template, isPreview) => {
 };
 
 let previewReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, "template", renderFromFirebase);
+    const pageId = ""+req.params.page;
+    if(pageId.includes("/")) {
+        logger.error("Error: invalid preview request (/ in page Id)");
+        res.send("Error: invalid preview request (/ in page Id)");
+        return;
+    }
+    logger.info(`User request preview for collection: ${pageId}`);
+    try {
+        const pageRef = fb.firestore().collection("Contributions").doc(pageId);
+        pageRef.get().then(snapshot => {
+            if(snapshot.exists) {
+                logger.success(`Page ${pageId} exists`);
+                const page = snapshot.data();
+                page.ref = snapshot.ref;
+                renderFromFirebase(req, res, page, "template", true);
+            } else {
+                logger.error(`Error: No such page found ${pageId}`, err);
+                res.send("Error: Page not found in database");
+            }
+        }).catch(err => {
+            logger.error(`Error: Could not fetch page data for ${pageId}`, err);
+            res.send("Error: Could not fetch page data");
+        });
+    } catch(err) {
+        logger.error("Error: Could not create db ref for "+pageId, err);
+        res.send("Error: Could not create db ref");
+    }
 }
 
 let renderReqHandler = (req, res) => {
@@ -207,7 +240,7 @@ app.get("/preview/branch", (req, res) => {
 });
 app.use("/mockup", express.static(path.join(__dirname, './mockup')));
 
-app.get("/preview/:collection", previewReqHandler);
+app.get("/preview/:page", previewReqHandler);
 app.get("/render/:collection", renderReqHandler);
 
 

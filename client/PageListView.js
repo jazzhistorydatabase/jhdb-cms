@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useHistory, useLocation, Route} from 'react-router-dom';
 import { withStyles } from '@material-ui/styles';
 import { Add, Done, PriorityHigh, Cached } from '@material-ui/icons';
@@ -29,17 +29,17 @@ const styles = theme => ({
 const PageListView = (props) => {
     const history = useHistory();
     const location = useLocation();
-
+    
     const classes = props.classes;
     let [collection, addPage, loadingPages, pagesError] = useCollection('Contributions', 
-            // If not admin, query for only my pages
-            props.user.admin ? undefined : ['owner', '==', props.user.uid]);
+        // If not admin, query for only my pages
+        props.user.admin ? undefined : ['owner', '==', props.user.uid]
+    );
     let [publishedList, loadingPublished, publishedError] = useDoc('Contributions/published');
 
     const loading = loadingPages || loadingPublished;
-    console.log(`pages ${loadingPages} published ${loadingPublished}`)
     const error = pagesError || publishedError;
-
+    
     let pages = collection && collection.filter(e => !!e.type);
     let [filterOwned, setFilterOwned] = useState(false);
     let [search, setSearch] = useState("");
@@ -99,7 +99,7 @@ const PageListView = (props) => {
                     </div>
                 )
             }
-            return <EditPageView page={page} />
+            return <EditPageView page={page} user={props.user} published={!!publishedList[page.ref.id]} />
         }}></Route>
     }
 
