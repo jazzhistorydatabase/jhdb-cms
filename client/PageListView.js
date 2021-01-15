@@ -167,7 +167,10 @@ const PageListView = (props) => {
                             <ListItem button 
                                     onClick={() => {history.push(`/pages/${e.ref.id}`)}}>
                                 <ListItemAvatar>
-                                    <Avatar src={e['bioUrl'] || ""} >{e.name.substring(0,1)}</Avatar>
+                                    <Avatar style={{backgroundColor: e['bioUrl'] ? 'white' : undefined}} 
+                                            src={e['bioUrl'] || ""} >
+                                        {e.name.substring(0,1)}
+                                    </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText primary={<b>{e.name}</b>}
                                             secondary={<span>

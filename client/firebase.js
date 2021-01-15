@@ -159,12 +159,25 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
     let [docLocal, setDocLocal] = useState(doc);
     let [queuedUpdates, setQueuedUpdates] = useState({});
     let [updateTimeout, setUpdateTimeout] = useState(null);
-    let [isUpdating, setUpdating]  = useState(false);
+    // let [isUpdating, setUpdating]  = useState(false);
+    let isUpdating = useRef(false);
 
     useEffect( () => {
         console.log(`delayedDocUpdated(${doc.ref.path})`)
-        setDocLocal(doc);
-        setUpdating(false);
+        let diff = false;
+        // Only update docLocal if upstream change is different
+        Object.keys(doc).forEach(key => {
+            if(key !== 'ref' && docLocal[key] !== doc[key]) {
+                console.log(`Key ${key} is different!`)
+                diff = true;
+            }
+        });
+        if(diff) {
+            console.log(`Upstream change for ${doc.ref.path}`);
+            setDocLocal(doc);
+        }
+        isUpdating.current = false;
+        // setUpdating(false);
     }, [doc]);
 
     useEffect( () => () => {
@@ -180,7 +193,8 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
         }, err => {
             console.error(err);
             onError(err);
-            setUpdating(false);
+            isUpdating.current = false;
+            // setUpdating(false);
         });
     }
     
@@ -197,7 +211,8 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
         });
         setQueuedUpdates(upd);
         setDocLocal(updDoc);
-        setUpdating(true);
+        isUpdating.current = true;
+        // setUpdating(true);
 
         setUpdateTimeout(
             setTimeout( () => {
@@ -207,7 +222,7 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
         );
     }
 
-    return [docLocal, updateDocDelayed, isUpdating];
+    return [docLocal, updateDocDelayed, isUpdating.current];
 
 }
 

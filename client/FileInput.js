@@ -17,27 +17,40 @@ import Grid from '@material-ui/core/Grid'
 
 import dbx from './dropbox.js';
 import { AddRounded, WarningRounded } from '@material-ui/icons';
+import RichTextEditor from './RichTextEditor.js';
 
 const styles = theme => ({
     root: {
-        flexGrow: 1,
+        // flexGrow: 1,
         backgroundColor: "#4B4B4B",
         padding: 2, 
+    },
+    button: {
+        height: 50,
     },
     container: {
         display: 'flex',
         flexWrap: 'wrap',
     },
     fab: {
-        margin: theme.spacing(1),
+        // margin: theme.spacing(1),
+        borderRadius: 10,
     },
     fabImg: {
-        width: '50px',
-        height: '50px',
-        borderRadius: 3,
+        width: '40px',
+        height: '40px',
+        // marginTop: '2px',
+        // borderRadius: 10,
         backgroundColor: 'white',
     },
 });
+
+const dbxFileType = {
+    'bio': 'Images',
+    'Images': 'Images',
+    'Audio': 'Audio',
+    'Video': 'Videos'
+}
 
 const FileInput = (props) => {
 
@@ -59,9 +72,9 @@ const FileInput = (props) => {
             fileDoc['optimized'] = false;
         }
         doc.ref.update(fileDoc).then(() => {
-            enqueueSnackbar('Save success!', {variant: 'success'});
+            enqueueSnackbar('Updated file!', {variant: 'success'});
         }).catch(err => {
-            enqueueSnackbar('Error saving changes', {variant: 'error'});
+            enqueueSnackbar('Error updating file', {variant: 'error'});
             console.error(err);
         });
     }
@@ -91,31 +104,43 @@ const FileInput = (props) => {
     return (
         <Paper className={classes.root}>
             <Grid container spacing={2} direction="row" alignItems={"center"}>
-                <Grid item xs={3}>
+                <Grid item xs={6} sm={2}>
                     <Tooltip title={tooltipText}>
+                        <Button variant="contained"
+                                className={classes.button}
+                                color="primary"
+                                onClick={() => dbx.onChoose(fileType, onDbxChoose)}
+                                startIcon={fileUploadIcon}>
+                            {doc[urlKey] ? "Change Image" : "Select from Dropbox"}
+                        </Button>
+                    </Tooltip>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                    <Typography style={{overflowWrap: 'break-word', wordWrap: "break-word"}} variant={"body1"}>
+                        {doc[nameKey]}
+                    </Typography>
+                </Grid>
+                <Grid item xs={10} sm={5}>
+                    {props.type !== 'bio' &&
+                        <RichTextEditor 
+                        className={classes.field}
+                        height={30}
+                        placeholder={"Caption"}
+                        onEditorChange={(value) => {}}
+                        value={""}/>
+                    }
+                </Grid>
+                <Grid item xs={2} sm={1}>
+                    <Tooltip title="Unlink">
                         <Fab
                             size="small"
                             color="primary"
-                            // style={doc[url] ? {backgroundColor: (isUnoptimizedImage ? 'red' : 'green')} : {}}
-                            aria-label="Upload"
+                            aria-label="Unlink"
                             className={classes.fab}
-                            onClick={() => dbx.onChoose(fileType, onDbxChoose)}>
-                                {fileUploadIcon}
+                            onClick={() => onDbxChoose([{name: '', url: '', icon: '', thumbnail: ''}])}>
+                                <LinkOffIcon />
                         </Fab>
                     </Tooltip>
-                </Grid>
-                <Grid item xs={6}>
-                    {doc[nameKey]}
-                </Grid>
-                <Grid item xs={3}>
-                    <Fab
-                        size="small"
-                        color="primary"
-                        aria-label="Unlink"
-                        className={classes.fab}
-                        onClick={() => onDbxChoose([{name: '', url: '', icon: '', thumbnail: ''}])}>
-                            <LinkOffIcon />
-                    </Fab>
                 </Grid>
             </Grid>
         </Paper>

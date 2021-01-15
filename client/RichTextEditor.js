@@ -16,7 +16,6 @@ const styles = theme => ({
         marginBottom: 0,
     },
     editorContainer: {
-        minHeight: 200,
         borderRadius: '5px 5px 0px 0px', 
         backgroundColor: '#5A5A5A',
         display: 'block',
@@ -67,6 +66,7 @@ const RichTextEditor = (props) => {
             <div className={classes.editorContainer} 
                  style={{
                         borderBottom: (focus ? '2px solid #039BE5' : '1px solid white'), 
+                        minHeight: props.height || 200,
                  }}
                  onClick={() => {
                     if(editor && !focus) {
@@ -78,10 +78,11 @@ const RichTextEditor = (props) => {
                     apiKey="8owmaqt97ssegw4b2kgx45y2ivg5vh79nec7qcf5wax12s0p"
                     inline
                     toolbar_mode={"wrap"}
-                    style={{minHeight: 200}}
+                    style={{minHeight: props.height || 200}}
                     init={{
                         width: '100%',
-                        theme_advanced_resizing_min_height: 200,
+                        theme_advanced_resizing_min_height: props.height || 200,
+                        placeholder: props.placeholder || "",
                         menubar: false,
                         plugins: [
                             'advlist autolink lists link',
