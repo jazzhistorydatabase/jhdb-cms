@@ -177,7 +177,8 @@ class FileUpload extends Component {
                                 onBlur={this.handleLinkBlur}
                                 margin="normal"
                                 variant="filled"
-                                placeholder={'Click SHARE on YouTube'}
+                                placeholder={this.props.isActuallyAudio ? 'JHDB Site Links Only' : 
+                                    'Click SHARE on YouTube'}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
