@@ -110,18 +110,26 @@
             margin-top: 0px;
             padding: 15px;
             background-color: #333333;
+            border: solid 1px whitesmoke;
             border-top: #19ABFF solid 3px;
+            border-radius: 0px 0px 5px 5px;
         }
 
         .portfolio-desc h7 {
             color: white;
         }
 
-        .biophoto, .portfolio-image {
+        .biophoto {
             border-radius: 5px;
             border: solid 1px whitesmoke;
         }
 
+        .portfolio-image {
+            border-radius: 5px 5px 0px 0px;
+            border: solid 1px whitesmoke;
+            border-bottom: none;
+        }
+        
         .biophoto {
             margin-left: 20px; 
             margin-bottom: 20px;
@@ -235,7 +243,9 @@
                                 <div id="pf-images" class="portfolio grid-container portfolio-masonry clearfix" data-lightbox="gallery">
                                     {{#each images }}
                                         <article style="min-width: 25%;" class="portfolio-item">
-                                            <div class="portfolio-image">
+                                            <div class="portfolio-image"
+                                                 style="border-radius: {{#if caption}}{{else}}5px{{/if}}"
+                                            >
                                                 <a href="#">
                                                     <img src="{{webThumb}}" alt="{{caption}}">
                                                 </a>
@@ -244,12 +254,12 @@
                                                         <a href="{{webLarge}}" title="{{caption}}" data-lightbox="gallery-item" class="center-icon"><i class="icon-line2-magnifier-add"></i></a>
                                                     </div>
                                                 </div>
-                                                {{#if caption}}
-                                                <div class="portfolio-desc">
-                                                    <h7>{{caption}}</h7>
-                                                </div>
-                                                {{/if}}
                                             </div>
+                                            {{#if caption}}
+                                            <div class="portfolio-desc">
+                                                <h7>{{{caption}}}</h7>
+                                            </div>
+                                            {{/if}}
                                         </article>
                                     {{/each}}
                                 </div>
@@ -281,10 +291,10 @@
                                                         Your browser does not support the audio element.
                                                     </audio>
                                                 </div>
-                                                <div class="portfolio-desc">
-                                                    <h7>{{caption}}</h7>
-                                                </div>
                                                 {{!-- {{/if}} --}}
+                                            </div>
+                                            <div class="portfolio-desc">
+                                                <h7>{{{caption}}}</h7>
                                             </div>
                                         </article>
                                     {{/each}}
@@ -310,7 +320,9 @@
                                 <div id="pf-videos" class="portfolio grid-container portfolio-masonry clearfix">
                                     {{#each video }}
                                         <article style="min-width: 50%;" class="portfolio-item">
-                                            <div class="portfolio-image">
+                                            <div class="portfolio-image"
+                                                 style="border-radius: {{#if caption}}{{else}}5px{{/if}}"
+                                            >
                                                 <a href="#">
                                                     <img src="{{thumbnail}}" alt="{{caption}}">
                                                 </a>
@@ -319,12 +331,12 @@
                                                         <a href="{{url}}" title="{{caption}}" data-lightbox="iframe" class="center-icon"><i class="icon-youtube-play"></i></a>
                                                     </div>
                                                 </div>
-                                                {{#if caption}}
-                                                <div class="portfolio-desc">
-                                                    <h7>{{caption}}</h7>
-                                                </div>
-                                                {{/if}}
                                             </div>
+                                            {{#if caption}}
+                                            <div class="portfolio-desc">
+                                                <h7>{{{caption}}}</h7>
+                                            </div>
+                                            {{/if}}
                                         </article>
                                     {{/each}}
                                 </div>
