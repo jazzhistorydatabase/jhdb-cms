@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import Button from "@material-ui/core/Button";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormGroup from "@material-ui/core/FormGroup";
@@ -13,6 +13,8 @@ import FileInput from "./FileInput";
 import fb, {useCollection} from "./firebase";
 import dbx from './dropbox.js';
 import ImageOptimize from './ImageOptimize';
+import { LinkRounded } from '@material-ui/icons';
+import ToggleSwitch from './ToggleSwitch';
 
 
 const styles = theme => ({
@@ -33,6 +35,7 @@ const EditPageSection = (props) => {
     const classes = props.classes;
     let [files, addFile, loadingFiles, filesError] = useCollection(props.collectionRef.path);
     const [page, updatePage] = [props.page, props.updatePage];
+    const [manualEntry, setManualEntry] = useState(false);
 
     if(loadingFiles) {
         return <CircularProgress />
@@ -80,6 +83,7 @@ const EditPageSection = (props) => {
             <div className={classes.field}
                  key={fileDoc.index || fileDoc.name || randomBytes(2)}>
                 <FileInput  type={props.fileType}
+                            manualEntry={manualEntry}
                             fileDoc={fileDoc}
                             />
             </div>
@@ -112,6 +116,13 @@ const EditPageSection = (props) => {
                                 shrink: true,
                             }}
                         /><br/><br/>
+                {props.fileType === 'Audio' && props.user && props.user.admin &&
+                    <ToggleSwitch labelText="Manual Link Entry (JHDB Website Links Only!)"
+                                  labelIcon={<LinkRounded />}
+                                  checked={manualEntry}
+                                  onChange={evt => setManualEntry(!manualEntry)} />
+                }
+                <br />
                 <Button variant="contained" color="primary" className={classes.button}
                         onClick={
                             () => {

@@ -127,11 +127,14 @@ const ImageOptimize = (props) => {
                                 }}>Generate Optimized Images</Button>}
                 <br />
                 {optimizing && 
-                    <Typography variant="body1">
+                    <div>
                         <CircularProgress />
-                        <i>Optimizing images... {optimizeProgress.s + optimizeProgress.f} out of {optimizeProgress.t} complete</i><br />
-                        {optimizeProgress.f} Errors
-                    </Typography>}
+                        <Typography variant="body1">
+                            <i>Optimizing images... {optimizeProgress.s + optimizeProgress.f} out of {optimizeProgress.t} complete</i><br />
+                            {optimizeProgress.f} Errors
+                        </Typography>
+                    </div>
+                }
             </Paper>
         </div>
     )

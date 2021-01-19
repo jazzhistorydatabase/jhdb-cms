@@ -70,7 +70,7 @@ const EditPageView = (props) => {
         enqueueSnackbar('Error saving changes', {variant: 'error'});
     }
     
-    const [page, updatePage, isUpdating] = useDelayedUpdate(pageUpstream, 3000, onSuccess, onError);
+    const [page, updatePage, isUpdating] = useDelayedUpdate(pageUpstream, 6000, onSuccess, onError);
     
     useEffect( () => {
         if(isUpdating) {
