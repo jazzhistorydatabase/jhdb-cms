@@ -161,7 +161,7 @@ const Header = (props) => {
                         indicatorColor="secondary" 
                         textColor="secondary">
                     <Tab label="Information" icon={<InfoRounded />} />
-                    <Tab label="Media Upload" icon={<CloudUploadRounded />} />
+                    <Tab label="Upload Files" icon={<CloudUploadRounded />} />
                     <Tab label="My Pages" icon={<LibraryBooks />} />
                 </Tabs>
             </AppBar>

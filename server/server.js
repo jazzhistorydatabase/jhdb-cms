@@ -293,7 +293,10 @@ app.post("/upload", (req, res) => {
 app.post("/publish", (req, res) => {
     const token = req.body.auth;
     const name = req.body.name;
-    const slug = name.toLowerCase().replace(/ /gi, '-');
+    let slug = name.toLowerCase().replace(/ /gi, '-');
+    if(IS_DEV) {
+        slug = "test-" + slug
+    }
     logger.info(`User request publish for page ${slug}`)
     if(!slug) {
         res.status(404).send("No such page found");
@@ -343,14 +346,16 @@ app.post("/publish", (req, res) => {
 app.post("/optimize", (req, res) => {
     let retry = false;
     const doOptimize = () => {
-        const cloudFnUrl = IS_DEV ? 
+        const cloudFnUrl = IS_LOCAL ? 
         `http://localhost:5001/${serviceAccount.project_id}/us-central1/optimize` : 
         `https://us-central1-${serviceAccount.project_id}.cloudfunctions.net/optimize`;
         logger.info("/optimize, proxy to function");
         axios.post(cloudFnUrl, {
             auth: req.body['auth'],
             ref: req.body['ref'],
-            parentPage: req.body['parentPage']
+            parentPage: req.body['parentPage'],
+            test: req.body['test'],
+            force: req.body['force'],
         }).then(result => {
             logger.info("Optimize success");
             res.status(200).send(result.body);
@@ -465,14 +470,25 @@ app.get("/login", (req, res) => {
     });
 });
 
+let staticHandler = express.static("dist");
 
+if(IS_DEV) {
+    // If dev, use Parcel for HMR
+    const Bundler = require('parcel-bundler');
+    const bundler = new Bundler('client/index.html', {
+        hmr: true,
+        hmrPort: 4321,
+    });
+    staticHandler = bundler.middleware();
+}
+    
 // Host compiled contributor portal
 app.use("/images", express.static("./templates/images"));
-app.use("/", express.static("dist"));
+app.use("/", staticHandler);
 // Allow React Router to handle subroutes
-app.use("/:route/", express.static("dist"));
-app.use("/:route/:subroute", express.static("dist"));
-app.use("/:route/:subroute/:subsubroute", express.static("dist"));
+app.use("/:route/", staticHandler);
+app.use("/:route/:subroute", staticHandler);
+app.use("/:route/:subroute/:subsubroute", staticHandler);
 // App Manifest
 app.get("/manifest.json", (req, res) => {
     res.sendFile("./dist/manifest.json", {root: __dirname});

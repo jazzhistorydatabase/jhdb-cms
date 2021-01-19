@@ -25,6 +25,7 @@ const styles = theme => ({
         backgroundColor: theme.palette.background.paper,
     },
     paper: {
+        padding: theme.spacing(2),
     },
     cardColor: {
     },
@@ -122,7 +123,7 @@ class AdminView extends Component {
         }
 
         return (
-            <div>
+            <Paper elevation={3} className={classes.paper}>
                 <h1> Admin Settings </h1>
                 <Button onClick={() => {window.history.back()}} variant="contained" color={"primary"}
                         className={classes.button}> Back </Button>
@@ -188,7 +189,7 @@ class AdminView extends Component {
                         );
                     })}
 
-            </div>
+            </Paper>
 
         );
     }

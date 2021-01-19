@@ -4,7 +4,7 @@ import { withStyles } from '@material-ui/styles';
 import { Add, Done, PriorityHigh, Cached } from '@material-ui/icons';
 import { SearchRounded } from '@material-ui/icons';
 
-import { Button, CircularProgress, List } from '@material-ui/core';
+import { Button, CircularProgress, List, Paper } from '@material-ui/core';
 import { InputAdornment } from '@material-ui/core';
 import { TextField } from '@material-ui/core';
 import { Checkbox } from '@material-ui/core';
@@ -21,9 +21,9 @@ import fb, { useCollection, useDoc } from './firebase';
 const styles = theme => ({
     root: {
         textAlign: 'left',
-        paddingLeft: theme.spacing(1),
-        paddingRight: theme.spacing(1),
-    }
+        padding: theme.spacing(3),
+        paddingTop: theme.spacing(1)
+    },
 });
 
 const PageListView = (props) => {
@@ -42,6 +42,7 @@ const PageListView = (props) => {
     
     let pages = collection && collection.filter(e => !!e.type);
     let [filterOwned, setFilterOwned] = useState(false);
+    let [filterReview, setFilterReview] = useState(false);
     let [search, setSearch] = useState("");
 
     pages = pages.filter(p => (
@@ -49,7 +50,10 @@ const PageListView = (props) => {
             (p.description && p.description.includes(search))
         ));
     if(filterOwned) {
-        pages = pages.filter(p => p.owner === props.user.uid);
+        pages = pages.filter(p => p.owner && p.owner === props.user.uid);
+    }
+    if(filterReview) {
+        pages = pages.filter(p => p["pendingReview"]);
     }
 
     const newPage = () => {
@@ -84,6 +88,7 @@ const PageListView = (props) => {
         if(loading) {
             return (loading && <span><br/><CircularProgress /><br />Loading Page...</span>)
         }
+        const user = props.user;
         return <Route path="/pages/:id" component={(props) => {
             const pget = pages && pages.filter(p => p.ref.id === props.match.params.id);
             const page = pget && pget[0]; 
@@ -99,12 +104,14 @@ const PageListView = (props) => {
                     </div>
                 )
             }
-            return <EditPageView page={page} user={props.user} published={!!publishedList[page.ref.id]} />
+            return <EditPageView page={page} 
+                                 user={user}
+                                 published={!!publishedList[page.ref.id]} />
         }}></Route>
     }
 
     return (
-        <div className={props.classes.root}>
+        <Paper className={props.classes.root}>
             <h1>My Pages</h1>
             <Button onClick={newPage} 
                     disabled={!!loading || !!error}
@@ -114,7 +121,6 @@ const PageListView = (props) => {
             </Button>
             <br /><br />
             <TextField
-                className={classes.margin}
                 id="input-with-icon-textfield"
                 variant="outlined"
                 placeholder="Search Pages"
@@ -129,22 +135,41 @@ const PageListView = (props) => {
             />
             <br />
             {props.user.admin && 
-                <FormControlLabel
-                        color={"primary"}
-                        label={<div style={{display: 'flex', alignItems: 'center'}}>
-                                Only Show My Pages
-                            </div>}
-                        labelPlacement="end"
-                        style={{marginLeft: 5}}
-                        control={
-                            <Checkbox
-                                disabled={loading}
-                                checked={filterOwned}
-                                onChange={() => {setFilterOwned(!filterOwned)}}
-                                name="filterOwnedSwitch"
-                                color="secondary"
-                            />}
-                        />
+                <div>
+                    <FormControlLabel
+                            color={"primary"}
+                            label={<div style={{display: 'flex', alignItems: 'center'}}>
+                                    Only Show My Pages
+                                </div>}
+                            labelPlacement="end"
+                            style={{marginLeft: 5}}
+                            control={
+                                <Checkbox
+                                    disabled={loading}
+                                    checked={filterOwned}
+                                    onChange={() => {setFilterOwned(!filterOwned)}}
+                                    name="filterOwnedSwitch"
+                                    color="secondary"
+                                />}
+                            />
+                    <br />
+                    <FormControlLabel
+                            color={"primary"}
+                            label={<div style={{display: 'flex', alignItems: 'center'}}>
+                                    Only Show Pages Awaiting Review
+                                </div>}
+                            labelPlacement="end"
+                            style={{marginLeft: 5}}
+                            control={
+                                <Checkbox
+                                    disabled={loading}
+                                    checked={filterReview}
+                                    onChange={() => {setFilterReview(!filterReview)}}
+                                    name="filterReviewSwitch"
+                                    color="secondary"
+                                />}
+                            />
+                </div>
             }
             <br />
             {/* Firestore data loading/error: */}
@@ -158,9 +183,11 @@ const PageListView = (props) => {
             {/* Page list */}
             <List>
                 {pages && publishedList && pages.map(e => {
-                    const pendingApproval = e.approval === "pending";
+                    const pendingApproval = e.pendingReview;
                     const published = publishedList[e.ref.id];
-                    const statusColor = (published) ? "lightgreen" : (pendingApproval) ? "lightyellow" : "whitesmoke";
+                    const statusColor = (published) ? "lightgreen" : (pendingApproval) ? "orange" : "whitesmoke";
+                    const statusText = (published) ? "Published" : (pendingApproval) ? "Awaiting Review" : "Work in Progress";
+                    const statusIcon = (published) ? <Done /> : (pendingApproval) ? <PriorityHigh /> : <Cached />;
                     return (
                         <div key={e.ref.id || e.name}>
                             <Divider />
@@ -179,15 +206,8 @@ const PageListView = (props) => {
                                             display: 'flex', 
                                             alignItems: 'center', 
                                             color:  statusColor }}>
-                                    {published && 
-                                        <span><Done /> Published</span>
-                                    }
-                                    {pendingApproval &&  
-                                        <span><PriorityHigh /> Needs Review</span>
-                                    }
-                                    {!published && !pendingApproval && 
-                                        <span><Cached /> Work in Progress</span>
-                                    }
+                                        {statusIcon}
+                                        {statusText}
                                         <br />
                                     </span>
                                     {/* Description */}
@@ -199,7 +219,7 @@ const PageListView = (props) => {
                     );
                 })}
             </List>
-        </div>
+        </Paper>
     );
 }
 

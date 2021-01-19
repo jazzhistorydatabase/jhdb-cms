@@ -6,99 +6,86 @@ import Paper from "@material-ui/core/Paper";
 import { withStyles } from '@material-ui/core/styles';
 import Switch from "@material-ui/core/Switch";
 import { randomBytes } from 'crypto';
-import { InputLabel } from '@material-ui/core';
+import { CircularProgress, InputLabel } from '@material-ui/core';
 import { TextField } from '@material-ui/core';
 
 import FileInput from "./FileInput";
 import fb, {useCollection} from "./firebase";
 import dbx from './dropbox.js';
+import ImageOptimize from './ImageOptimize';
 
 
 const styles = theme => ({
     paper: {
         padding: theme.spacing(2),
     },
+    field: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+    },
 });
 
-// class MediaUpload extends Component { 
-//     constructor(props) {
-//         super(props);
-//         this.state = {
-//             contribText: '',
-//             collection: [],
-//             add: '',
-//         };
-//     }
-
-
-//     addFileUpload(event) {
-//         if (this.props.isPendingApproval) {
-//             window.alert("Please rescind your request for approval before making changes.");
-//             return;
-//         }
-//         let lst = this.state.collection;
-//         let maxIndex = 0;
-//         lst.forEach( (e) => {
-//             if(e.index > maxIndex) maxIndex = e.index;
-//         })
-//         fb.base.addToCollection(this.props.collection, {
-//             name: "",
-//             url: "",
-//             caption: "",
-//             icon: "",
-//             thumbnail: "",
-//             index: maxIndex + 1,
-//         });
-//     };
-
-//     onChooserSuccess(files) {
-//         // Get highest file index
-//         let lst = this.state.collection;
-//         let maxIndex = 0;
-//         lst.forEach( (e) => {
-//             if(e.index > maxIndex) maxIndex = e.index;
-//         })
-//         // create and push each doc
-//         files.forEach( file => {
-//             let fileDoc = {};
-//             fileDoc['name'] = file.name || "";
-//             fileDoc['url'] = (file.link && file.link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
-//             fileDoc['caption'] = "";
-//             fileDoc['icon'] = file.icon || "";
-//             fileDoc['thumbnail'] = (file.link && file.link.replace('www.dropbox', 'dl.dropboxusercontent')) || "";
-//             fileDoc['index'] = ++maxIndex;
-//             fb.base.addToCollection(this.props.collection, fileDoc);
-//         });
-//     }
-
-//     componentDidMount() {
-//         if(this.props && this.props.collection) {
-//             fb.base.bindCollection(this.props.collection, {
-//                 context: this,
-//                 state: 'collection',
-//                 withRefs: true
-//             });
-//         }
-//     }
+const processFileLink = (link) => {
+    return link.replace('www.dropbox', 'dl.dropboxusercontent').replace(' ', '%20');
+}
 
 const EditPageSection = (props) => {
     const classes = props.classes;
     let [files, addFile, loadingFiles, filesError] = useCollection(props.collectionRef.path);
+    const [page, updatePage] = [props.page, props.updatePage];
+
+    if(loadingFiles) {
+        return <CircularProgress />
+    } else if (filesError) {
+        return <div>
+                <h4>Error loading files</h4>
+                <p>Try refreshing the page, and contact global@jazzhistorydatabase.com if this issue persists</p>
+            </div>
+    }
+
+    let maxIndex = 0;
+    files.forEach( (e) => {
+        if(e.index > maxIndex) maxIndex = e.index;
+    });
+    const onChooserSuccess = (files) => {
+        // create and push each doc
+        files.forEach( file => {
+            let fileDoc = {};
+            fileDoc['name'] = file.name || "";
+            fileDoc['url'] = (file.link && processFileLink(file.link)) || "";
+            fileDoc['caption'] = "";
+            fileDoc['icon'] = file.icon || "";
+            fileDoc['thumbnail'] = (file.link && processFileLink(file.link)) || "";
+            fileDoc['index'] = ++maxIndex;
+            addFile(fileDoc);
+        });
+    };
+    const addFileInput = () => addFile({
+        name: "",
+        url: "",
+        caption: "",
+        icon: "",
+        thumbnail: "",
+        index: maxIndex + 1,
+    });
     
     files.sort((a, b) => {
         if (!a.index) return -1;
         if (!b.index) return 1;
         return a.index - b.index;
     });
-    fileInputs = files.map((fileDoc) => {
+
+    let fileInputs = files.map((fileDoc) => {
         return (
-            <FileInput  key={fileDoc.index || fileDoc.name || randomBytes(2)}
-                        fileType={props.fileType}
-                        fileIndex={fileDoc.index}
-                        fileDoc={fileDoc}
-                        isPendingApproval={props.page.isPendingApproval}
-            />);
+            <div className={classes.field}
+                 key={fileDoc.index || fileDoc.name || randomBytes(2)}>
+                <FileInput  type={props.fileType}
+                            fileDoc={fileDoc}
+                            />
+            </div>
+        );
     });
+    const sectionTitleKey = props.fileType.toLowerCase()+"Title";
 
     return (
         <div className={classes.root}>
@@ -106,17 +93,21 @@ const EditPageSection = (props) => {
             <Paper className={classes.paper} elevation={3} square={false}>
                 <FormGroup row>
                     <h2 className={classes.mediaUploadTitle}>
-                        {props.mediaType || ""}
+                        {props.fileType || ""}
                     </h2>
                 </FormGroup><br/>
                 <InputLabel>Section Title</InputLabel>
                 <TextField
                             variant="filled"
-                            className={classes.textField}
-                            defaultValue={this.props.sectionTitle || ""}
-                            onChange={(evt) => }
+                            className={classes.field}
+                            defaultValue={page[sectionTitleKey] || ""}
+                            onChange={(evt) => {
+                                let chg = {};
+                                chg[sectionTitleKey] = evt.target.value;
+                                updatePage(chg);
+                            }}
                             margin="normal"
-                            placeholder={"Default: " + (this.props.mediaType || "")}
+                            placeholder={"Default: " + (props.fileType || "")}
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -124,24 +115,27 @@ const EditPageSection = (props) => {
                 <Button variant="contained" color="primary" className={classes.button}
                         onClick={
                             () => {
-                                if (this.props.isPendingApproval) {
-                                    window.alert("Please rescind your request for approval before making changes.");
-                                } else {
-                                    dbx.onChooseMulti(this.props.uploadName, this.onChooserSuccess.bind(this));
-                                }
+                                dbx.onChooseMulti(props.fileType, onChooserSuccess);
                             }
                         }>
                     ++ Bulk Add
                 </Button>
-                <h4>
-                    {fileUploads}
-                </h4>
+                <br />
+                <br />
                 <Button variant="contained" color="primary" className={classes.button}
-                        onClick={this.addFileUpload.bind(this)}>
+                        onClick={addFileInput}>
                     + ADD ONE
                 </Button>
                 <br/>
                 <br/>
+                {fileInputs}
+                {props.fileType === 'Images' && 
+                <ImageOptimize parentPage={page}
+                               images={files}
+                               admin={props.user && props.user.admin}
+                               loadingImages={loadingFiles}
+                               errorImages={filesError}
+                />}
             </Paper>
         </div>
     );

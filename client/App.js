@@ -9,7 +9,6 @@ import { lightBlue } from '@material-ui/core/colors';
 import { SnackbarProvider } from 'notistack';
 
 import { CircularProgress, Link } from '@material-ui/core';
-import Paper from "@material-ui/core/Paper";
 
 import Header from './Header';
 import InfoView from './InfoView';
@@ -58,28 +57,21 @@ const styles = theme => ({
         opacity: 0.0,
         visibility: 'hidden',
     },
-    paper: {
-        maxWidth: 1500,
-        margin: theme.spacing(3),
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        padding: theme.spacing(3),
-    },
     shown: {
         opacity: 1.0,
         visibility: 'visible',
         transition: 'opacity 500ms 0ms'
     },
-    hidden: {
+hidden: {
         opacity: 0.0,
         visibility: 'hidden',
         transition: 'opacity 500ms 0ms',
     },
-    snackbarContainer: {
-        // top: 20,
-        // right: 20,
-        // left: 'auto',
-        // bottom: 'auto',
+    switch: {
+        margin: theme.spacing(2),
+        maxWidth: 1500,
+        marginLeft: 'auto',
+        marginRight: 'auto',
     }
 });
 
@@ -121,7 +113,7 @@ const App = (props) => {
                         <MuiThemeProvider theme={theme}>
                             <SnackbarProvider maxSnack={1}
                                               anchorOrigin={{
-                                                  vertical: 'top',
+                                                  vertical: 'bottom',
                                                   horizontal: 'right'
                                               }}
                                               classes={{containerRoot: classes.snackbarContainer}}>
@@ -142,7 +134,7 @@ const App = (props) => {
                                     </h3>
                                 }
                                 {user && user.authorized &&
-                                    <Paper className={classes.paper} elevation={3}>
+                                    <div className={classes.switch}>
                                         <Switch>
                                             <Route exact path="/">
                                                 <InfoView />
@@ -159,7 +151,7 @@ const App = (props) => {
                                                             users={[user]} />
                                             </Route>
                                         </Switch>
-                                    </Paper>
+                                    </div>
                                 }
                             </SnackbarProvider>
                         </MuiThemeProvider>

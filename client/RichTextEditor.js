@@ -61,6 +61,7 @@ const RichTextEditor = (props) => {
                     width: '100%',
                     height: 39,
                     textAlign: 'center',
+                    color: 'black',
                 }}>
             </div>
             <div className={classes.editorContainer} 
@@ -83,6 +84,7 @@ const RichTextEditor = (props) => {
                         width: '100%',
                         theme_advanced_resizing_min_height: props.height || 200,
                         placeholder: props.placeholder || "",
+                        block_formats: 'Paragraph=p; Header 2=h2; Header 3=h3',
                         menubar: false,
                         plugins: [
                             'advlist autolink lists link',
@@ -91,7 +93,7 @@ const RichTextEditor = (props) => {
                         fixed_toolbar_container: `#${toolbarContainer.current}`,
                         toolbar_sticky: true,
                         toolbar:
-                        'undo redo | h2 h3 paragraph | bold italic blockquote | bullist numlist outdent indent | removeformat',
+                        'undo redo | h2 h3 lineheight | bold italic blockquote | bullist numlist outdent indent | removeformat',
                         init_instance_callback: (e) => {
                             if(!editor) {
                                 setEditor(e.editorManager.activeEditor);

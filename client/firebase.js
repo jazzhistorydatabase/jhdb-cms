@@ -163,7 +163,6 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
     let isUpdating = useRef(false);
 
     useEffect( () => {
-        console.log(`delayedDocUpdated(${doc.ref.path})`)
         let diff = false;
         // Only update docLocal if upstream change is different
         Object.keys(doc).forEach(key => {
@@ -271,9 +270,6 @@ export const useDocDelayedUpdate = (path, updateDelayMs) => {
 }
 
 export const useCollection = (path, query=undefined) => {
-
-    console.log(`useColl(${path})`)
-
     let [collection, setCollection] = useState([]);
     let [loading, setLoading] = useState(true);
     let [error, setError] = useState(null);

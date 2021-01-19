@@ -12,7 +12,7 @@ const ToggleSwitch = (props) => {
     return (
         <Paper style={{padding: 2}}>
             <FormControlLabel
-            label={<div style={{display: 'flex', alignItems: 'center'}}>
+            label={<div style={{display: 'flex', alignItems: 'center', textAlign: 'center'}}>
                     {props.labelIcon}<span>{props.labelText}</span>
                 </div>}
             labelPlacement="start"
