@@ -106,6 +106,7 @@ const PageListView = (props) => {
             }
             return <EditPageView page={page} 
                                  user={user}
+                                 publishedList={publishedList}
                                  published={!!publishedList[page.ref.id]} />
         }}></Route>
     }
