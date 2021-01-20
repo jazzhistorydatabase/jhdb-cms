@@ -1,19 +1,19 @@
 import React, { useEffect } from 'react';
-import {useHistory, useLocation, Route} from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
+import { Button, FormControlLabel, Grid, Paper, Switch, TextField, Typography } from '@material-ui/core';
+import { AssignmentLateRounded, DeleteRounded, EditRounded, FullscreenRounded, LibraryBooksRounded, PageviewRounded, PublishRounded, VisibilityRounded } from '@material-ui/icons';
 import { withStyles } from '@material-ui/styles';
-import { Button, Grid, TextField, SnackbarContent, CircularProgress } from '@material-ui/core';
-import { Link, Paper, Typography, Switch, FormControlLabel } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 
-import { useDelayedUpdate } from './firebase';
-import { Editor, getTinymce } from '@tinymce/tinymce-react';
-import RichTextEditor from './RichTextEditor';
-import { FormLabel } from '@material-ui/core';
-import { AssignmentLateRounded, EditRounded, FullscreenRounded, LibraryBooksRounded, PageviewRounded, PublishRounded, VisibilityRounded } from '@material-ui/icons';
-import ToggleSwitch from './ToggleSwitch';
-import FileInput from './FileInput';
 import EditPageSection from './EditPageSection';
+import FileInput from './FileInput';
+import fb, { useDelayedUpdate } from './firebase';
+import RichTextEditor from './RichTextEditor';
+import ToggleSwitch from './ToggleSwitch';
+
+
 
 const styles = theme => ({
     root: {
@@ -101,6 +101,42 @@ const EditPageView = (props) => {
     const host = window.location.host;
     const isTest = host.includes("localhost") || host.includes("staging") || host.includes("dev");
 
+    const handlePublish = (evt) => {
+        if(!props.published && window.confirm("Are you sure you are ready to publish? If this page has been previously published, the public-facing page will be overridden.")) {
+            fb.getToken( token => {
+                axios.post(`/publish`, {
+                    auth: token,
+                    name: page.name,
+                    page: page.ref.id,
+                    test: isTest,
+                }).then(resp => {
+                    let upd = {};
+                    upd[page.ref.id] = true;
+                    props.publishedList.ref.update(upd);
+                    pageUpstream.ref.update({lastPublished: new Date().toISOString()});
+                    window.alert("Publish success! Click the 'View Published' button to visit the published page");
+                }).catch( err => {
+                    window.alert("Error publishing - if this issue persists, please contact global@jazzhistorydatabase.com for support\n\n" + err);
+                    console.log(err);
+                    return;
+                });
+            });
+        } else if(window.confirm("Are you sure you want to unpublish? Re-publishing again later will overwrite any public-facing page with the same name.")) {
+            let upd = {};
+            upd[page.ref.id] = false;
+            props.publishedList.ref.update(upd);
+            if(!page.lastPublished) {
+                pageUpstream.ref.update({lastPublished: new Date().toISOString()});
+            }
+        }
+    }
+
+    const handleDelete = () => {
+        if(window.confirm("Are you sure? This will permanently delete all entered data for this page! (This should only be used if you just created the page by accident)")) {
+            page.ref.delete();
+        }
+    }
+
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row-reverse" alignItems="stretch">
@@ -160,7 +196,12 @@ const EditPageView = (props) => {
                                     <ToggleSwitch labelText="Publish"
                                                 labelIcon={<PublishRounded />}
                                                 checked={props.published}
-                                                onChange={evt => handleToggleChange(evt, 'pendingReview')} />
+                                                onChange={evt => handlePublish(evt)} />
+                                </Grid>
+                            }
+                            {page.lastPublished && 
+                                <Grid item xs={12}>
+                                    Published on {(""+new Date(page.lastPublished)).split('GMT')[0]}
                                 </Grid>
                             }
                             {props.published &&
@@ -176,6 +217,18 @@ const EditPageView = (props) => {
                                             startIcon={<PageviewRounded />}
                                             className={classes.button}>
                                         View Published
+                                    </Button>
+                                </Grid>
+                            }
+                            {!props.published && !page.lastPublished && !page.pendingReview &&
+                                <Grid item xs={12}>
+                                    <Button onClick={handleDelete} 
+                                            variant="contained"
+                                            color={"primary"}
+                                            style={{backgroundColor: 'red'}}
+                                            startIcon={<DeleteRounded />}
+                                            className={classes.button}>
+                                        Delete Page
                                     </Button>
                                 </Grid>
                             }

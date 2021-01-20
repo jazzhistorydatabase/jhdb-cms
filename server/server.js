@@ -67,33 +67,6 @@ let logUsage = () => {
     logger.info(`Resource Usage\nCPU\t${process.cpuUsage().user}\nMemory\t${mem}MB / ${totalMem}MB\nMem RSS\t${memRSS}`)
 }
 
-let fetchContributionByName = (req, res, contributionName, template, callback, isPreview=true) => {
-    const collRoot = fb.firestore().collection("Contributions");
-    let collsRef;
-    let collName = contributionName.toLowerCase().replace(/-/g, " ")
-        .split(" ")
-        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-        .join(" ");
-    logger.info(`Fetching contribution by name: "${contributionName}" -> "${collName}"`);
-    collsRef = collRoot.where("name", "==", collName);
-    collsRef.get().then(snapshots => {
-        if (snapshots.empty) { // No such collection
-            logger.error(`No matching contributions found for name: ${contributionName}`);
-            res.send("No matching contributions found");
-            return;
-        } else {
-            logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
-            snapshots.forEach(snapshot => {
-                let collRef = snapshot.data();
-                callback(req, res, collRef, template, isPreview);
-            });
-        }
-    }).catch( err => {
-        logger.error(`Error fetching contribution by name "${contributionName}"`, err);
-        callback(req, res, null);
-    });
-};
-
 // Define function to render with handlebars
 let renderFromFirebase = (req, res, collRef, template, isPreview) => {
     if (!collRef) {
@@ -188,7 +161,7 @@ let renderFromFirebase = (req, res, collRef, template, isPreview) => {
     })
 };
 
-let previewReqHandler = (req, res) => {
+let getPageAndRender = (req, res, isPreview=true) => {
     const pageId = ""+req.params.page;
     if(pageId.includes("/")) {
         logger.error("Error: invalid preview request (/ in page Id)");
@@ -203,7 +176,7 @@ let previewReqHandler = (req, res) => {
                 logger.success(`Page ${pageId} exists`);
                 const page = snapshot.data();
                 page.ref = snapshot.ref;
-                renderFromFirebase(req, res, page, "template", true);
+                renderFromFirebase(req, res, page, "template", isPreview);
             } else {
                 logger.error(`Error: No such page found ${pageId}`, err);
                 res.send("Error: Page not found in database");
@@ -218,10 +191,12 @@ let previewReqHandler = (req, res) => {
     }
 }
 
+let previewReqHandler = (req, res) => {
+    getPageAndRender(req, res, true);
+}
+
 let renderReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, "template", renderFromFirebase, false);
+    getPageAndRender(req, res, false);
 }
 
 app.get("/header-new.php", (req, res) => {
@@ -229,25 +204,13 @@ app.get("/header-new.php", (req, res) => {
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
 
-app.get("/preview/home", (req, res) => {
-    logger.info('User request preview/home');
-    res.sendFile("./templates/CMS-landing-page.html", {root: __dirname});
-});
-
-app.get("/preview/branch", (req, res) => {
-    logger.info('User request preview/branch');
-    res.sendFile("./templates/landing-page.html", {root: __dirname});
-});
-app.use("/mockup", express.static(path.join(__dirname, './mockup')));
-
-app.get("/preview/:page", previewReqHandler);
-app.get("/render/:collection", renderReqHandler);
-
-
 app.get("/published/header-new.html", (req, res) => {
     logger.info('User request published/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
+
+app.get("/preview/:page", previewReqHandler);
+app.get("/render/:page", renderReqHandler);
 
 // Enable json
 app.use(express.json());
@@ -292,12 +255,14 @@ app.post("/upload", (req, res) => {
 // Publish Endpoint
 app.post("/publish", (req, res) => {
     const token = req.body.auth;
+    const page = req.body.page;
     const name = req.body.name;
+    const test = req.body.test;
     let slug = name.toLowerCase().replace(/ /gi, '-');
-    if(IS_DEV) {
+    if(test) {
         slug = "test-" + slug
     }
-    logger.info(`User request publish for page ${slug}`)
+    logger.info(`User request publish for page ${page} with slug ${slug}`)
     if(!slug) {
         res.status(404).send("No such page found");
     }
@@ -310,8 +275,8 @@ app.post("/publish", (req, res) => {
             logger.success(`Successfully get admin users, checking account_id: ${uid}`)
             if(snapshot.data()[uid]) {
                 logger.success(`User ${uid} is admin, beginning publish`);
-                axios.get(`http://0.0.0.0:${PORT}/render/${slug}`).then( resp => {
-                    logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
+                axios.get(`http://0.0.0.0:${PORT}/render/${page}`).then( resp => {
+                    logger.success(`Got render for page ${slug}, uploading to dropbox`);
                     dbx.filesUpload({
                         "path": `/jhdb global/Published/${slug}/index.php`,
                         "mode": "overwrite",
