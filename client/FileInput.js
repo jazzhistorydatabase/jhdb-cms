@@ -51,13 +51,6 @@ const styles = theme => ({
     }
 });
 
-const dbxFileType = {
-    'bio': 'Images',
-    'Images': 'Images',
-    'Audio': 'Audio',
-    'Video': 'Videos'
-}
-
 const processFileLink = (link, reverse=false) => {
     if(reverse) {
         return link.replace('dl.dropboxusercontent', 'www.dropbox');
@@ -152,19 +145,21 @@ const FileInput = (props) => {
             tooltipText = "Click to change file"
         }
 
-    const manualEntry = (props.type === 'Video' || props.manualEntry);
+    const manualEntry = props.manualEntry;
 
     return (
         <Paper className={classes.root}>
             <Grid container spacing={2} direction="row" alignItems={"center"}>
                 {manualEntry && 
                     <Grid item xs={6} sm={6}>
-                        <TextField
-                            className={classes.field}
-                            variant="filled"
-                            placeholder={"Youtube Link (Use Share Button)"}
-                            value={doc.url}
-                            onChange={evt => updateDoc({url: processVideoLink(evt.target.value)})} />
+                        <Tooltip title={'Pages with linked content not licensed to JHDB can not be published. Please see info tab for more information.'}>
+                            <TextField
+                                className={classes.field}
+                                variant="filled"
+                                placeholder={props.type === 'Video' ? "Youtube Link (Use Share Button)" : "JHDB Website Links Only!"}
+                                value={doc.url}
+                                onChange={evt => updateDoc({url: processVideoLink(evt.target.value)})} />
+                        </Tooltip>
                     </Grid>
                 }
                 {!manualEntry &&

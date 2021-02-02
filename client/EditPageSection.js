@@ -6,7 +6,7 @@ import Paper from "@material-ui/core/Paper";
 import { withStyles } from '@material-ui/core/styles';
 import Switch from "@material-ui/core/Switch";
 import { randomBytes } from 'crypto';
-import { CircularProgress, InputLabel } from '@material-ui/core';
+import { CircularProgress, InputLabel, Typography } from '@material-ui/core';
 import { TextField } from '@material-ui/core';
 
 import FileInput from "./FileInput";
@@ -116,8 +116,8 @@ const EditPageSection = (props) => {
                                 shrink: true,
                             }}
                         /><br/><br/>
-                {props.fileType === 'Audio' && props.user && props.user.admin &&
-                    <ToggleSwitch labelText="Manual Link Entry (JHDB Website Links Only!)"
+                {/(Audio|Video)/.compile().exec(props.fileType) && props.user &&
+                    <ToggleSwitch labelText="Manual Link Entry"
                                   labelIcon={<LinkRounded />}
                                   checked={manualEntry}
                                   onChange={evt => setManualEntry(!manualEntry)} />
@@ -139,6 +139,11 @@ const EditPageSection = (props) => {
                 </Button>
                 <br/>
                 <br/>
+                {props.fileType === 'Video' && !manualEntry && 
+                    <Typography variant="body1" style={{color: 'orange'}}>
+                        NOTE: Videos selected from dropbox will not appear in preview. Once you request review, an admin will upload these to the JHDB YouTube.
+                    </Typography>
+                }
                 {fileInputs}
                 {props.fileType === 'Images' && 
                 <ImageOptimize parentPage={page}
