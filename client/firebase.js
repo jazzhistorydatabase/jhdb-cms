@@ -73,7 +73,7 @@ const fb = {
                 callback(user);
             } else {
                 callback(null);
-            }
+            }p
         });
     },
 
@@ -159,8 +159,8 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
     let [docLocal, setDocLocal] = useState(doc);
     let [queuedUpdates, setQueuedUpdates] = useState({});
     let [updateTimeout, setUpdateTimeout] = useState(null);
-    // let [isUpdating, setUpdating]  = useState(false);
-    let isUpdating = useRef(false);
+    let [isUpdating, setUpdating]  = useState(false);
+    // let isUpdating = useRef(false);
 
     useEffect( () => {
         let diff = false;
@@ -175,8 +175,8 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
             console.log(`Upstream change for ${doc.ref.path}`);
             setDocLocal(doc);
         }
-        isUpdating.current = false;
-        // setUpdating(false);
+        // isUpdating.current = false;
+        setUpdating(false);
     }, [doc]);
 
     useEffect( () => () => {
@@ -192,8 +192,8 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
         }, err => {
             console.error(err);
             onError(err);
-            isUpdating.current = false;
-            // setUpdating(false);
+            // isUpdating.current = false;
+            setUpdating(false);
         });
     }
     
@@ -210,8 +210,8 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
         });
         setQueuedUpdates(upd);
         setDocLocal(updDoc);
-        isUpdating.current = true;
-        // setUpdating(true);
+        // isUpdating.current = true;
+        setUpdating(true);
 
         setUpdateTimeout(
             setTimeout( () => {
@@ -221,7 +221,7 @@ export const useDelayedUpdate = (doc, updateDelayMs, onSuccess, onError) => {
         );
     }
 
-    return [docLocal, updateDocDelayed, isUpdating.current];
+    return [docLocal, updateDocDelayed, isUpdating];
 
 }
 
