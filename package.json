@@ -19,7 +19,7 @@
     "@material-ui/styles": "^4.11.2",
     "@tinymce/tinymce-react": "^3.8.4",
     "@types/react": "^17.0.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "backpack-core": "^0.8.4",
     "colors": "^1.4.0",
     "dropbox": "^4.0.30",
