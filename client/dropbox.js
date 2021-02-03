@@ -27,19 +27,24 @@ const dbx = {
     },
 
     onChoose(fileType, successCallback) {
-        if (!this.isDropboxReady() || !successCallback || (fileType !== 'Images' && fileType !== 'Audio')) return null;
+        if (!this.isDropboxReady() || !successCallback || (fileType !== 'Images' && fileType !== 'Audio' && fileType !== 'Video')) return null;
         let options;
         if (fileType === 'Images') options = this.dbxImageOptions;
         else if (fileType === 'Audio') options = this.dbxAudioOptions;
+        else if (fileType === 'Video') options = this.dbxVideoOptions;
+        else console.error("Invalid file type for dropbox chooser");
+        console.log("Choosing type "+fileType);
         options.success = successCallback;
         window.Dropbox.choose(options);
     },
 
     onChooseMulti(fileType, successCallback) {
-        if (!this.isDropboxReady() || !successCallback || (fileType !== 'Images' && fileType !== 'Audio')) return null;
+        if (!this.isDropboxReady() || !successCallback || (fileType !== 'Images' && fileType !== 'Audio' && fileType !== 'Video')) return null;
         let options;
         if (fileType === 'Images') options = this.dbxImageOptions;
         else if (fileType === 'Audio') options = this.dbxAudioOptions;
+        else if (fileType === 'Video') options = this.dbxVideoOptions;
+        else console.error("Invalid file type for dropbox chooser");
         options.success = successCallback;
         options.multiselect = true;
         window.Dropbox.choose(options);
@@ -61,6 +66,16 @@ const dbx = {
         linkType: "preview", // or "direct"
         multiselect: false,
         extensions: ['audio'],
+        folderselect: false,
+        sizeLimit: 1024 * 1024 * 1024, // in bytes
+    },
+    
+    dbxVideoOptions: {
+        success: null,
+        cancel: null,
+        linkType: "preview", // or "direct"
+        multiselect: false,
+        extensions: ['video'],
         folderselect: false,
         sizeLimit: 1024 * 1024 * 1024, // in bytes
     },

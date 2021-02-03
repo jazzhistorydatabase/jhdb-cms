@@ -8,6 +8,7 @@ const axios = require('axios');
 
 const logger = require('./logger');
 
+/*=== Load credentials ===*/
 const serverCredentials = require("./server-creds.json");
 const serviceAccount = serverCredentials.firebaseConfig;
 const dropboxKey = serverCredentials.dropboxConfig.appKey;
@@ -25,21 +26,24 @@ const credentials = {
         authorizeHost: 'https://www.dropbox.com',
         authorizePath: '1/oauth2/authorize'
     }
-    
 };
+
+/*=== Init oauth2 handler ===*/
 const oauth2 = require('simple-oauth2').create(credentials);
 
-// Fetch cli args
+/*=== Load environment ===*/
 const IS_DEV = process.env["DEV"];
+const IS_LOCAL = process.env["LOCAL"];
 const PORT = process.env.PORT || 8080;
 
 logger.info(`Starting server in ${IS_DEV ? "dev" : "prod"} mode`);
 
 fb.initializeApp({
     credential: fb.credential.cert(serviceAccount),
-    databaseURL: "https://" + serviceAccount.project_id + "firebaseio.com"
+    databaseURL: IS_LOCAL ? "http://localhost:8000" : "https://" + serviceAccount.project_id + "firebaseio.com"
 });
 
+/*=== Initialize dropbox integration ===*/
 const dbx = new dropbox.Dropbox({
     "clientId": dropboxKey, 
     "clientSecret": dropboxSecret, 
@@ -47,9 +51,10 @@ const dbx = new dropbox.Dropbox({
     "fetch": fetch
 });
 
+/*=== Create express server ===*/
 const app = express();
 
-// Configure handlebars
+/*=== Configure handlebars ===*/
 app.engine("handlebars", exphbs({defaultLayout: "template"}));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "handlebars");
@@ -62,37 +67,13 @@ let logUsage = () => {
     logger.info(`Resource Usage\nCPU\t${process.cpuUsage().user}\nMemory\t${mem}MB / ${totalMem}MB\nMem RSS\t${memRSS}`)
 }
 
-let fetchContributionByName = (req, res, contributionName, template, callback, isPreview=true) => {
-    const collRoot = fb.firestore().collection("Contributions");
-    let collsRef;
-    let collName = contributionName.toLowerCase().replace(/-/g, " ")
-        .split(" ")
-        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-        .join(" ");
-    logger.info(`Fetching contribution by name: "${contributionName}" -> "${collName}"`);
-    collsRef = collRoot.where("name", "==", collName);
-    collsRef.get().then(snapshots => {
-        if (snapshots.empty) { // No such collection
-            logger.error(`No matching contributions found for name: ${contributionName}`);
-            res.send("No matching contributions found");
-            return;
-        } else {
-            logger.log(`Found ${snapshots.size} matches for name: ${contributionName}`);
-            snapshots.forEach(snapshot => {
-                let collRef = snapshot.data();
-                callback(req, res, collRef, template, isPreview);
-            });
-        }
-    }).catch( err => {
-        logger.error(`Error fetching contribution by name "${contributionName}"`, err);
-        callback(req, res, null);
-    });
-};
-
 // Define function to render with handlebars
 let renderFromFirebase = (req, res, collRef, template, isPreview) => {
-    if (!collRef) return;
-
+    if (!collRef) {
+        logger.error("Erorr: Can't render null data");
+        return;
+    }
+    logger.info(`Rendering page ${collRef.ref.path} in ${isPreview ? 'preview' : 'publish'} mode`);
     // Get images
     let images = [];
     let collectionDoc = collRef;
@@ -180,16 +161,42 @@ let renderFromFirebase = (req, res, collRef, template, isPreview) => {
     })
 };
 
+let getPageAndRender = (req, res, isPreview=true) => {
+    const pageId = ""+req.params.page;
+    if(pageId.includes("/")) {
+        logger.error("Error: invalid preview request (/ in page Id)");
+        res.send("Error: invalid preview request (/ in page Id)");
+        return;
+    }
+    logger.info(`User request preview for collection: ${pageId}`);
+    try {
+        const pageRef = fb.firestore().collection("Contributions").doc(pageId);
+        pageRef.get().then(snapshot => {
+            if(snapshot.exists) {
+                logger.success(`Page ${pageId} exists`);
+                const page = snapshot.data();
+                page.ref = snapshot.ref;
+                renderFromFirebase(req, res, page, "template", isPreview);
+            } else {
+                logger.error(`Error: No such page found ${pageId}`, err);
+                res.send("Error: Page not found in database");
+            }
+        }).catch(err => {
+            logger.error(`Error: Could not fetch page data for ${pageId}`, err);
+            res.send("Error: Could not fetch page data");
+        });
+    } catch(err) {
+        logger.error("Error: Could not create db ref for "+pageId, err);
+        res.send("Error: Could not create db ref");
+    }
+}
+
 let previewReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, "template", renderFromFirebase);
+    getPageAndRender(req, res, true);
 }
 
 let renderReqHandler = (req, res) => {
-    let collName = req.params.collection.toLowerCase();
-    logger.info(`User request preview for collection: ${collName}`);
-    fetchContributionByName(req, res, collName, "template", renderFromFirebase, false);
+    getPageAndRender(req, res, false);
 }
 
 app.get("/header-new.php", (req, res) => {
@@ -197,25 +204,13 @@ app.get("/header-new.php", (req, res) => {
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
 
-app.get("/preview/home", (req, res) => {
-    logger.info('User request preview/home');
-    res.sendFile("./templates/CMS-landing-page.html", {root: __dirname});
-});
-
-app.get("/preview/branch", (req, res) => {
-    logger.info('User request preview/branch');
-    res.sendFile("./templates/landing-page.html", {root: __dirname});
-});
-app.use("/mockup", express.static(path.join(__dirname, './mockup')));
-
-app.get("/preview/:collection", previewReqHandler);
-app.get("/render/:collection", renderReqHandler);
-
-
 app.get("/published/header-new.html", (req, res) => {
     logger.info('User request published/header-new.html');
     res.sendFile("./mockup/header-new.html", {root: __dirname});
 });
+
+app.get("/preview/:page", previewReqHandler);
+app.get("/render/:page", renderReqHandler);
 
 // Enable json
 app.use(express.json());
@@ -260,9 +255,14 @@ app.post("/upload", (req, res) => {
 // Publish Endpoint
 app.post("/publish", (req, res) => {
     const token = req.body.auth;
+    const page = req.body.page;
     const name = req.body.name;
-    const slug = name.toLowerCase().replace(/ /gi, '-');
-    logger.info(`User request publish for page ${slug}`)
+    const test = req.body.test;
+    let slug = name.toLowerCase().replace(/ /gi, '-');
+    if(test) {
+        slug = "test-" + slug
+    }
+    logger.info(`User request publish for page ${page} with slug ${slug}`)
     if(!slug) {
         res.status(404).send("No such page found");
     }
@@ -275,8 +275,8 @@ app.post("/publish", (req, res) => {
             logger.success(`Successfully get admin users, checking account_id: ${uid}`)
             if(snapshot.data()[uid]) {
                 logger.success(`User ${uid} is admin, beginning publish`);
-                axios.get(`http://0.0.0.0:${PORT}/render/${slug}`).then( resp => {
-                    logger.success(`Got preview render for page ${slug}, uploading to dropbox`);
+                axios.get(`http://0.0.0.0:${PORT}/render/${page}`).then( resp => {
+                    logger.success(`Got render for page ${slug}, uploading to dropbox`);
                     dbx.filesUpload({
                         "path": `/jhdb global/Published/${slug}/index.php`,
                         "mode": "overwrite",
@@ -311,14 +311,16 @@ app.post("/publish", (req, res) => {
 app.post("/optimize", (req, res) => {
     let retry = false;
     const doOptimize = () => {
-        const cloudFnUrl = IS_DEV ? 
+        const cloudFnUrl = IS_LOCAL ? 
         `http://localhost:5001/${serviceAccount.project_id}/us-central1/optimize` : 
         `https://us-central1-${serviceAccount.project_id}.cloudfunctions.net/optimize`;
         logger.info("/optimize, proxy to function");
         axios.post(cloudFnUrl, {
             auth: req.body['auth'],
             ref: req.body['ref'],
-            parentPage: req.body['parentPage']
+            parentPage: req.body['parentPage'],
+            test: req.body['test'],
+            force: req.body['force'],
         }).then(result => {
             logger.info("Optimize success");
             res.status(200).send(result.body);
@@ -387,6 +389,7 @@ app.get('/redirect', (req, res) => {
     logger.info(`Beginning OAuth Code Flow redirect, redirect_uri: ${redirectUri}`);
     const redir = oauth2.authorizationCode.authorizeURL({
       redirect_uri: callbackUri(req),
+    //   scope: "account_info.read files.content.read files.metadata.read"
     });
     res.redirect(redir);
 });
@@ -432,11 +435,29 @@ app.get("/login", (req, res) => {
     });
 });
 
+let staticHandler = express.static("dist");
 
+if(IS_DEV) {
+    // If dev, use Parcel for HMR
+    const Bundler = require('parcel-bundler');
+    const bundler = new Bundler('client/index.html', {
+        hmr: true,
+        hmrPort: 4321,
+    });
+    staticHandler = bundler.middleware();
+}
+    
 // Host compiled contributor portal
-app.use("/", express.static("dist"));
 app.use("/images", express.static("./templates/images"));
-
+app.use("/", staticHandler);
+// Allow React Router to handle subroutes
+app.use("/:route/", staticHandler);
+app.use("/:route/:subroute", staticHandler);
+app.use("/:route/:subroute/:subsubroute", staticHandler);
+// App Manifest
+app.get("/manifest.json", (req, res) => {
+    res.sendFile("./dist/manifest.json", {root: __dirname});
+});
 
 // Start the server
 logger.info("Binding to port "+PORT);

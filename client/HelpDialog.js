@@ -19,16 +19,22 @@ export default function HelpDialog(props) {
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Created by Mikel Matticoli and Lucas Varella. 
-            Questions? Technical difficulties? Email us at <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link>
+            <br />
+            <br />
+            <h4>Questions? Technical difficulties? Email us at <Link href="mailto:global@jazzhistorydatabase.com">global@jazzhistorydatabase.com</Link></h4>
             <br/>                     
             <br/>                     
             <Typography variant="h5">Special Thanks:</Typography>
-            <br/>                     
             <Link href="https://jazzhistorydatabase.com">Rich Falco, JHDB Founder</Link>
+            <br/>                     
             <Link href="https://www.linkedin.com/in/mikedrnek/">Mike Drnek, JHDB Lab Admin</Link>
+            <br/>                     
             <Link href="https://keithzizza.com">Keith Zizza, IQP Advisor</Link>
+            <br/>                     
             <Link href="https://www.charlie-roberts.com/">Charlie Roberts, Prototype ISP Advisor</Link>
+            <br/>                     
             <Link href="https://imgd.wpi.edu">Interactive Media & Game Development</Link>
+            <br/>                     
             <Link href="https://global-lab.wpi.edu">The Global Lab at WPI</Link>
           </DialogContentText>
         </DialogContent>

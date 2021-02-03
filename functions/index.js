@@ -38,10 +38,12 @@ exports.optimize = functions.runWith(runtimeOpts).https.onRequest(async (req, re
     const token = req.body && req.body['auth'];
     const docPath = req.body && req.body['ref'];
     const parentPage = req.body && req.body['parentPage'];
+    const isTest = req.body && req.body['test'];
+    const forceOp = req.body && req.body['force'];
 
     let step = "";
     try {
-        logger.info(`User request optimize images in collection ${docPath}`);
+        logger.info(`User request optimize images in collection ${docPath} ${isTest ? 'in test mode' : ''})`);
         logUsage();
         
         if(!token || !docPath || !parentPage) {
@@ -86,7 +88,7 @@ exports.optimize = functions.runWith(runtimeOpts).https.onRequest(async (req, re
         const docRef = imageSnapshot.ref;
         const isOptimized = doc['optimized'];
         logger.success(`Parsed image data at ${docPath}, optimized status: ${isOptimized}`);
-        if(isOptimized) {
+        if(isOptimized && !forceOp) {
             logger.success(`Image already optimized, skipping ${docPath}`);
             return res.status(200).send("Already optimized");
         }
@@ -152,7 +154,10 @@ exports.optimize = functions.runWith(runtimeOpts).https.onRequest(async (req, re
         
         // Construct filename and path for upload
         step = "preparing upload parameters";
-        const slug = parentPage.toLowerCase().replace(/ /gi, '-');
+        let slug = (""+parentPage).toLowerCase().replace(/ /gi, '-');
+        if(isTest) {
+            slug = 'test-'+slug;
+        }
         const cappedCaption = doc.caption.length > 150 ? doc.caption.substring(0, 150) : doc.caption;
         const filename = `${cappedCaption ? cappedCaption.toLowerCase().replace(/[^a-zA-Z\d]/g, '-') : ''}_${docRef.id}`;
         const uploadPath = `/jhdb global/Published/${slug}/images/${filename}`;
