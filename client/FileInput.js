@@ -79,7 +79,7 @@ const FileInput = (props) => {
 
     const onSuccess = () => {
         closeSnackbar();
-        enqueueSnackbar('Save success!', {variant: 'success'});
+        // enqueueSnackbar('Save success!', {variant: 'success'});
     }
     
     const onError = () => {
@@ -87,13 +87,12 @@ const FileInput = (props) => {
         enqueueSnackbar('Error saving changes', {variant: 'error'});
     }
 
-    const [doc, updateDoc, isUpdating] = useDelayedUpdate(props.fileDoc, 3000, onSuccess, onError);
+    const [doc, updateDoc] = useDelayedUpdate(props.fileDoc, 3000, onSuccess, onError);
 
-    useEffect( () => {
-        if(isUpdating) {
-            enqueueSnackbar('Saving changes...', {variant: 'info', persist: true});
-        }
-    }, [isUpdating]);
+    const update = (data) => {
+        props.updatePage({});
+        updateDoc(data);
+    }
     
     const onDbxChoose = (file) => {
         let fileDoc = {};
@@ -158,7 +157,7 @@ const FileInput = (props) => {
                                 variant="filled"
                                 placeholder={props.type === 'Video' ? "Youtube Link (Use Share Button)" : "JHDB Website Links Only!"}
                                 value={doc.url}
-                                onChange={evt => updateDoc({url: processVideoLink(evt.target.value)})} />
+                                onChange={evt => update({url: processVideoLink(evt.target.value)})} />
                         </Tooltip>
                     </Grid>
                 }
@@ -191,7 +190,7 @@ const FileInput = (props) => {
                         className={classes.field}
                         height={30}
                         placeholder={"Caption"}
-                        onEditorChange={(value) => updateDoc({caption: value, optimized: false})}
+                        onEditorChange={(value) => update({caption: value, optimized: false})}
                         value={doc.caption}/>
                     }
                 </Grid>

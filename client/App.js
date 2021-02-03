@@ -8,16 +8,17 @@ import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/
 import { lightBlue } from '@material-ui/core/colors';
 import { SnackbarProvider } from 'notistack';
 
-import { CircularProgress, Link } from '@material-ui/core';
+import { Button, CircularProgress, Link } from '@material-ui/core';
 
 import Header from './Header';
 import InfoView from './InfoView';
 import UploadView from './UploadView';
 import AdminView from './AdminView';
-import fb from './firebase';
+import fb, { useDoc } from './firebase';
 import dbx from './dropbox.js';
 import { ArrowUpwardSharp } from '@material-ui/icons';
 import PageListView from './PageListView';
+import EditPageView from './EditPageView';
 
 
 
@@ -142,8 +143,36 @@ const App = (props) => {
                                             <Route path="/upload">
                                                 <UploadView user={user} />
                                             </Route>
-                                            <Route path="/pages">
+                                            <Route exact path="/pages">
                                                 <PageListView user={user} />
+                                            </Route>
+                                            <Route path="/pages/:id" component={(props) => {
+                                                let [publishedList, loadingPublished] = useDoc('Contributions/published');
+                                                const [page, loadingPage] = useDoc(`Contributions/${props.match.params.id}`);
+                                                if(loadingPublished || loadingPage) {
+                                                    return (
+                                                        <div>
+                                                            Loading page...
+                                                            <br />
+                                                            <CircularProgress />
+                                                        </div>);
+                                                } else if(!page) {
+                                                    return (
+                                                        <div>
+                                                            <h4>No such page</h4>
+                                                            <Button variant="contained"
+                                                                    color="primary"
+                                                                    onClick={() => {history.push('/pages')}}>
+                                                                Back
+                                                            </Button>
+                                                        </div>
+                                                    )
+                                                }
+                                                return <EditPageView page={page} 
+                                                                    user={user}
+                                                                    publishedList={publishedList}
+                                                                    published={!!publishedList[page.ref.id]} />
+                                                }}>
                                             </Route>
                                             <Route path="/admin">
                                                 <AdminView user={user}
