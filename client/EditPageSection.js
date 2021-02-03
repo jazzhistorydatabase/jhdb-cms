@@ -85,6 +85,7 @@ const EditPageSection = (props) => {
                 <FileInput  type={props.fileType}
                             manualEntry={manualEntry}
                             fileDoc={fileDoc}
+                            updatePage={updatePage}
                             />
             </div>
         );
@@ -116,7 +117,7 @@ const EditPageSection = (props) => {
                                 shrink: true,
                             }}
                         /><br/><br/>
-                {/(Audio|Video)/.compile().exec(props.fileType) && props.user &&
+                {(props.fileType === "Audio" || props.fileType === "Video") && props.user &&
                     <ToggleSwitch labelText="Manual Link Entry"
                                   labelIcon={<LinkRounded />}
                                   checked={manualEntry}

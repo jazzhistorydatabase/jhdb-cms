@@ -70,13 +70,15 @@ const EditPageView = (props) => {
         enqueueSnackbar('Error saving changes', {variant: 'error'});
     }
     
-    const [page, updatePage, isUpdating] = useDelayedUpdate(pageUpstream, 6000, onSuccess, onError);
+    const [page, doUpdatePage, isUpdating] = useDelayedUpdate(pageUpstream, 6000, onSuccess, onError);
     
-    useEffect( () => {
-        if(isUpdating) {
+    const updatePage = (data) => {
+        if(!isUpdating) {
             enqueueSnackbar('Saving changes...', {variant: 'info', persist: true});
         }
-    }, [isUpdating]);
+        data['lastEdited'] = new Date().toISOString();
+        doUpdatePage(data);
+    }
 
     const showPreview = location.pathname.includes("/preview");
     
@@ -197,6 +199,11 @@ const EditPageView = (props) => {
                                                 labelIcon={<PublishRounded />}
                                                 checked={props.published}
                                                 onChange={evt => handlePublish(evt)} />
+                                </Grid>
+                            }
+                            {page.lastEdited && 
+                                <Grid item xs={12}>
+                                    Last edited {(""+new Date(page.lastEdited)).split('GMT')[0]}
                                 </Grid>
                             }
                             {page.lastPublished && 

@@ -82,34 +82,15 @@ const PageListView = (props) => {
         }
     };
 
-    const showList = location.pathname.split('pages')[1].length <= 1;
+    // const showList = location.pathname.split('pages')[1].length <= 1;
 
-    if(!showList) {
-        if(loading) {
-            return (loading && <span><br/><CircularProgress /><br />Loading Page...</span>)
-        }
-        const user = props.user;
-        return <Route path="/pages/:id" component={(props) => {
-            const pget = pages && pages.filter(p => p.ref.id === props.match.params.id);
-            const page = pget && pget[0]; 
-            if(!page) {
-                return (
-                    <div>
-                        <h4>No such page</h4>
-                        <Button variant="contained"
-                                color="primary"
-                                onClick={() => {history.push('/pages')}}>
-                            Back
-                        </Button>
-                    </div>
-                )
-            }
-            return <EditPageView page={page} 
-                                 user={user}
-                                 publishedList={publishedList}
-                                 published={!!publishedList[page.ref.id]} />
-        }}></Route>
-    }
+    // if(!showList) {
+    //     if(loading) {
+    //         return (loading && <span><br/><CircularProgress /><br />Loading Page...</span>)
+    //     }
+    //     const user = props.user;
+    //     return 
+    // }
 
     return (
         <Paper className={props.classes.root}>
