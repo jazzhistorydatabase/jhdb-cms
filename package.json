@@ -24,7 +24,7 @@
     "colors": "^1.4.0",
     "dropbox": "^4.0.30",
     "express": "^4.17.1",
-    "express-handlebars": "^3.1.0",
+    "express-handlebars": "^5.3.1",
     "firebase": "^8.2.1",
     "firebase-admin": "^9.4.2",
     "isomorphic-fetch": "^3.0.0",
